@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  hospilink-db:
+    image: postgres:alpine3.20
+    container_name: hospilink-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - 54321:5432
+    volumes:
+      - ./hospilink/data:/var/lib/postgresql/data
+      - ./hospilink/bkp:/backup
+    restart: unless-stopped
