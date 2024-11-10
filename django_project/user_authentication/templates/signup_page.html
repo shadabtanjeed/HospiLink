@@ -5,7 +5,44 @@
 <head>
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <style>
+        .password-container {
+            display: flex;
+            position: relative;
+            width: 100%;
+
+            /* Match other input margins */
+        }
+
+        .password-container .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            z-index: 1;
+            /* Ensure icon stays above input */
+        }
+
+        .password-container input {
+            padding-right: 45px;
+            /* Make space for the icon */
+            margin-bottom: 0;
+            /* Remove default margin as container handles it */
+        }
+
+
+        .password-warning {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: -1rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
         body {
             font-family: 'Poppins', sans-serif;
         }
@@ -217,8 +254,19 @@
                         <option value="patient">Patient</option>
                         <option value="doctor">Doctor</option>
                     </select>
-                    <input type="text" name="username" placeholder="Enter your username">
-                    <input type="password" name="password" placeholder="Create a password">
+                    <input type="text" name="username" id="username" placeholder="Enter your username">
+                    <div id="usernameWarning" class="password-warning" style="display: none;">
+                        Username already exists
+                    </div>
+                    <div class="password-container">
+                        <input type="password" name="password" id="password" placeholder="Create a password">
+                        <i class="toggle-password fas fa-eye" onclick=" togglePassword()"></i>
+
+                    </div>
+                    <div id="passwordWarning" class="password-warning">
+                        Password must be at least 8 characters long and contain uppercase, lowercase, number and special
+                        character
+                    </div>
                     <input type="text" name="phone_number" placeholder="Enter your phone number">
                     <input type="button" class="button" value="Next" onclick="showNextSegment(1)">
                 </div>
@@ -318,13 +366,20 @@
     </div>
 
     <script>
+        let isPasswordValid = false;
+        let isUsernameValid = false;
+
+        // Update showNextSegment to include validations
         function showNextSegment(currentSegment) {
             if (currentSegment === 1) {
                 const userType = document.getElementById('user_type').value;
-                if (!userType) {
-                    alert("Please select a user type.");
+                const username = document.getElementById('username').value.trim();
+
+                if (!userType || !username || !isPasswordValid || !isUsernameValid) {
+                    alert("Please fill all fields correctly before proceeding.");
                     return;
                 }
+
                 document.getElementById('segment1').classList.add('hidden');
                 document.getElementById('segment2').classList.remove('hidden');
 
@@ -350,6 +405,93 @@
                 document.getElementById('segment2').classList.remove('hidden');
             }
         }
+
+        // Update password validation
+        document.getElementById('password').addEventListener('input', function () {
+            const password = this.value;
+            const passwordWarning = document.getElementById('passwordWarning');
+            const nextButton = document.querySelector('input[value="Next"]');
+
+            // Password validation regex
+            const minLength = password.length >= 8;
+            const hasUpperCase = /[A-Z]/.test(password);
+            const hasLowerCase = /[a-z]/.test(password);
+            const hasNumbers = /\d/.test(password);
+            const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+            isPasswordValid = minLength && hasUpperCase && hasLowerCase && hasNumbers && hasSpecialChar;
+
+            if (password && !isPasswordValid) {
+                passwordWarning.style.display = 'block';
+                this.style.borderColor = '#dc3545';
+            } else {
+                passwordWarning.style.display = 'none';
+                this.style.borderColor = '#ddd';
+            }
+
+            // Update next button state
+            updateNextButton();
+        });
+
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.querySelector('.toggle-password');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        document.getElementById('username').addEventListener('input', async function () {
+            const username = this.value.trim();
+            const usernameWarning = document.getElementById('usernameWarning');
+
+            if (!username) {
+                usernameWarning.textContent = 'Username cannot be empty';
+                usernameWarning.style.display = 'block';
+                this.style.borderColor = '#dc3545';
+                isUsernameValid = false;
+            } else {
+                try {
+                    const response = await fetch(`/user_authentication/check_username/?username=${username}`);
+                    const data = await response.json();
+
+                    if (data.exists) {
+                        usernameWarning.textContent = 'Username already exists';
+                        usernameWarning.style.display = 'block';
+                        this.style.borderColor = '#dc3545';
+                        isUsernameValid = false;
+                    } else {
+                        usernameWarning.style.display = 'none';
+                        this.style.borderColor = '#ddd';
+                        isUsernameValid = true;
+                    }
+                } catch (error) {
+                    console.error('Error checking username:', error);
+                }
+            }
+
+            // Update next button state
+            updateNextButton();
+        });
+
+        // Function to update Next button state
+        function updateNextButton() {
+            const nextButton = document.querySelector('input[value="Next"]');
+            const userType = document.getElementById('user_type').value;
+
+            nextButton.disabled = !(isPasswordValid && isUsernameValid && userType);
+        }
+
+        // Add event listener for user type selection
+        document.getElementById('user_type').addEventListener('change', updateNextButton);
+
     </script>
 </body>
 
