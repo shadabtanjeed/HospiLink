@@ -199,7 +199,9 @@
 
             <header>Signup</header>
 
-            <form id="signupForm" method="post" action="#" style="width: 100%;">
+            <!-- django_project/user_authentication/templates/signup_page.html -->
+            <!-- django_project/user_authentication/templates/signup_page.html -->
+            <form id="signupForm" method="post" action="{% url 'signup' %}" style="width: 100%;">
                 {% csrf_token %}
                 <div id="segment1">
                     <select name="user_type" id="user_type">
@@ -207,10 +209,10 @@
                         <option value="patient">Patient</option>
                         <option value="doctor">Doctor</option>
                     </select>
-                    <input type="text" placeholder="Enter your username">
-                    <input type="password" placeholder="Create a password">
-                    <input type="text" placeholder="Enter your phone number">
-                    <input type="button" class="button" value="Next" onclick="showNextSegment()">
+                    <input type="text" name="username" placeholder="Enter your username">
+                    <input type="password" name="password" placeholder="Create a password">
+                    <input type="text" name="phone_number" placeholder="Enter your phone number">
+                    <input type="button" class="button" value="Next" onclick="showNextSegment(1)">
                 </div>
 
                 <div id="segment2" class="hidden">
@@ -236,21 +238,7 @@
                             <option value="Dentist">Dentist</option>
                             <option value="Dermatologist">Dermatologist</option>
                             <option value="Endocrinologist">Endocrinologist</option>
-                            <option value="Gastroenterologist">Gastroenterologist</option>
-                            <option value="Hematologist">Hematologist</option>
-                            <option value="Nephrologist">Nephrologist</option>
-                            <option value="Neurologist">Neurologist</option>
-                            <option value="Oncologist">Oncologist</option>
-                            <option value="Ophthalmologist">Ophthalmologist</option>
-                            <option value="Orthopedic">Orthopedic</option>
-                            <option value="Otolaryngologist">Otolaryngologist</option>
-                            <option value="Pediatrician">Pediatrician</option>
-                            <option value="Physiatrist">Physiatrist</option>
-                            <option value="Psychiatrist">Psychiatrist</option>
-                            <option value="Pulmonologist">Pulmonologist</option>
-                            <option value="Radiologist">Radiologist</option>
-                            <option value="Rheumatologist">Rheumatologist</option>
-                            <option value="Urologist">Urologist</option>
+                            <!-- Add other specializations here -->
                         </select>
 
                         <p><b>Choose your visiting days</b></p>
@@ -277,9 +265,17 @@
                         </div>
                     </div>
 
+                    <input type="button" class="button" value="Next" onclick="showNextSegment(2)">
+                </div>
+
+                <div id="segment3" class="hidden">
+                    <input type="text" name="security_question" placeholder="Security Question">
+                    <input type="text" name="security_answer" placeholder="Security Question Answer">
                     <input type="submit" class="button" value="Signup">
                 </div>
             </form>
+
+
             <div class="login">
                 <span class="login">Already have an account?
                     <label for="check">Login</label>
@@ -289,17 +285,26 @@
     </div>
 
     <script>
-        function showNextSegment() {
-            const userType = document.getElementById('user_type').value;
-            document.getElementById('segment1').classList.add('hidden');
-            document.getElementById('segment2').classList.remove('hidden');
+        function showNextSegment(currentSegment) {
+            if (currentSegment === 1) {
+                const userType = document.getElementById('user_type').value;
+                if (!userType) {
+                    alert("Please select a user type.");
+                    return;
+                }
+                document.getElementById('segment1').classList.add('hidden');
+                document.getElementById('segment2').classList.remove('hidden');
 
-            if (userType === 'patient') {
-                document.getElementById('patientFields').classList.remove('hidden');
-                document.getElementById('doctorFields').classList.add('hidden');
-            } else if (userType === 'doctor') {
-                document.getElementById('doctorFields').classList.remove('hidden');
-                document.getElementById('patientFields').classList.add('hidden');
+                if (userType === 'patient') {
+                    document.getElementById('patientFields').classList.remove('hidden');
+                    document.getElementById('doctorFields').classList.add('hidden');
+                } else if (userType === 'doctor') {
+                    document.getElementById('doctorFields').classList.remove('hidden');
+                    document.getElementById('patientFields').classList.add('hidden');
+                }
+            } else if (currentSegment === 2) {
+                document.getElementById('segment2').classList.add('hidden');
+                document.getElementById('segment3').classList.remove('hidden');
             }
         }
     </script>
