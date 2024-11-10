@@ -1,15 +1,17 @@
 # django_project/user_authentication/views.py
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from django.db import connection
 import hashlib
-
 
 
 def index(request):
     return render(request, "login_page.html")
 
+
 def login_view(request):
     return render(request, "login_page.html")
+
 
 def signup_view(request):
     if request.method == "POST":
@@ -26,10 +28,10 @@ def signup_view(request):
         security_question = request.POST.get("security_question")
         security_answer = request.POST.get("security_answer")
 
-        hash_object = hashlib.sha512(password.encode('utf-8'))  
+        hash_object = hashlib.sha512(password.encode("utf-8"))
         password = hash_object.hexdigest()
 
-        hash_object = hashlib.sha512(security_answer.encode('utf-8'))
+        hash_object = hashlib.sha512(security_answer.encode("utf-8"))
         security_answer = hash_object.hexdigest()
 
         # Store the data in variables (for demonstration purposes)
@@ -48,16 +50,34 @@ def signup_view(request):
             "security_answer": security_answer,
         }
 
+        # Insert data into the users table
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO public.users 
+                (username, password_hash, users_type, security_question, security_answer_hash)
+                VALUES (%s, %s, %s, %s, %s)
+            """,
+                [
+                    username,
+                    password,
+                    user_type,
+                    security_question,
+                    security_answer,
+                ],
+            )
+
         # Store the form data in the session
-        request.session['form_data'] = form_data
+        request.session["form_data"] = form_data
 
         # Redirect to a success page
-        return redirect('signup_success')
+        return redirect("signup_success")
 
     return render(request, "signup_page.html")
 
+
 def signup_success(request):
     # Retrieve the form data from the session
-    form_data = request.session.get('form_data', {})
+    form_data = request.session.get("form_data", {})
     print(form_data)
     return HttpResponse(f"Signup successful! Data: {form_data}")
