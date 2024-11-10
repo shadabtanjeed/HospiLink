@@ -115,17 +115,22 @@ Check constraints:
 ### Functions and Procedures
 
 ```text
- Schema |         Name         |                              Result data type                                |                           Argument data types                                     | Type
---------+----------------------+------------------------------------------------------------------------------+-----------------------------------------------------------------------------------+------
- public | check_user_exists    | boolean                                                                      | p_username character varying                                                      | func
- public | donated              |                                                                              | IN donor character varying                                                        | proc
- public | haversine_distance   | double precision                                                             | point1 point, point2 point                                                        | func
- public | search_donor         | TABLE(name character varying, ..... , approximate_distance double precision) | _blood_group character                                                            | func
- public | signup_doctor        | void                                                                         | p_username character varying, .... ,p_visiting_time_end time without time zone    | func
- public | signup_patient       | void                                                                         | p_username character varying, .... , p_complexities text                          | func
- public | signup_users         | void                                                                         | p_username character varying, .... , pt_complexities text, time without time zone | func
- public | validate_blood_group | trigger                                                                      |                                                                                   | func
- public | validate_phone_no    | trigger                                                                      |                                                                                   | func
-(9 rows)
+ Schema |            Name           |                              Result data type                                |                                 Argument data types                                    | Type
+--------+---------------------------+------------------------------------------------------------------------------+----------------------------------------------------------------------------------------+------
+ public | check_user_exists         | boolean                                                                      | p_username character varying                                                           | func
+ public | donated                   |                                                                              | IN donor character varying                                                             | proc
+ public | haversine_distance        | double precision                                                             | point1 point, point2 point                                                             | func
+ public | login_user                | boolean                                                                      | p_username character varying, p_password_hash character                                | func
+ public | reset_user_password       | boolean                                                                      | p_username character varying, p_answer_hash character, p_new_password_hash character   | func
+ public | search_donor              | TABLE(name character varying, ..... , approximate_distance double precision) | _blood_group character                                                                 | func
+ public | show_security_question    | text                                                                         | p_username character varying                                                           | func
+ public | signup_doctor             | void                                                                         | p_username character varying, .... ,p_visiting_time_end time without time zone         | func
+ public | signup_patient            | void                                                                         | p_username character varying, .... , p_complexities text                               | func
+ public | signup_users              | void                                                                         | p_username character varying, .... , pt_complexities text, time without time zone      | func
+ public | validate_blood_group      | trigger                                                                      |                                                                                        | func
+ public | validate_phone_no         | trigger                                                                      |                                                                                        | func
+ public | verify_security_question  | boolean                                                                      | p_username character varying, p_answer_hash character                                  | func
+
+(13 rows)
 ```
 

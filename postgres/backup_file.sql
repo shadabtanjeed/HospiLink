@@ -145,6 +145,65 @@ $$;
 ALTER FUNCTION public.haversine_distance(point1 point, point2 point) OWNER TO oblivious;
 
 --
+-- Name: login_user(character varying, character); Type: FUNCTION; Schema: public; Owner: oblivious
+--
+
+CREATE FUNCTION public.login_user(p_username character varying, p_password_hash character) RETURNS boolean
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    stored_password_hash CHAR(128);
+BEGIN
+    -- retrieve the stored password hash 
+    SELECT password_hash
+    INTO stored_password_hash
+    FROM users
+    WHERE username = p_username;
+
+    -- if passwords matches, return true
+    IF stored_password_hash = p_password_hash THEN
+        RETURN true;
+    ELSE
+        RETURN false;
+    END IF;
+
+END;
+$$;
+
+
+ALTER FUNCTION public.login_user(p_username character varying, p_password_hash character) OWNER TO oblivious;
+
+--
+-- Name: reset_user_password(character varying, character, character); Type: FUNCTION; Schema: public; Owner: oblivious
+--
+
+CREATE FUNCTION public.reset_user_password(p_username character varying, p_answer_hash character, p_new_password_hash character) RETURNS boolean
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    is_verified BOOLEAN;
+BEGIN
+    -- verify the security answer
+    is_verified := verify_security_question(p_username, p_answer_hash);
+
+    -- if verified, update password
+    IF is_verified THEN
+        UPDATE users
+        SET password_hash = p_new_password_hash
+        WHERE username = p_username;
+
+        RETURN true; -- successful
+    ELSE
+        RETURN false; -- security answer did not match
+    END IF;
+    
+END;
+$$;
+
+
+ALTER FUNCTION public.reset_user_password(p_username character varying, p_answer_hash character, p_new_password_hash character) OWNER TO oblivious;
+
+--
 -- Name: search_donor(character); Type: FUNCTION; Schema: public; Owner: oblivious
 --
 
@@ -173,6 +232,29 @@ $$;
 
 
 ALTER FUNCTION public.search_donor(_blood_group character) OWNER TO oblivious;
+
+--
+-- Name: show_security_question(character varying); Type: FUNCTION; Schema: public; Owner: oblivious
+--
+
+CREATE FUNCTION public.show_security_question(p_username character varying) RETURNS text
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    security_question TEXT;
+BEGIN
+    -- retrieve security question
+    SELECT users.security_question
+    INTO security_question
+    FROM users
+    WHERE username = p_username;
+
+    RETURN security_question;
+END;
+$$;
+
+
+ALTER FUNCTION public.show_security_question(p_username character varying) OWNER TO oblivious;
 
 --
 -- Name: signup_doctor(character varying, character, character varying, public.day_of_week[], time without time zone, time without time zone); Type: FUNCTION; Schema: public; Owner: oblivious
@@ -238,10 +320,9 @@ CREATE FUNCTION public.signup_users(p_username character varying, p_password_has
 BEGIN
 
     -- validate username: only lowercase letters, ., _, -, @
-    IF p_username !~ '^[a-z._\-@]+$' THEN
-        RAISE EXCEPTION 'Invalid Username. Valid characters in username: a-z, ., _, -, @';
+     IF p_username !~ '^[a-z0-9._\-@]+$' THEN
+        RAISE EXCEPTION 'Invalid Username. Valid characters in username: a-z, 0-9, ., _, -, @';
     END IF;
-
     -- insert the user into the users table
     INSERT INTO users (
         username,
@@ -336,6 +417,31 @@ $$;
 
 
 ALTER FUNCTION public.validate_phone_no() OWNER TO oblivious;
+
+--
+-- Name: verify_security_question(character varying, character); Type: FUNCTION; Schema: public; Owner: oblivious
+--
+
+CREATE FUNCTION public.verify_security_question(p_username character varying, p_answer_hash character) RETURNS boolean
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    stored_answer_hash CHAR(128);
+BEGIN
+    -- retrieve the stored security answer
+    SELECT security_answer_hash
+    INTO stored_answer_hash
+    FROM users
+    WHERE username = p_username;
+
+    -- return true if the answer hash matches
+    RETURN stored_answer_hash = p_answer_hash;
+
+END;
+$$;
+
+
+ALTER FUNCTION public.verify_security_question(p_username character varying, p_answer_hash character) OWNER TO oblivious;
 
 SET default_tablespace = '';
 
@@ -917,7 +1023,7 @@ COPY public.django_migrations (id, app, name, applied) FROM stdin;
 --
 
 COPY public.django_session (session_key, session_data, expire_date) FROM stdin;
-dbalp91lugytdmotfu80gqj00bsarzux	.eJw9zjFuwzAMRuG7_LOG1A5agHNuURQCbTG1AkkUJCppGuTuRTx0fd_yHjhryz6wMeiB0aUVzgJC3zjwYlwuIgFuJ2_3-rKgq2mDQ920iC8jL9JAOByn-TjBYUmqwX83HRVURkoOq-aa5CdalA4CHHqVNXKKv2xRCwgnKRa7wYGvHBMvSXzgewd9wobA4bav2Dbw5XBumr3F_fbwQfPbi_S_TDS_4_n8A48xS1A:1tAEbW:XlPjZHN3byWoT5G3iRuUPsGAgW8dMKRGKg13lSZlKwk	2024-11-24 20:32:14.418959+00
+dbalp91lugytdmotfu80gqj00bsarzux	.eJwdykEKwyAQBdC7_LWFkmblLqfoUsY6jZboiI7QEHL3kq7fO_CWll0gJdgDo3MrlBkWPVIgr1Q-zGGC-ZvTvV5YSRMXhUGNUtiVkT03WNzn6TFf228iwa1NRoXFcoPBS3Ld-Js0cYfFMyZlnOcPs8IsjQ:1tAFNf:xggQtxD4p7mIlvbVuOC5jMl9KRqNmNb6taZ0ekhzBOM	2024-11-24 21:21:59.630801+00
 \.
 
 
@@ -928,6 +1034,7 @@ dbalp91lugytdmotfu80gqj00bsarzux	.eJw9zjFuwzAMRuG7_LOG1A5agHNuURQCbTG1AkkUJCppGu
 COPY public.doctors (username, phone_no, visiting_days, visiting_time_start, visiting_time_end, specialization) FROM stdin;
 shahbuggy	12345678901	{monday,wednesday,friday}	09:00:00	17:00:00	Cardiology
 dr_smith	98765432100	{monday,wednesday,friday}	09:00:00	17:00:00	Cardiology
+shadabtanjeed	042342     	{monday,tuesday,wednesday}	03:13:00	09:13:00	Dentist
 \.
 
 
@@ -1004,6 +1111,8 @@ Vitamax	Multivitamins	tablet	ACI Limited	500mg	2026-10-10	2028-10-10	250	20.00
 
 COPY public.patients (username, phone_no, blood_group, complexities) FROM stdin;
 john_doe	12345678901	A+	Diabetes
+shadab_tanjeed	32523      	B+	Black
+shadabtanjeed2	042342     	A-	White
 \.
 
 
@@ -1020,11 +1129,14 @@ COPY public.user_authentication_user (id, username, password_hash, user_type, se
 --
 
 COPY public.users (username, password_hash, users_type, security_question, security_answer_hash) FROM stdin;
-shahbuggy	long_march_to_shahbag                                                                                                           	doctor	Emon sadinotae ki amra ceyecilam?	Haa                                                                                                                             
 zoro	santoryu                                                                                                                        	doctor	Nothing Happened	The very very very strongest                                                                                                    
 sanji	melorine                                                                                                                        	patient	love sick?	Real Men forgives womens' lies                                                                                                  
 john_doe	hashed_password_example                                                                                                         	patient	What is your favorite color?	hashed_answer_example                                                                                                           
 dr_smith	hashed_password_example                                                                                                         	doctor	What is your favorite subject?	hashed_answer_example                                                                                                           
+shadabtanjeed	837ae03e1636ff7ca43d825a473be620babec1f82ba6a8d88351675b6b6578dbadc9fa51e3b136e8caf665c8d99b571bc07fde877c1ac464503aa9660ef966bc	doctor	Hospital Name?	6d736f3fa0965ed048cb2436559a5dd6878e7ed7e7e33a91cbf4135ca174dd949f3a40ceeb9ce6507bad89a43f0e036ee1d5fff798433efa30171b41d5672cc0
+shadab_tanjeed	cbaf1ee32c13479b85ebdebf62c917c30bf9d2c487622da6428d5ba09d9e6dbf03662f55642f8b2e50881eeab09c8ea50413966d725105d1792761fea67d3b4a	patient	What are you?	5e319bb988ec9857ee5f8e77b0923e16424e72d0ce74c09a394011bd2f441cd0265575173f2699c0d76dac1d07d68e886485bb7d73dc7fdfd9df211499eebff2
+shadabtanjeed2	837ae03e1636ff7ca43d825a473be620babec1f82ba6a8d88351675b6b6578dbadc9fa51e3b136e8caf665c8d99b571bc07fde877c1ac464503aa9660ef966bc	patient	what is your password?	cc8d8ce7b9b4ec7f5abd1a302f3b9b31cef8a4d291f56c800971467f506d93158f4985460ed77ac5baebc560661bf0970d8acb5c24f84908f91bd55c1dbb56d6
+shahbuggy	Asus                                                                                                                            	doctor	Emon sadinotae ki amra ceyecilam?	Haa                                                                                                                             
 \.
 
 
