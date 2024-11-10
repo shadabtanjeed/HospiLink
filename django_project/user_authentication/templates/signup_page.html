@@ -41,9 +41,7 @@
             left: 50%;
             transform: translate(-50%, -50%);
             max-width: 550px !important;
-            /* Reduce this value to make the box narrower */
             width: 100% !important;
-            /* Ensure this takes precedence */
             background: #fff;
             border-radius: 7px;
             box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
@@ -69,6 +67,8 @@
 
         .container .form {
             padding: 2rem;
+            width: 100%;
+            /* Ensure form takes full width */
         }
 
         .form header {
@@ -178,6 +178,10 @@
             height: auto;
             padding: 15px;
         }
+
+        .hidden {
+            display: none;
+        }
     </style>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -195,83 +199,86 @@
 
             <header>Signup</header>
 
-            <form action="#">
-                <select name="user_type" id="user_type">
-                    <option value="" disabled selected>Choose the user type</option>
-                    <option value="patient">Patient</option>
-                    <option value="doctor">Doctor</option>
-                </select>
-                <input type="text" placeholder="Enter your username">
-                <input type="password" placeholder="Create a password">
-                <input type="Phone number" placeholder="Enter your phone number">
-
-                <select name="blood_group" id="blood_group">
-                    <option value="" disabled selected>Choose your blood group</option>
-                    <option value="A+">A+</option>
-                    <option value="A-">A-</option>
-                    <option value="B+">B+</option>
-                    <option value="B-">B-</option>
-                    <option value="AB+">AB+</option>
-                    <option value="AB-">AB-</option>
-                    <option value="O+">O+</option>
-                    <option value="O-">O-</option>
-                </select>
-
-                <select name="Specialization" id="Specialization">
-                    <option value="" disabled selected>Choose your specialization</option>
-                    <option value="Cardiologist">Cardiologist</option>
-                    <option value="Dentist">Dentist</option>
-                    <option value="Dermatologist">Dermatologist</option>
-                    <option value="Endocrinologist">Endocrinologist</option>
-                    <option value="Gastroenterologist">Gastroenterologist</option>
-                    <option value="Hematologist">Hematologist</option>
-                    <option value="Nephrologist">Nephrologist</option>
-                    <option value="Neurologist">Neurologist</option>
-                    <option value="Oncologist">Oncologist</option>
-                    <option value="Ophthalmologist">Ophthalmologist</option>
-                    <option value="Orthopedic">Orthopedic</option>
-                    <option value="Otolaryngologist">Otolaryngologist</option>
-                    <option value="Pediatrician">Pediatrician</option>
-                    <option value="Physiatrist">Physiatrist</option>
-                    <option value="Psychiatrist">Psychiatrist</option>
-                    <option value="Pulmonologist">Pulmonologist</option>
-                    <option value="Radiologist">Radiologist</option>
-                    <option value="Rheumatologist">Rheumatologist</option>
-                    <option value="Urologist">Urologist</option>
-                </select>
-
-                <p><b>Choose your visiting days</b></p>
-
-                <p></p>
-                <div class="days-checkboxes">
-                    <input type="checkbox" id="mon" name="available_days" value="mon">
-                    <label for="mon">Mon</label>
-                    <input type="checkbox" id="tue" name="available_days" value="tue">
-                    <label for="tue">Tue</label>
-                    <input type="checkbox" id="wed" name="available_days" value="wed">
-                    <label for="wed">Wed</label>
-                    <input type="checkbox" id="thu" name="available_days" value="thu">
-                    <label for="thu">Thu</label>
-                    <input type="checkbox" id="fri" name="available_days" value="fri">
-                    <label for="fri">Fri</label>
-                    <input type="checkbox" id="sat" name="available_days" value="sat">
-                    <label for="sat">Sat</label>
-                    <input type="checkbox" id="sun" name="available_days" value="sun">
-                    <label for="sun">Sun</label>
+            <form id="signupForm" method="post" action="#" style="width: 100%;">
+                {% csrf_token %}
+                <div id="segment1">
+                    <select name="user_type" id="user_type">
+                        <option value="" disabled selected>Choose the user type</option>
+                        <option value="patient">Patient</option>
+                        <option value="doctor">Doctor</option>
+                    </select>
+                    <input type="text" placeholder="Enter your username">
+                    <input type="password" placeholder="Create a password">
+                    <input type="text" placeholder="Enter your phone number">
+                    <input type="button" class="button" value="Next" onclick="showNextSegment()">
                 </div>
 
-                <p><b>Choose your visiting hours</b></p>
+                <div id="segment2" class="hidden">
+                    <div id="patientFields" class="hidden">
+                        <select name="blood_group" id="blood_group">
+                            <option value="" disabled selected>Choose your blood group</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                        </select>
+                        <textarea name="complexities" placeholder="Write about your complexities"></textarea>
+                    </div>
 
-                <p></p>
-                <div class="time-picker">
-                    <input type="time" name="from_time" placeholder="From">
-                    <input type="time" name="to_time" placeholder="To">
+                    <div id="doctorFields" class="hidden">
+                        <select name="specialization" id="specialization">
+                            <option value="" disabled selected>Choose your specialization</option>
+                            <option value="Cardiologist">Cardiologist</option>
+                            <option value="Dentist">Dentist</option>
+                            <option value="Dermatologist">Dermatologist</option>
+                            <option value="Endocrinologist">Endocrinologist</option>
+                            <option value="Gastroenterologist">Gastroenterologist</option>
+                            <option value="Hematologist">Hematologist</option>
+                            <option value="Nephrologist">Nephrologist</option>
+                            <option value="Neurologist">Neurologist</option>
+                            <option value="Oncologist">Oncologist</option>
+                            <option value="Ophthalmologist">Ophthalmologist</option>
+                            <option value="Orthopedic">Orthopedic</option>
+                            <option value="Otolaryngologist">Otolaryngologist</option>
+                            <option value="Pediatrician">Pediatrician</option>
+                            <option value="Physiatrist">Physiatrist</option>
+                            <option value="Psychiatrist">Psychiatrist</option>
+                            <option value="Pulmonologist">Pulmonologist</option>
+                            <option value="Radiologist">Radiologist</option>
+                            <option value="Rheumatologist">Rheumatologist</option>
+                            <option value="Urologist">Urologist</option>
+                        </select>
+
+                        <p><b>Choose your visiting days</b></p>
+                        <div class="days-checkboxes">
+                            <input type="checkbox" id="mon" name="available_days" value="mon">
+                            <label for="mon">Mon</label>
+                            <input type="checkbox" id="tue" name="available_days" value="tue">
+                            <label for="tue">Tue</label>
+                            <input type="checkbox" id="wed" name="available_days" value="wed">
+                            <label for="wed">Wed</label>
+                            <input type="checkbox" id="thu" name="available_days" value="thu">
+                            <label for="thu">Thu</label>
+                            <input type="checkbox" id="fri" name="available_days" value="fri">
+                            <label for="fri">Fri</label>
+                            <input type="checkbox" id="sat" name="available_days" value="sat">
+                            <label for="sat">Sat</label>
+                            <input type="checkbox" id="sun" name="available_days" value="sun">
+                            <label for="sun">Sun</label>
+                        </div>
+
+                        <div class="time-picker">
+                            <input type="time" name="from_time" placeholder="From">
+                            <input type="time" name="to_time" placeholder="To">
+                        </div>
+                    </div>
+
+                    <input type="submit" class="button" value="Signup">
                 </div>
-
-
-                <textarea name="complexities" placeholder="Write about your complexities"></textarea>
-
-                <input type="button" class="button" value="Signup">
             </form>
             <div class="login">
                 <span class="login">Already have an account?
@@ -281,6 +288,21 @@
         </div>
     </div>
 
+    <script>
+        function showNextSegment() {
+            const userType = document.getElementById('user_type').value;
+            document.getElementById('segment1').classList.add('hidden');
+            document.getElementById('segment2').classList.remove('hidden');
+
+            if (userType === 'patient') {
+                document.getElementById('patientFields').classList.remove('hidden');
+                document.getElementById('doctorFields').classList.add('hidden');
+            } else if (userType === 'doctor') {
+                document.getElementById('doctorFields').classList.remove('hidden');
+                document.getElementById('patientFields').classList.add('hidden');
+            }
+        }
+    </script>
 </body>
 
 </html>
