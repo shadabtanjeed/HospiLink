@@ -182,6 +182,16 @@
         .hidden {
             display: none;
         }
+
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+        }
+
+        .button-container input {
+            width: 48%;
+        }
     </style>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -199,8 +209,6 @@
 
             <header>Signup</header>
 
-            <!-- django_project/user_authentication/templates/signup_page.html -->
-            <!-- django_project/user_authentication/templates/signup_page.html -->
             <form id="signupForm" method="post" action="{% url 'signup' %}" style="width: 100%;">
                 {% csrf_token %}
                 <div id="segment1">
@@ -238,6 +246,23 @@
                             <option value="Dentist">Dentist</option>
                             <option value="Dermatologist">Dermatologist</option>
                             <option value="Endocrinologist">Endocrinologist</option>
+                            <option value="Gastroenterologist">Gastroenterologist</option>
+                            <option value="Gynecologist">Gynecologist</option>
+                            <option value="Hematologist">Hematologist</option>
+                            <option value="Nephrologist">Nephrologist</option>
+                            <option value="Neurologist">Neurologist</option>
+                            <option value="Oncologist">Oncologist</option>
+                            <option value="Ophthalmologist">Ophthalmologist</option>
+                            <option value="Orthopedic">Orthopedic</option>
+                            <option value="Otolaryngologist">Otolaryngologist</option>
+                            <option value="Pediatrician">Pediatrician</option>
+                            <option value="Physiatrist">Physiatrist</option>
+                            <option value="Psychiatrist">Psychiatrist</option>
+                            <option value="Pulmonologist">Pulmonologist</option>
+                            <option value="Radiologist">Radiologist</option>
+                            <option value="Rheumatologist">Rheumatologist</option>
+                            <option value="Urologist">Urologist</option>
+
                             <!-- Add other specializations here -->
                         </select>
 
@@ -259,19 +284,27 @@
                             <label for="sun">Sun</label>
                         </div>
 
+                        <p></p>
+                        <p><b>Choose your visiting hours</b></p>
                         <div class="time-picker">
                             <input type="time" name="from_time" placeholder="From">
                             <input type="time" name="to_time" placeholder="To">
                         </div>
                     </div>
 
-                    <input type="button" class="button" value="Next" onclick="showNextSegment(2)">
+                    <div class="button-container">
+                        <input type="button" class="button" value="Back" onclick="showPreviousSegment(1)">
+                        <input type="button" class="button" value="Next" onclick="showNextSegment(2)">
+                    </div>
                 </div>
 
                 <div id="segment3" class="hidden">
                     <input type="text" name="security_question" placeholder="Security Question">
                     <input type="text" name="security_answer" placeholder="Security Question Answer">
-                    <input type="submit" class="button" value="Signup">
+                    <div class="button-container">
+                        <input type="button" class="button" value="Back" onclick="showPreviousSegment(2)">
+                        <input type="submit" class="button" value="Signup">
+                    </div>
                 </div>
             </form>
 
@@ -305,6 +338,16 @@
             } else if (currentSegment === 2) {
                 document.getElementById('segment2').classList.add('hidden');
                 document.getElementById('segment3').classList.remove('hidden');
+            }
+        }
+
+        function showPreviousSegment(currentSegment) {
+            if (currentSegment === 1) {
+                document.getElementById('segment2').classList.add('hidden');
+                document.getElementById('segment1').classList.remove('hidden');
+            } else if (currentSegment === 2) {
+                document.getElementById('segment3').classList.add('hidden');
+                document.getElementById('segment2').classList.remove('hidden');
             }
         }
     </script>
