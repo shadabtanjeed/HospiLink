@@ -4,8 +4,54 @@
 
 <head>
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        .login.form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 500px;
+        }
+
+        .password-container {
+            display: flex;
+            position: relative;
+            width: 100%;
+
+            /* Match other input margins */
+        }
+
+        .password-container .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            z-index: 1;
+            /* Ensure icon stays above input */
+        }
+
+        .password-container input {
+            padding-right: 45px;
+            /* Make space for the icon */
+            margin-bottom: 0;
+            /* Remove default margin as container handles it */
+        }
+
+        .username-warning {
+            color: #dc3545;
+            /* Red color for error messages */
+            font-size: 14px;
+            margin-top: -1rem;
+            margin-bottom: 1rem;
+            display: none;
+            /* Hidden by default */
+        }
+
+
         body {
             font-family: 'Poppins', sans-serif;
         }
@@ -42,9 +88,7 @@
             left: 50%;
             transform: translate(-50%, -50%);
             max-width: 550px !important;
-            /* Reduce this value to make the box narrower */
             width: 100% !important;
-            /* Ensure this takes precedence */
             background: #fff;
             border-radius: 7px;
             box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
@@ -141,28 +185,93 @@
 </head>
 
 <body>
-    <div class="container">
-        <input type="checkbox" id="check">
-        <div class="login form">
-            <img src="{% static 'app_logo.png' %}" width="125" height="125" alt="App Logo"
-                style="margin-top: 10px; margin-bottom: 40px;">
 
-            <header>Login</header>
+    <body>
+        <div class="container">
+            <input type="checkbox" id="check">
+            <div class="login form">
+                <img src="{% static 'app_logo.png' %}" width="125" height="125" alt="App Logo"
+                    style="margin-top: 10px; margin-bottom: 40px;">
 
-            <form action="#">
-                <input type="text" placeholder="Enter your username">
-                <input type="password" placeholder="Enter your password">
-                <a href="#">Forgot password?</a>
-                <input type="button" class="button" value="Login">
-            </form>
-            <div class="signup">
-                <span class="signup">Don't have an account?
-                    <a href="{% url 'signup' %}">Signup</a>
-                </span>
+                <header>Login</header>
+
+                <form method="post" action="{% url 'login' %}">
+                    {% csrf_token %}
+                    <input type="text" name="username" id="username" placeholder="Enter your username">
+                    <div id="usernameWarning" class="username-warning">
+                        Username not found
+                    </div>
+
+                    <div class="password-container">
+                        <input type="password" name="password" id="password" placeholder="Create a password">
+                        <i class="toggle-password fas fa-eye" onclick="togglePassword()"></i>
+                    </div>
+
+                    <a href="{% url 'forgot_password' %}">Forgot password?</a>
+                    <input type="submit" class="button" value="Login">
+                </form>
+                <div class="signup">
+                    <span class="signup">Don't have an account?
+                        <a href="{% url 'signup' %}">Signup</a>
+                    </span>
+                </div>
             </div>
         </div>
-    </div>
 
-</body>
+        <script>
+            document.getElementById('username').addEventListener('blur', async function () {
+                const username = this.value.trim();
+                const usernameWarning = document.getElementById('usernameWarning');
+                const warningDisplay = getComputedStyle(usernameWarning).display;
+
+                if (username) {
+                    try {
+                        // Add error handling for the response
+                        const response = await fetch(`/user_authentication/check_username/?username=${username}`);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        const data = await response.json();
+
+                        // Debug logging
+                        console.log('Response data:', data);
+
+                        if (!data.exists) {
+                            usernameWarning.style.display = 'block';
+                            this.style.borderColor = '#dc3545';
+                        } else {
+                            usernameWarning.style.display = 'none';
+                            this.style.borderColor = '#ddd';
+                        }
+                    } catch (error) {
+                        console.error('Error checking username:', error);
+                        // Optionally show an error message to the user
+                        usernameWarning.textContent = 'Error checking username. Please try again.';
+                        usernameWarning.style.display = 'block';
+                    }
+                } else {
+                    // Clear warning if username field is empty
+                    usernameWarning.style.display = 'none';
+                    this.style.borderColor = '#ddd';
+                }
+            });
+
+            function togglePassword() {
+                const passwordInput = document.getElementById('password');
+                const toggleIcon = document.querySelector('.toggle-password');
+
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    toggleIcon.classList.remove('fa-eye');
+                    toggleIcon.classList.add('fa-eye-slash');
+                } else {
+                    passwordInput.type = 'password';
+                    toggleIcon.classList.remove('fa-eye-slash');
+                    toggleIcon.classList.add('fa-eye');
+                }
+            }
+        </script>
+
+    </body>
 
 </html>

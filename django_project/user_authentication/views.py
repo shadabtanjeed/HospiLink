@@ -12,7 +12,60 @@ def index(request):
 
 
 def login_view(request):
+    if request.method == "POST":
+        username = request.POST.get("username").lower()  # Convert to lowercase
+        password = request.POST.get("password")
+
+        # Debug: Print retrieved username and password
+        print(f"Username: {username}, Password: {password}")
+
+        # Hash the password
+        hash_object = hashlib.sha512(password.encode("utf-8"))
+        password_hash = hash_object.hexdigest()
+
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT public.login_user(%s, %s)
+                    """,
+                    [username, password_hash],
+                )
+                login_success = cursor.fetchone()[0]
+
+            if login_success:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        """
+                        SELECT public.find_user_type(%s)
+                        """,
+                        [username],
+                    )
+                    user_type = cursor.fetchone()[0]
+
+                # Store login data in session
+                login_form_data = {
+                    "username": username,
+                    "user_type": user_type,
+                }
+
+                request.session["login_form_data"] = login_form_data
+                return redirect("login_success")
+
+            else:
+                return HttpResponse(
+                    "Login failed: Invalid username or password", status=401
+                )
+
+        except DatabaseError as e:
+            error_message = str(e)
+            return HttpResponse(f"Login failed: {error_message}", status=400)
+
     return render(request, "login_page.html")
+
+
+def forgot_password_view(request):
+    return render(request, "forgot_password.html")
 
 
 def signup_view(request):
@@ -132,6 +185,13 @@ def signup_success(request):
     form_data = request.session.get("form_data", {})
     print(form_data)
     return HttpResponse(f"Signup successful! Data: {form_data}")
+
+
+def login_success(request):
+    # Retrieve the form data from the session
+    form_data = request.session.get("login_form_data", {})
+    print(form_data)
+    return HttpResponse(f"Login successful! Data: {form_data}")
 
 
 def check_username(request):
