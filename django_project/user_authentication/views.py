@@ -5,6 +5,9 @@ from django.db import connection
 from django.db.utils import DatabaseError
 import hashlib
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+import json
 
 
 def index(request):
@@ -200,3 +203,32 @@ def check_username(request):
         cursor.execute("SELECT public.check_user_exists(%s)", [username])
         exists = cursor.fetchone()[0]
     return JsonResponse({"exists": exists})
+
+
+def get_security_question(request):
+    username = request.GET.get("username", "")
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT public.show_security_question(%s)", [username])
+        question = cursor.fetchone()[0]
+    return JsonResponse({"question": question})
+
+
+@csrf_exempt
+def verify_security_question(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        username = data.get("username", "")
+        answer = data.get("security_answer", "")
+
+        # Hash the answer
+        hash_object = hashlib.sha512(answer.encode("utf-8"))
+        answer_hash = hash_object.hexdigest()
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT public.verify_security_question(%s, %s)",
+                [username, answer_hash],
+            )
+            correct = cursor.fetchone()[0]
+        return JsonResponse({"correct": correct})
+    return JsonResponse({"error": "Invalid request method"}, status=400)
