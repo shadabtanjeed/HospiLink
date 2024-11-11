@@ -20,4 +20,5 @@ urlpatterns = [
         views.verify_security_question,
         name="verify_security_question",
     ),
+    path("update_password/", views.update_password, name="update_password"),
 ]

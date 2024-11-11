@@ -232,3 +232,29 @@ def verify_security_question(request):
             correct = cursor.fetchone()[0]
         return JsonResponse({"correct": correct})
     return JsonResponse({"error": "Invalid request method"}, status=400)
+
+
+@csrf_exempt
+def update_password(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        username = data.get("username", "")
+        answer = data.get("security_answer", "")
+        new_password = data.get("password", "")
+
+        # Hash the answer
+        hash_object = hashlib.sha512(answer.encode("utf-8"))
+        answer_hash = hash_object.hexdigest()
+
+        # Hash the new password
+        hash_object = hashlib.sha512(new_password.encode("utf-8"))
+        new_password_hash = hash_object.hexdigest()
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT public.reset_user_password(%s, %s, %s)",
+                [username, answer_hash, new_password_hash],
+            )
+            correct = cursor.fetchone()[0]
+        return JsonResponse({"correct": correct})
+    return JsonResponse({"error": "Invalid request method"}, status=400)
