@@ -93,10 +93,12 @@ def signup_view(request):
                 if user_type == "patient":
                     blood_group = request.POST.get("blood_group")
                     complexities = request.POST.get("complexities")
+                    date_of_birth = request.POST.get("dob")
+                    p_gender = request.POST.get("p_gender")
 
                     cursor.execute(
                         """
-                        SELECT public.signup_users(%s, %s, %s::users_type, %s, %s, %s, %s::bloodgroup, %s, NULL, NULL, NULL, NULL)
+                        SELECT public.signup_users(%s, %s, %s::users_type, %s, %s, %s, %s::bloodgroup, %s, NULL, NULL, NULL, NULL, %s::date, %s, NULL)
                         """,
                         [
                             username,
@@ -107,6 +109,8 @@ def signup_view(request):
                             phone_number,
                             blood_group,
                             complexities,
+                            date_of_birth,
+                            p_gender,
                         ],
                     )
                 else:  # doctor
@@ -114,6 +118,7 @@ def signup_view(request):
                     visiting_days = request.POST.getlist("available_days")
                     from_time = request.POST.get("from_time")
                     to_time = request.POST.get("to_time")
+                    d_gender = request.POST.get("d_gender")
 
                     # Map short day names to enum values
                     day_mapping = {
@@ -132,7 +137,7 @@ def signup_view(request):
 
                     cursor.execute(
                         """
-                        SELECT public.signup_users(%s, %s, %s::users_type, %s, %s, %s, NULL, NULL, %s, %s::day_of_week[], %s::time, %s::time)
+                        SELECT public.signup_users(%s, %s, %s::users_type, %s, %s, %s, NULL, NULL, %s, %s::day_of_week[], %s::time, %s::time, NULL, NULL, %s)
                         """,
                         [
                             username,
@@ -145,6 +150,7 @@ def signup_view(request):
                             visiting_days_array,
                             from_time,
                             to_time,
+                            d_gender,
                         ],
                     )
 
@@ -161,6 +167,8 @@ def signup_view(request):
                     {
                         "blood_group": request.POST.get("blood_group"),
                         "complexities": request.POST.get("complexities"),
+                        "date of birth": request.POST.get("dob"),
+                        "gender": request.POST.get("p_gender"),
                     }
                 )
             else:
@@ -170,6 +178,7 @@ def signup_view(request):
                         "available_days": request.POST.getlist("available_days"),
                         "from_time": request.POST.get("from_time"),
                         "to_time": request.POST.get("to_time"),
+                        "d_gender": request.POST.get("d_gender"),
                     }
                 )
 
