@@ -267,7 +267,10 @@
                         Password must be at least 8 characters long and contain uppercase, lowercase, number and special
                         character
                     </div>
-                    <input type="text" name="phone_number" placeholder="Enter your phone number">
+                    <input type="text" name="phone_number" id="phone_number" placeholder="Enter your phone number">
+                    <div id="phoneNumberWarning" class="password-warning" style="display: none;">Invalid phone number.
+                        Only
+                        digits and + are allowed.</div>
                     <input type="button" class="button" value="Next" onclick="showNextSegment(1)">
                 </div>
 
@@ -284,7 +287,10 @@
                             <option value="O+">O+</option>
                             <option value="O-">O-</option>
                         </select>
-                        <input type="date" name="dob" placeholder="Enter your date of birth">
+                        <input type="date" name="dob" id="dob" placeholder="Enter your date of birth">
+                        <div id="dobWarning" class="password-warning" style="display: none;">Date of birth cannot be in
+                            the
+                            future.</div>
                         <select name="p_gender" id="blood_group">
                             <option value="" disabled selected>Choose your gender</option>
                             <option value="Male">Male</option>
@@ -505,6 +511,45 @@
 
         // Add event listener for user type selection
         document.getElementById('user_type').addEventListener('change', updateNextButton);
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Set the max attribute of the date input to today's date
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dob').setAttribute('max', today);
+
+            // Phone number validation
+            document.getElementById('phone_number').addEventListener('input', function () {
+                const phoneNumber = this.value;
+                const phoneNumberWarning = document.getElementById('phoneNumberWarning');
+
+                const isValidPhoneNumber = /^[+]?[0-9]*$/.test(phoneNumber);
+
+                if (!isValidPhoneNumber) {
+                    phoneNumberWarning.style.display = 'block';
+                    this.style.borderColor = '#dc3545';
+                } else {
+                    phoneNumberWarning.style.display = 'none';
+                    this.style.borderColor = '#ddd';
+                }
+            });
+
+            // Date of birth validation
+            document.getElementById('dob').addEventListener('input', function () {
+                const dob = this.value;
+                const dobWarning = document.getElementById('dobWarning');
+
+                const currentDate = new Date();
+                const selectedDate = new Date(dob);
+
+                if (selectedDate > currentDate) {
+                    dobWarning.style.display = 'block';
+                    this.style.borderColor = '#dc3545';
+                } else {
+                    dobWarning.style.display = 'none';
+                    this.style.borderColor = '#ddd';
+                }
+            });
+        });
 
     </script>
 </body>
