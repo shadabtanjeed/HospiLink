@@ -80,6 +80,8 @@ def signup_view(request):
         security_question = request.POST.get("security_question")
         security_answer = request.POST.get("security_answer")
         phone_number = request.POST.get("phone_number")
+        name = request.POST.get("name")
+        gender = request.POST.get("gender")
 
         # Hash password and security answer
         hash_object = hashlib.sha512(password.encode("utf-8"))
@@ -94,14 +96,14 @@ def signup_view(request):
                     blood_group = request.POST.get("blood_group")
                     complexities = request.POST.get("complexities")
                     date_of_birth = request.POST.get("dob")
-                    p_gender = request.POST.get("p_gender")
 
                     cursor.execute(
                         """
-                        SELECT public.signup_users(%s, %s, %s::users_type, %s, %s, %s, %s::bloodgroup, %s, NULL, NULL, NULL, NULL, %s::date, %s, NULL)
+                        SELECT public.signup_users(%s, %s, %s, %s::users_type, %s, %s, %s, %s::bloodgroup, %s, NULL, NULL, NULL, NULL, %s::date, %s, NULL)
                         """,
                         [
                             username,
+                            name,
                             password_hash,
                             user_type,
                             security_question,
@@ -110,7 +112,7 @@ def signup_view(request):
                             blood_group,
                             complexities,
                             date_of_birth,
-                            p_gender,
+                            gender,
                         ],
                     )
                 else:  # doctor
@@ -118,7 +120,10 @@ def signup_view(request):
                     visiting_days = request.POST.getlist("available_days")
                     from_time = request.POST.get("from_time")
                     to_time = request.POST.get("to_time")
-                    d_gender = request.POST.get("d_gender")
+                    degrees = request.POST.getlist("doctor_degrees")
+
+                    # print the degrees
+                    print(degrees)
 
                     # Map short day names to enum values
                     day_mapping = {
@@ -135,12 +140,16 @@ def signup_view(request):
                     enum_days = [day_mapping[day.lower()] for day in visiting_days]
                     visiting_days_array = "{" + ",".join(enum_days) + "}"
 
+                    # Convert degrees list to PostgreSQL array format
+                    degrees_array = "{" + ",".join(degrees) + "}"
+
                     cursor.execute(
                         """
-                        SELECT public.signup_users(%s, %s, %s::users_type, %s, %s, %s, NULL, NULL, %s, %s::day_of_week[], %s::time, %s::time, NULL, NULL, %s)
+                        SELECT public.signup_users(%s, %s, %s, %s::users_type, %s, %s, %s, NULL, NULL, %s, %s::day_of_week[], %s::time, %s::time, NULL, %s, %s::text[])
                         """,
                         [
                             username,
+                            name,
                             password_hash,
                             user_type,
                             security_question,
@@ -150,7 +159,8 @@ def signup_view(request):
                             visiting_days_array,
                             from_time,
                             to_time,
-                            d_gender,
+                            gender,
+                            degrees_array,
                         ],
                     )
 
@@ -159,6 +169,7 @@ def signup_view(request):
                 "username": username,
                 "user_type": user_type,
                 "phone_number": phone_number,
+                "name": name,
             }
 
             # Add type-specific data
@@ -168,7 +179,7 @@ def signup_view(request):
                         "blood_group": request.POST.get("blood_group"),
                         "complexities": request.POST.get("complexities"),
                         "date of birth": request.POST.get("dob"),
-                        "gender": request.POST.get("p_gender"),
+                        "gender": request.POST.get("gender"),
                     }
                 )
             else:
@@ -178,7 +189,7 @@ def signup_view(request):
                         "available_days": request.POST.getlist("available_days"),
                         "from_time": request.POST.get("from_time"),
                         "to_time": request.POST.get("to_time"),
-                        "d_gender": request.POST.get("d_gender"),
+                        "gender": request.POST.get("gender"),
                     }
                 )
 
