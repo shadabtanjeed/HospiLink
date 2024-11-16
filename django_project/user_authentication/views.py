@@ -73,24 +73,24 @@ def forgot_password_view(request):
 
 def signup_view(request):
     if request.method == "POST":
-        # Common fields
-        user_type = request.POST.get("user_type")
-        username = request.POST.get("username")
-        password = request.POST.get("password")
-        security_question = request.POST.get("security_question")
-        security_answer = request.POST.get("security_answer")
-        phone_number = request.POST.get("phone_number")
-        name = request.POST.get("name")
-        gender = request.POST.get("gender")
-
-        # Hash password and security answer
-        hash_object = hashlib.sha512(password.encode("utf-8"))
-        password_hash = hash_object.hexdigest()
-
-        hash_object = hashlib.sha512(security_answer.encode("utf-8"))
-        security_answer_hash = hash_object.hexdigest()
-
         try:
+            # Common fields
+            user_type = request.POST.get("user_type")
+            username = request.POST.get("username")
+            password = request.POST.get("password")
+            security_question = request.POST.get("security_question")
+            security_answer = request.POST.get("security_answer")
+            phone_number = request.POST.get("phone_number")
+            name = request.POST.get("name")
+            gender = request.POST.get("gender")
+
+            # Hash password and security answer
+            hash_object = hashlib.sha512(password.encode("utf-8"))
+            password_hash = hash_object.hexdigest()
+
+            hash_object = hashlib.sha512(security_answer.encode("utf-8"))
+            security_answer_hash = hash_object.hexdigest()
+
             with connection.cursor() as cursor:
                 if user_type == "patient":
                     blood_group = request.POST.get("blood_group")
@@ -121,9 +121,6 @@ def signup_view(request):
                     from_time = request.POST.get("from_time")
                     to_time = request.POST.get("to_time")
                     degrees = request.POST.getlist("doctor_degrees")
-
-                    # print the degrees
-                    print(degrees)
 
                     # Map short day names to enum values
                     day_mapping = {
@@ -190,15 +187,19 @@ def signup_view(request):
                         "from_time": request.POST.get("from_time"),
                         "to_time": request.POST.get("to_time"),
                         "gender": request.POST.get("gender"),
+                        "degrees": request.POST.getlist("doctor_degrees"),
                     }
                 )
 
             request.session["form_data"] = form_data
-            return redirect("signup_success")
+            return JsonResponse({"success": True, "message": "Signup successful"})
 
         except DatabaseError as e:
             error_message = str(e)
-            return HttpResponse(f"Signup failed: {error_message}", status=400)
+            return JsonResponse(
+                {"success": False, "message": f"Signup failed: {error_message}"},
+                status=400,
+            )
 
     return render(request, "signup_page.html")
 

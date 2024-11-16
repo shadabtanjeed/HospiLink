@@ -456,6 +456,8 @@
         let isPasswordValid = false;
         let isUsernameValid = false;
 
+
+
         // Update showNextSegment to include validations
         function showNextSegment(currentSegment) {
             if (currentSegment === 1) {
@@ -490,6 +492,32 @@
             } else if (currentSegment === 2) {
                 document.getElementById('segment3').classList.add('hidden');
                 document.getElementById('segment2').classList.remove('hidden');
+            }
+        }
+
+        // Function to show error message
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.style.color = 'red';
+            errorDiv.style.marginTop = '10px';
+            errorDiv.textContent = message;
+
+            // Remove any existing error messages
+            const existingError = document.querySelector('.error-message');
+            if (existingError) {
+                existingError.remove();
+            }
+
+            const form = document.querySelector('form');
+            form.appendChild(errorDiv);
+        }
+
+        // Function to clear error message
+        function clearError() {
+            const errorDiv = document.querySelector('.error-message');
+            if (errorDiv) {
+                errorDiv.remove();
             }
         }
 
@@ -679,6 +707,7 @@
         document.getElementById('signupForm').addEventListener('submit', function (event) {
             event.preventDefault();  // Prevent the default form submission
 
+            // Collect degrees
             const degrees = Array.from(document.querySelectorAll('.doctor_degrees'))
                 .map(select => select.value)
                 .filter(value => value);
@@ -690,19 +719,22 @@
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-CSRFToken': getCookie('csrftoken')  // Ensure CSRF token is included
+                    'X-CSRFToken': getCookie('csrftoken')
                 }
-            }).then(response => response.json())
+            })
+                .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         alert("Signup successful!");
                         window.location.href = "{% url 'signup_success' %}";
                     } else {
-                        alert("Signup failed: " + data.error);
+                        // Show the error message from the server response
+                        alert(data.message || "Signup failed. Please try again.");
                     }
-                }).catch(error => {
+                })
+                .catch(error => {
                     console.error('Error:', error);
-                    alert("Signup failed: " + error);
+                    alert("An error occurred during signup. Please try again.");
                 });
         });
 
