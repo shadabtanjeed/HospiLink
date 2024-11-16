@@ -161,6 +161,20 @@ def signup_view(request):
                         ],
                     )
 
+                    # Handle image upload
+                    image = request.FILES.get("image")
+                    image_data = image.read() if image else None
+
+                    cursor.execute(
+                        """
+                        SELECT public.add_doctor_profile_pic(%s, %s)
+                        """,
+                        [
+                            username,
+                            image_data,
+                        ],
+                    )
+
             # Store form data in session
             form_data = {
                 "username": username,

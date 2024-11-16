@@ -311,7 +311,8 @@
 
             <header>Signup</header>
 
-            <form id="signupForm" method="post" action="{% url 'signup' %}" style="width: 100%;">
+            <form id="signupForm" method="post" action="{% url 'signup' %}" enctype="multipart/form-data"
+                style="width: 100%;">
                 {% csrf_token %}
                 <div id="segment1">
                     <select name="user_type" id="user_type">
@@ -379,7 +380,7 @@
                     <div id="doctorFields" class="hidden">
 
                         <div class="file-input-container">
-                            <label for="image" class="file-input-label">Upload your image</label>
+                            <label for="image" class="file-input-label">Upload your profile picture</label>
                             <input type="file" name="image" id="image" class="file-input" accept="image/*">
                             <span id="file-name" class="file-name"></span>
                         </div>
