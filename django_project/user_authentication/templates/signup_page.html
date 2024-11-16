@@ -177,6 +177,8 @@
         }
 
         .form input.button {
+            display: flex;
+            justify-content: center;
             color: #fff;
             background: #dd636e;
             font-size: 1.2rem;
@@ -261,6 +263,37 @@
         .button-container input {
             width: 48%;
         }
+
+        .file-input-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 1rem;
+            margin-bottom: 10px;
+        }
+
+        .file-input-label {
+            background-color: #dd636e;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.4s;
+        }
+
+        .file-input-label:hover {
+            background-color: #c5555e;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-name {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
     </style>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -344,7 +377,13 @@
                     </div>
 
                     <div id="doctorFields" class="hidden">
-                        <input type="image" name="image" id="image" placeholder="Enter your image">
+
+                        <div class="file-input-container">
+                            <label for="image" class="file-input-label">Upload your image</label>
+                            <input type="file" name="image" id="image" class="file-input" accept="image/*">
+                            <span id="file-name" class="file-name"></span>
+                        </div>
+
                         <select name="specialization" id="specialization">
                             <option value="" disabled selected>Choose your specialization</option>
                             <option value="Cardiologist">Cardiologist</option>
@@ -661,6 +700,11 @@
                     dobWarning.style.display = 'none';
                     this.style.borderColor = '#ddd';
                 }
+            });
+
+            document.getElementById('image').addEventListener('change', function () {
+                const fileName = this.files[0] ? this.files[0].name : '';
+                document.getElementById('file-name').textContent = fileName;
             });
         });
 
