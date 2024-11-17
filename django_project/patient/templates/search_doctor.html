@@ -62,10 +62,11 @@
         .card_img {
             flex: 0 0 100px;
             /* Fixed width of 100px, won't grow or shrink */
+
         }
 
         .card_identity {
-            flex: 0 0 300px;
+            flex: 0 0 250px;
             /* Fixed width of 200px */
             display: flex;
             flex-direction: column;
@@ -378,6 +379,13 @@
                             <span class="link">Medicine Corner</span>
                         </a>
                     </li>
+
+                    <li class="list">
+                        <a href="#" class="nav-link">
+                            <i class="bx bx-droplet icon"></i>
+                            <span class="link">Blood Repo</span>
+                        </a>
+                    </li>
                 </ul>
 
                 <div class="bottom-content">
@@ -423,28 +431,29 @@
                 </div>
 
 
+                {% for doctor in doctors %}
                 <div class="card">
                     <div class="card_img">
-                        <!-- <img src="/api/placeholder/100/100" width="100px" height="100px" alt="Profile Picture"> -->
-                        <img src="{% static 'male_default.png' %}" width="100px" height="100px" alt="Profile Picture">
+                        <img src="{% url 'profile_picture' doctor.username %}" width="100px" height="100px"
+                            alt="Profile Picture">
                     </div>
-
                     <div class="card_identity">
-                        <h4 class="card-title">Dr. Shadab Tanjeed Ahmad </h4>
-                        <p class="card-text">Dentist</p>
-                        <p class="card-text">FCPS, BDS, MBBS</p>
+                        <h4 class="card-title">{{ doctor.username }}</h4>
+                        <p class="card-text">{{ doctor.specialization }}</p>
+                        <p class="card-text">{{ doctor.degrees|join:", " }}</p>
                     </div>
-
                     <div class="card_details">
-                        <p class="card-text"><b>Available on: </b>Sun, Mon, Tues, Wed, Thursday, Fri, Sat</p>
-                        <p class="card-text"><b>Visiting hours:</b> 10:00 to 21:00</p>
+                        <p class="card-text"><b>Available on:</b> {{ doctor.visiting_days|join:", " }}</p>
+                        <p class="card-text"><b>Visiting hours:</b> {{ doctor.visiting_time_start }} to {{
+                            doctor.visiting_time_end }}</p>
                     </div>
-
                     <div class="card_appointment">
-                        <p>Tk. 1000/=</p>
+                        <p>Tk. {{ doctor.fee }}/=</p>
                         <button type="button" class="btn"><b>Book Appointment</b></button>
                     </div>
                 </div>
+                {% endfor %}
+
             </div>
         </div>
 
