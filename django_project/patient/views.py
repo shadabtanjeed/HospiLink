@@ -2,16 +2,12 @@
 from django.shortcuts import render
 from django.db import connection
 from django.http import HttpResponse
+from django.core.paginator import Paginator
 
 
 def index(request):
     # Your existing index view code
     return render(request, "patient_page.html")
-
-
-def search_doctor(request):
-    # Your logic to handle the search doctor page
-    return render(request, "search_doctor.html")
 
 
 def fetch_doctors():
@@ -40,7 +36,7 @@ def fetch_doctors():
             if isinstance(visiting_days, list):
                 visiting_days = [day.capitalize() for day in visiting_days]
             else:
-                # If visiting_days is a string, split it into a list
+                # Handle as string
                 visiting_days = (
                     visiting_days.replace("{", "").replace("}", "").split(",")
                 )
@@ -54,18 +50,17 @@ def fetch_doctors():
                 degrees = degrees.replace("{", "").replace("}", "").split(",")
                 degrees = [degree.strip() for degree in degrees]
 
+            visiting_time_start = doctor[4].strftime("%I:%M %p") if doctor[4] else "N/A"
+            visiting_time_end = doctor[5].strftime("%I:%M %p") if doctor[5] else "N/A"
+
             doctor_list.append(
                 {
                     "username": doctor[0],
                     "name": doctor[1],
                     "phone_no": doctor[2],
                     "visiting_days": visiting_days,
-                    "visiting_time_start": (
-                        doctor[4].strftime("%I:%M %p") if doctor[4] else "N/A"
-                    ),
-                    "visiting_time_end": (
-                        doctor[5].strftime("%I:%M %p") if doctor[5] else "N/A"
-                    ),
+                    "visiting_time_start": visiting_time_start,
+                    "visiting_time_end": visiting_time_end,
                     "specialization": doctor[6],
                     "fee": doctor[7],
                     "degrees": degrees,
@@ -76,7 +71,14 @@ def fetch_doctors():
 
 def search_doctor(request):
     doctors = fetch_doctors()
-    return render(request, "search_doctor.html", {"doctors": doctors})
+
+    # Set up pagination: 5 doctors per page
+    paginator = Paginator(doctors, 5)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    context = {"page_obj": page_obj}
+    return render(request, "search_doctor.html", context)
 
 
 def profile_picture(request, username):

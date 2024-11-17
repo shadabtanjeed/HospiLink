@@ -341,6 +341,40 @@
             justify-content: center;
             align-items: center;
         }
+
+        /* Pagination Styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .pagination a,
+        .pagination span {
+            padding: 8px 16px;
+            text-decoration: none;
+            border: 1px solid #ddd;
+            color: #333;
+            border-radius: 5px;
+        }
+
+        .pagination a:hover {
+            background-color: #f0f0f0;
+        }
+
+        .pagination .active {
+            background-color: #c5555e;
+            ;
+            color: white;
+            border: 1px solid #c5555e;
+            ;
+        }
+
+        .pagination .disabled {
+            color: #ccc;
+            border: 1px solid #ddd;
+        }
     </style>
 
     <title>Search Doctor</title>
@@ -415,15 +449,13 @@
 
     <div class="content">
         <h1>Search Doctor</h1>
-        <div class=search_container>
-
+        <div class="search_container">
 
             <div class="filter_section">
                 This is the filter section
             </div>
             <div class="list_section">
-                <!-- search doctor input with a search logo as button -->
-
+                <!-- Search form -->
                 <div class="search-container">
                     <form action="" method="GET" class="search-wrapper">
                         {% csrf_token %}
@@ -435,16 +467,15 @@
                     </form>
                 </div>
 
-
-                {% for doctor in doctors %}
+                <!-- Doctor Cards -->
+                {% for doctor in page_obj.object_list %}
                 <div class="card">
                     <div class="card_img">
                         <img src="{% url 'profile_picture' doctor.username %}" width="100px" height="100px"
                             alt="Profile Picture">
                     </div>
                     <div class="card_identity">
-                        <!-- <h4 class="card-title">{{ doctor.username }}</h4> -->
-                        <h4 class="card-title">Dr. {{ doctor.name }}</h4>
+                        <h4 class="card-title">Doctor {{ doctor.name }}</h4>
                         <p class="card-text">{{ doctor.specialization }}</p>
                         <p class="card-text">{{ doctor.degrees|join:", " }}</p>
                     </div>
@@ -458,26 +489,56 @@
                         <button type="button" class="btn"><b>Book Appointment</b></button>
                     </div>
                 </div>
+                {% empty %}
+                <p>No doctors found.</p>
                 {% endfor %}
 
+                <!-- Pagination Controls -->
+                {% if page_obj.has_other_pages %}
+                <div class="pagination">
+                    <!-- Previous Page Link -->
+                    {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}">&#171; Previous</a>
+                    {% else %}
+                    <span class="disabled">&#171; Previous</span>
+                    {% endif %}
+
+                    <!-- Page Number Links -->
+                    {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <span class="active">{{ num }}</span>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <a
+                        href="?page={{ num }}">{{ num }}</a>
+                        {% endif %}
+                        {% endfor %}
+
+                        <!-- Next Page Link -->
+                        {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}">Next &#187;</a>
+                        {% else %}
+                        <span class="disabled">Next &#187;</span>
+                        {% endif %}
+                </div>
+                {% endif %}
             </div>
         </div>
+    </div>
 
-        <script>
-            const navBar = document.querySelector("nav"),
-                menuBtns = document.querySelectorAll(".menu-icon"),
-                overlay = document.querySelector(".overlay");
+    <script>
+        const navBar = document.querySelector("nav"),
+            menuBtns = document.querySelectorAll(".menu-icon"),
+            overlay = document.querySelector(".overlay");
 
-            menuBtns.forEach((menuBtn) => {
-                menuBtn.addEventListener("click", () => {
-                    navBar.classList.toggle("open");
-                });
+        menuBtns.forEach((menuBtn) => {
+            menuBtn.addEventListener("click", () => {
+                navBar.classList.toggle("open");
             });
+        });
 
-            overlay.addEventListener("click", () => {
-                navBar.classList.remove("open");
-            });
-        </script>
+        overlay.addEventListener("click", () => {
+            navBar.classList.remove("open");
+        });
+    </script>
 </body>
 
 </html>
