@@ -18,41 +18,56 @@ def fetch_doctors():
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT username, phone_no, visiting_days, visiting_time_start, visiting_time_end, specialization, fee, degrees
+            SELECT 
+                username, 
+                public.get_name(username) AS name, 
+                phone_no, 
+                visiting_days, 
+                visiting_time_start, 
+                visiting_time_end, 
+                specialization, 
+                fee, 
+                degrees
             FROM doctors
         """
         )
         doctors = cursor.fetchall()
         doctor_list = []
         for doctor in doctors:
-            try:
-                visiting_time_start = (
-                    doctor[3].strftime("%I:%M %p") if doctor[3] else "N/A"
+            # doctor[3] is visiting_days
+            visiting_days = doctor[3] if doctor[3] else []
+            # Ensure visiting_days is a list
+            if isinstance(visiting_days, list):
+                visiting_days = [day.capitalize() for day in visiting_days]
+            else:
+                # If visiting_days is a string, split it into a list
+                visiting_days = (
+                    visiting_days.replace("{", "").replace("}", "").split(",")
                 )
-                visiting_time_end = (
-                    doctor[4].strftime("%I:%M %p") if doctor[4] else "N/A"
-                )
-            except AttributeError:
-                # In case the time is already a string or different format
-                visiting_time_start = str(doctor[3])
-                visiting_time_end = str(doctor[4])
+                visiting_days = [day.strip().capitalize() for day in visiting_days]
 
-            visiting_days = doctor[2].replace("{", "").replace("}", "").split(",")
-            visiting_days = [day.capitalize() for day in visiting_days]
-            degrees = (
-                doctor[7]
-                if isinstance(doctor[7], list)
-                else doctor[7].replace("{", "").replace("}", "").split(",")
-            )
+            # doctor[8] is degrees
+            degrees = doctor[8] if doctor[8] else []
+            if isinstance(degrees, list):
+                degrees = [degree.strip() for degree in degrees]
+            else:
+                degrees = degrees.replace("{", "").replace("}", "").split(",")
+                degrees = [degree.strip() for degree in degrees]
+
             doctor_list.append(
                 {
                     "username": doctor[0],
-                    "phone_no": doctor[1],
+                    "name": "Dr. " + doctor[1],
+                    "phone_no": doctor[2],
                     "visiting_days": visiting_days,
-                    "visiting_time_start": visiting_time_start,
-                    "visiting_time_end": visiting_time_end,
-                    "specialization": doctor[5],
-                    "fee": doctor[6],
+                    "visiting_time_start": (
+                        doctor[4].strftime("%I:%M %p") if doctor[4] else "N/A"
+                    ),
+                    "visiting_time_end": (
+                        doctor[5].strftime("%I:%M %p") if doctor[5] else "N/A"
+                    ),
+                    "specialization": doctor[6],
+                    "fee": doctor[7],
                     "degrees": degrees,
                 }
             )
