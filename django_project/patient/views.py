@@ -57,7 +57,7 @@ def fetch_doctors():
             doctor_list.append(
                 {
                     "username": doctor[0],
-                    "name": "Dr. " + doctor[1],
+                    "name": doctor[1],
                     "phone_no": doctor[2],
                     "visiting_days": visiting_days,
                     "visiting_time_start": (

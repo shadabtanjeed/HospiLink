@@ -20,7 +20,7 @@
             align-items: center;
             margin-top: 20px;
             border-radius: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
             padding: 15px 20px;
             width: 95%;
             min-height: 120px;
@@ -63,6 +63,11 @@
             flex: 0 0 100px;
             /* Fixed width of 100px, won't grow or shrink */
 
+        }
+
+        .card_img img {
+            border-radius: 20px;
+            /* Adjust the value as needed */
         }
 
         .card_identity {
@@ -439,7 +444,7 @@
                     </div>
                     <div class="card_identity">
                         <!-- <h4 class="card-title">{{ doctor.username }}</h4> -->
-                        <h4 class="card-title">{{ doctor.name }}</h4>
+                        <h4 class="card-title">Dr. {{ doctor.name }}</h4>
                         <p class="card-text">{{ doctor.specialization }}</p>
                         <p class="card-text">{{ doctor.degrees|join:", " }}</p>
                     </div>
