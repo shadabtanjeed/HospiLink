@@ -15,6 +15,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+# django_project/hospilink_django/urls.py
+
 from django.contrib import admin
 from django.urls import include, path
 
@@ -22,4 +24,6 @@ urlpatterns = [
     path("", include("user_authentication.urls")),
     path("user_authentication/", include("user_authentication.urls")),
     path("admin/", admin.site.urls),
+    path("", include("patient.urls")),
+    path("patient/", include("patient.urls")),
 ]

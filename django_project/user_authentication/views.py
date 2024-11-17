@@ -99,7 +99,7 @@ def signup_view(request):
 
                     cursor.execute(
                         """
-                        SELECT public.signup_users(%s, %s, %s, %s::users_type, %s, %s, %s, %s::bloodgroup, %s, NULL, NULL, NULL, NULL, %s::date, %s, NULL)
+                        SELECT public.signup_users(%s, %s, %s, %s::users_type, %s, %s, %s, %s::bloodgroup, %s, NULL, NULL, NULL, NULL, %s::date, %s, NULL, NULL, NULL)
                         """,
                         [
                             username,
@@ -121,6 +121,12 @@ def signup_view(request):
                     from_time = request.POST.get("from_time")
                     to_time = request.POST.get("to_time")
                     degrees = request.POST.getlist("doctor_degrees")
+                    doctor_fee = request.POST.get("doctor_fee")
+                    avg_time = request.POST.get("avg_time")
+
+                    # convert into number
+                    doctor_fee = int(doctor_fee)
+                    avg_time = int(avg_time)
 
                     # Map short day names to enum values
                     day_mapping = {
@@ -142,7 +148,7 @@ def signup_view(request):
 
                     cursor.execute(
                         """
-                        SELECT public.signup_users(%s, %s, %s, %s::users_type, %s, %s, %s, NULL, NULL, %s, %s::day_of_week[], %s::time, %s::time, NULL, %s, %s::text[])
+                        SELECT public.signup_users(%s, %s, %s, %s::users_type, %s, %s, %s, NULL, NULL, %s, %s::day_of_week[], %s::time, %s::time, NULL, %s, %s::text[], %s, %s)
                         """,
                         [
                             username,
@@ -158,6 +164,8 @@ def signup_view(request):
                             to_time,
                             gender,
                             degrees_array,
+                            doctor_fee,
+                            avg_time,
                         ],
                     )
 
