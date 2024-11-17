@@ -3,6 +3,9 @@ from django.shortcuts import render
 from django.db import connection
 from django.http import HttpResponse
 from django.core.paginator import Paginator
+from django.core.paginator import EmptyPage, PageNotAnInteger
+from django.shortcuts import redirect
+from django.urls import reverse
 
 
 def index(request):
@@ -73,9 +76,21 @@ def search_doctor(request):
     doctors = fetch_doctors()
 
     # Set up pagination: 5 doctors per page
-    paginator = Paginator(doctors, 5)
+    paginator = Paginator(doctors, 3)  # Change to 3 as per your requirement
     page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
+
+    if not page_number:
+        # Redirect to the same view with ?page=1 if 'page' is not present
+        return redirect(f"{reverse('search_doctor')}?page=1")
+
+    try:
+        page_obj = paginator.get_page(page_number)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        page_obj = paginator.get_page(1)
+    except EmptyPage:
+        # If page is out of range (e.g., 9999), deliver last page of results.
+        page_obj = paginator.get_page(paginator.num_pages)
 
     context = {"page_obj": page_obj}
     return render(request, "search_doctor.html", context)
