@@ -4,16 +4,12 @@
 
 <head>
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Book Appointment</title>
     <link rel="icon" href="{% static 'app_logo_3.png' %}" type="image/png">
-    <link href="https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css" rel="stylesheet" />
-
+    <!-- Internal Stylesheet -->
     <style>
         /* Google Fonts - Poppins */
         @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap");
-
-
 
         * {
             margin: 0;
@@ -134,32 +130,91 @@
             pointer-events: auto;
         }
 
+        /* Content */
         .content {
-            margin-top: 10px;
-            /* Adjust this value based on your navbar height */
+            margin-top: 80px;
             padding: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .content h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #dd636e;
+        }
+
+        .doctor-info {
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .doctor-info img {
+            border-radius: 50%;
+            margin-bottom: 20px;
+        }
+
+        .doctor-info p {
+            font-size: 16px;
+            margin: 5px 0;
+            color: #333;
+        }
+
+        /* Form */
+        .appointment-form {
+            display: flex;
+            flex-direction: column;
             align-items: center;
         }
-    </style>
 
-    <title>Book Appointment</title>
+        .appointment-form label {
+            font-size: 16px;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .appointment-form input[type="date"],
+        .appointment-form input[type="time"] {
+            padding: 10px;
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .appointment-form .btn {
+            padding: 10px 20px;
+            background-color: #dd636e;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .appointment-form .btn:hover {
+            background-color: #c5555e;
+        }
+    </style>
+    <!-- Boxicons -->
+    <link href="https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css" rel="stylesheet" />
 </head>
 
 <body>
+    <!-- Navigation Menu -->
     <nav>
         <div class="logo">
             <i class="bx bx-menu menu-icon"></i>
-            <!-- <span class="logo-name">HospiLinkdf</span> -->
+            <!-- <span class="logo-name"><b>HospiLink</b></span> -->
         </div>
         <div class="sidebar">
             <div class="logo">
                 <i class="bx bx-menu menu-icon"></i>
                 <span class="logo-name"><b>HospiLink</b></span>
             </div>
-
             <div class="sidebar-content">
                 <ul class="lists">
                     <li class="list">
@@ -187,7 +242,6 @@
                         </a>
                     </li>
                 </ul>
-
                 <div class="bottom-content">
                     <li class="list">
                         <a href="#" class="nav-link">
@@ -208,6 +262,7 @@
 
     <section class="overlay"></section>
 
+    <!-- Main Content -->
     <div class="content">
         <h1>Book Appointment with Dr. {{ doctor.name }}</h1>
         <div class="doctor-info">
@@ -220,7 +275,7 @@
             <p><strong>Fee:</strong> Tk. {{ doctor.fee }}/=</p>
         </div>
 
-        <form method="post">
+        <form method="post" class="appointment-form">
             {% csrf_token %}
             <label for="booking_date">Select Booking Date:</label>
             <input type="date" id="booking_date" name="booking_date" min="{{ today }}" max="{{ end_date }}" required>
@@ -233,7 +288,9 @@
         </form>
     </div>
 
+    <!-- JavaScript -->
     <script>
+        // Navigation Menu Toggle
         const navBar = document.querySelector("nav"),
             menuBtns = document.querySelectorAll(".menu-icon"),
             overlay = document.querySelector(".overlay");
@@ -248,12 +305,8 @@
             navBar.classList.remove("open");
         });
 
-        // Disable dates not in doctor's available days
+        // Date Validation
         const availableDays = {{ doctor.visiting_days| safe }};
-        const today = new Date();
-        const endDate = new Date();
-        endDate.setDate(today.getDate() + 10);
-
         const dateInput = document.getElementById('booking_date');
         dateInput.addEventListener('change', function () {
             const selectedDate = new Date(this.value);
