@@ -6,6 +6,8 @@ from django.core.paginator import Paginator
 from django.core.paginator import EmptyPage, PageNotAnInteger
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.utils import timezone
+from datetime import timedelta, datetime
 
 
 def index(request):
@@ -106,3 +108,67 @@ def profile_picture(request, username):
         cursor.execute("SELECT public.get_profile_pic(%s)", [username])
         profile_picture = cursor.fetchone()[0]
     return HttpResponse(profile_picture, content_type="image/png")
+
+
+def book_appointment(request, doctor_username):
+    if request.method == "POST":
+        booking_date = request.POST.get("booking_date")
+        booking_time = request.POST.get("booking_time")
+
+        # Handle form submission and create appointment logic here
+        # ...
+
+        return redirect("appointment_success")
+    else:
+        # Fetch doctor information
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT username, public.get_name(username) AS name, phone_no,
+                       visiting_days, visiting_time_start, visiting_time_end,
+                       specialization, fee, degrees
+                FROM doctors
+                WHERE username = %s
+            """,
+                [doctor_username],
+            )
+            doctor = cursor.fetchone()
+
+        if doctor:
+            # Process doctor data
+            visiting_days = doctor[3]
+            if isinstance(visiting_days, str):
+                visiting_days = visiting_days.strip("{}").split(",")
+                visiting_days = [day.capitalize() for day in visiting_days]
+            degrees = doctor[8]
+            if isinstance(degrees, str):
+                degrees = degrees.strip("{}").split(",")
+
+            doctor_info = {
+                "username": doctor[0],
+                "name": doctor[1],
+                "phone_no": doctor[2],
+                "visiting_days": visiting_days,
+                "visiting_time_start": doctor[4],
+                "visiting_time_end": doctor[5],
+                "specialization": doctor[6],
+                "fee": doctor[7],
+                "degrees": degrees,
+            }
+
+            # Prepare date range for the next 10 days
+            today = timezone.now().date()
+            end_date = today + timedelta(days=10)
+            date_range = [today + timedelta(days=x) for x in range(0, 11)]
+
+            context = {
+                "doctor": doctor_info,
+                "date_range": date_range,
+                "today": today,
+                "end_date": end_date,
+            }
+
+            return render(request, "book_appointment.html", context)
+        else:
+            # Handle case when doctor is not found
+            return HttpResponse("Doctor not found.")

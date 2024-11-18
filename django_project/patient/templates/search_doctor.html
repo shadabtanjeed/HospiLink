@@ -486,7 +486,10 @@
                     </div>
                     <div class="card_appointment">
                         <p>Tk. {{ doctor.fee }}/=</p>
-                        <button type="button" class="btn"><b>Book Appointment</b></button>
+                        <!-- In search_doctor.html -->
+                        <button type="button" class="btn"
+                            onclick="window.location.href='{% url 'book_appointment' doctor.username %}'"><b>Book
+                                Appointment</b></button>
                     </div>
                 </div>
                 {% empty %}
