@@ -236,8 +236,18 @@ def signup_success(request):
 def login_success(request):
     # Retrieve the form data from the session
     form_data = request.session.get("login_form_data", {})
-    print(form_data)
-    return HttpResponse(f"Login successful! Data: {form_data}")
+    username = form_data.get("username", "")
+
+    # Check the user type using the find_user_type function
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT public.find_user_type(%s)", [username])
+        user_type = cursor.fetchone()[0]
+
+    if user_type == "patient":
+        request.session["patient_username"] = username
+        return redirect(f"/patient/?username={username}")
+    else:
+        return HttpResponse("Login successful, but you are not a patient.")
 
 
 def check_username(request):

@@ -9,8 +9,13 @@ from django.urls import reverse
 
 
 def index(request):
-    # Your existing index view code
-    return render(request, "patient_page.html")
+    username = request.session.get("patient_username", "")
+
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT public.get_name(%s)", [username])
+        name = cursor.fetchone()[0]
+
+    return render(request, "patient_page.html", {"username": username, "name": name})
 
 
 def fetch_doctors():
