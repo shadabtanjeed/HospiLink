@@ -9,4 +9,9 @@ urlpatterns = [
     path(
         "profile_picture/<str:username>/", views.profile_picture, name="profile_picture"
     ),
+    path(
+        "book_appointment/<str:doctor_username>/",
+        views.book_appointment,
+        name="book_appointment",
+    ),
 ]

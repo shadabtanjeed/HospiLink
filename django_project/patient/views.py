@@ -2,57 +2,79 @@
 from django.shortcuts import render
 from django.db import connection
 from django.http import HttpResponse
+from django.core.paginator import Paginator
+from django.core.paginator import EmptyPage, PageNotAnInteger
+from django.shortcuts import redirect
+from django.urls import reverse
+from django.utils import timezone
+from datetime import timedelta, datetime
+from django.http import JsonResponse
 
 
 def index(request):
-    # Your existing index view code
-    return render(request, "patient_page.html")
+    username = request.session.get("patient_username", "")
 
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT public.get_name(%s)", [username])
+        name = cursor.fetchone()[0]
 
-def search_doctor(request):
-    # Your logic to handle the search doctor page
-    return render(request, "search_doctor.html")
+    return render(request, "patient_page.html", {"username": username, "name": name})
 
 
 def fetch_doctors():
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT username, phone_no, visiting_days, visiting_time_start, visiting_time_end, specialization, fee, degrees
+            SELECT 
+                username, 
+                public.get_name(username) AS name, 
+                phone_no, 
+                visiting_days, 
+                visiting_time_start, 
+                visiting_time_end, 
+                specialization, 
+                fee, 
+                degrees
             FROM doctors
         """
         )
         doctors = cursor.fetchall()
         doctor_list = []
         for doctor in doctors:
-            try:
-                visiting_time_start = (
-                    doctor[3].strftime("%I:%M %p") if doctor[3] else "N/A"
+            # doctor[3] is visiting_days
+            visiting_days = doctor[3] if doctor[3] else []
+            # Ensure visiting_days is a list
+            if isinstance(visiting_days, list):
+                visiting_days = [day.capitalize() for day in visiting_days]
+            else:
+                # Handle as string
+                visiting_days = (
+                    visiting_days.replace("{", "").replace("}", "").split(",")
                 )
-                visiting_time_end = (
-                    doctor[4].strftime("%I:%M %p") if doctor[4] else "N/A"
-                )
-            except AttributeError:
-                # In case the time is already a string or different format
-                visiting_time_start = str(doctor[3])
-                visiting_time_end = str(doctor[4])
+                visiting_days = [day.strip().capitalize() for day in visiting_days]
 
-            visiting_days = doctor[2].replace("{", "").replace("}", "").split(",")
-            visiting_days = [day.capitalize() for day in visiting_days]
-            degrees = (
-                doctor[7]
-                if isinstance(doctor[7], list)
-                else doctor[7].replace("{", "").replace("}", "").split(",")
-            )
+            # doctor[8] is degrees
+            degrees = doctor[8] if doctor[8] else []
+            if isinstance(degrees, list):
+                degrees = [degree.strip() for degree in degrees]
+            else:
+                degrees = degrees.replace("{", "").replace("}", "").split(",")
+                degrees = [degree.strip() for degree in degrees]
+
+            # Corrected time formatting to 24-hour format
+            visiting_time_start = doctor[4].strftime("%H:%M") if doctor[4] else None
+            visiting_time_end = doctor[5].strftime("%H:%M") if doctor[5] else None
+
             doctor_list.append(
                 {
                     "username": doctor[0],
-                    "phone_no": doctor[1],
+                    "name": doctor[1],
+                    "phone_no": doctor[2],
                     "visiting_days": visiting_days,
                     "visiting_time_start": visiting_time_start,
                     "visiting_time_end": visiting_time_end,
-                    "specialization": doctor[5],
-                    "fee": doctor[6],
+                    "specialization": doctor[6],
+                    "fee": doctor[7],
                     "degrees": degrees,
                 }
             )
@@ -61,7 +83,26 @@ def fetch_doctors():
 
 def search_doctor(request):
     doctors = fetch_doctors()
-    return render(request, "search_doctor.html", {"doctors": doctors})
+
+    # Set up pagination: 5 doctors per page
+    paginator = Paginator(doctors, 3)  # Change to 3 as per your requirement
+    page_number = request.GET.get("page")
+
+    if not page_number:
+        # Redirect to the same view with ?page=1 if 'page' is not present
+        return redirect(f"{reverse('search_doctor')}?page=1")
+
+    try:
+        page_obj = paginator.get_page(page_number)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        page_obj = paginator.get_page(1)
+    except EmptyPage:
+        # If page is out of range (e.g., 9999), deliver last page of results.
+        page_obj = paginator.get_page(paginator.num_pages)
+
+    context = {"page_obj": page_obj}
+    return render(request, "search_doctor.html", context)
 
 
 def profile_picture(request, username):
@@ -69,3 +110,93 @@ def profile_picture(request, username):
         cursor.execute("SELECT public.get_profile_pic(%s)", [username])
         profile_picture = cursor.fetchone()[0]
     return HttpResponse(profile_picture, content_type="image/png")
+
+
+def book_appointment(request, doctor_username):
+    if request.method == "POST":
+        booking_date = request.POST.get("booking_date")
+        patient_username = request.session.get("patient_username")
+
+        try:
+            with connection.cursor() as cursor:
+                # Call the schedule_appointment function
+                cursor.execute(
+                    """
+                    SELECT public.schedule_appointment(%s, %s, %s)
+                    """,
+                    [patient_username, doctor_username, booking_date],
+                )
+                # Fetch the appointment time
+                cursor.execute(
+                    """
+                    SELECT appointment_time
+                    FROM appointments
+                    WHERE patient_username = %s
+                      AND doctor_username = %s
+                      AND appointment_date = %s
+                    """,
+                    [patient_username, doctor_username, booking_date],
+                )
+                appointment_time = cursor.fetchone()[0]
+
+            return JsonResponse(
+                {
+                    "success": True,
+                    "appointment_time": appointment_time.strftime("%H:%M"),
+                }
+            )
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)}, status=400)
+    else:
+        # Fetch doctor information
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT username, public.get_name(username) AS name, phone_no,
+                       visiting_days, visiting_time_start, visiting_time_end,
+                       specialization, fee, degrees
+                FROM doctors
+                WHERE username = %s
+                """,
+                [doctor_username],
+            )
+            doctor = cursor.fetchone()
+
+        if doctor:
+            # Process doctor data
+            visiting_days = doctor[3]
+            if isinstance(visiting_days, str):
+                visiting_days = visiting_days.strip("{}").split(",")
+                visiting_days = [day.capitalize() for day in visiting_days]
+            degrees = doctor[8]
+            if isinstance(degrees, str):
+                degrees = degrees.strip("{}").split(",")
+
+            doctor_info = {
+                "username": doctor[0],
+                "name": doctor[1],
+                "phone_no": doctor[2],
+                "visiting_days": visiting_days,
+                "visiting_time_start": doctor[4],
+                "visiting_time_end": doctor[5],
+                "specialization": doctor[6],
+                "fee": doctor[7],
+                "degrees": degrees,
+            }
+
+            # Prepare date range for the next 10 days
+            today = timezone.now().date()
+            end_date = today + timedelta(days=10)
+            date_range = [today + timedelta(days=x) for x in range(0, 11)]
+
+            context = {
+                "doctor": doctor_info,
+                "date_range": date_range,
+                "today": today,
+                "end_date": end_date,
+            }
+
+            return render(request, "book_appointment.html", context)
+        else:
+            # Handle case when doctor is not found
+            return HttpResponse("Doctor not found.")
