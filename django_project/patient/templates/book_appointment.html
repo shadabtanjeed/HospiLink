@@ -158,6 +158,10 @@
         }
 
         .doctor-info p {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            /* Adjust the gap as needed */
             font-size: 16px;
             margin: 5px 0;
             color: #333;
@@ -196,6 +200,85 @@
         }
 
         .appointment-form .btn:hover {
+            background-color: #c5555e;
+        }
+
+        .doctor-info p {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            margin: 5px 0;
+            color: #333;
+        }
+
+        .doctor-info i {
+            margin-right: 8px;
+            font-size: 20px;
+            /* Adjust icon size if necessary */
+            /* color: #b1545c; */
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            text-align: center;
+            border-radius: 10px;
+        }
+
+        .close-button {
+            color: #ffffff;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .modal-content p {
+            margin: 20px 0;
+            font-size: 18px;
+        }
+
+        .modal-content .bold {
+            font-weight: bold;
+        }
+
+        .modal-content .btn {
+            padding: 10px 20px;
+            background-color: #dd636e;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .modal-content .btn:hover {
             background-color: #c5555e;
         }
     </style>
@@ -267,26 +350,57 @@
         <h1>Book Appointment with Dr. {{ doctor.name }}</h1>
         <div class="doctor-info">
             <img src="{% url 'profile_picture' doctor.username %}" alt="Profile Picture" width="150" height="150">
-            <p><strong>Name:</strong> Dr. {{ doctor.name }}</p>
-            <p><strong>Specialization:</strong> {{ doctor.specialization }}</p>
-            <p><strong>Degrees:</strong> {{ doctor.degrees|join:", " }}</p>
-            <p><strong>Available Days:</strong> {{ doctor.visiting_days|join:", " }}</p>
-            <p><strong>Visiting Time:</strong> {{ doctor.visiting_time_start }} to {{ doctor.visiting_time_end }}</p>
-            <p><strong>Fee:</strong> Tk. {{ doctor.fee }}/=</p>
+            <p>
+                <i class="bx bx-user"></i>
+                <strong>Name:</strong>
+                <span>Dr. {{ doctor.name }}</span>
+            </p>
+            <p>
+                <i class="bx bx-briefcase"></i>
+                <strong>Specialization:</strong>
+                <span>{{ doctor.specialization }}</span>
+            </p>
+            <p>
+                <i class="bx bxs-certification"></i>
+                <strong>Degrees:</strong>
+                <span>{{ doctor.degrees|join:", " }}</span>
+            </p>
+            <p>
+                <i class="bx bx-calendar"></i>
+                <strong>Available Days:</strong>
+                <span>{{ doctor.visiting_days|join:", " }}</span>
+            </p>
+            <p>
+                <i class="bx bx-time"></i>
+                <strong>Visiting Time:</strong>
+                <span>{{ doctor.visiting_time_start }} to {{ doctor.visiting_time_end }}</span>
+            </p>
+            <p>
+                <i class="bx bx-money"></i>
+                <strong>Fee:</strong>
+                <span>Tk. {{ doctor.fee }}/=</span>
+            </p>
         </div>
 
-        <form method="post" class="appointment-form">
+        <form id="appointmentForm" method="post" class="appointment-form">
             {% csrf_token %}
             <label for="booking_date">Select Booking Date:</label>
             <input type="date" id="booking_date" name="booking_date" min="{{ today }}" max="{{ end_date }}" required>
 
-            <label for="booking_time">Select Time:</label>
-            <input type="time" id="booking_time" name="booking_time" min="{{ doctor.visiting_time_start }}"
-                max="{{ doctor.visiting_time_end }}" required>
+
 
             <button type="submit" class="btn">Confirm Booking</button>
         </form>
+
+        <div id="confirmationModal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close-button">&times;</span>
+                <p>Appointment confirmed at <span class="bold" id="confirmationMessage"></span></p>
+                <button class="btn" id="okButton">OK</button>
+            </div>
+        </div>
     </div>
+
 
     <!-- JavaScript -->
     <script>
@@ -316,6 +430,50 @@
                 this.value = '';
             }
         });
+
+
+        document.getElementById('appointmentForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(this);
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('confirmationMessage').textContent = data.appointment_time;
+                        document.getElementById('confirmationModal').style.display = 'flex';
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+
+        document.querySelector('.close-button').addEventListener('click', function () {
+            document.getElementById('confirmationModal').style.display = 'none';
+            window.location.href = 'http://127.0.0.1:8000/patient/';
+        });
+
+        document.getElementById('okButton').addEventListener('click', function () {
+            document.getElementById('confirmationModal').style.display = 'none';
+            window.location.href = 'http://127.0.0.1:8000/patient/';
+        });
+
+        window.onclick = function (event) {
+            const modal = document.getElementById('confirmationModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+                window.location.href = 'http://127.0.0.1:8000/patient/';
+            }
+        }
     </script>
 </body>
 

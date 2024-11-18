@@ -8,6 +8,7 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
 from datetime import timedelta, datetime
+from django.http import JsonResponse
 
 
 def index(request):
@@ -60,8 +61,9 @@ def fetch_doctors():
                 degrees = degrees.replace("{", "").replace("}", "").split(",")
                 degrees = [degree.strip() for degree in degrees]
 
-            visiting_time_start = doctor[4].strftime("%I:%M %p") if doctor[4] else "N/A"
-            visiting_time_end = doctor[5].strftime("%I:%M %p") if doctor[5] else "N/A"
+            # Corrected time formatting to 24-hour format
+            visiting_time_start = doctor[4].strftime("%H:%M") if doctor[4] else None
+            visiting_time_end = doctor[5].strftime("%H:%M") if doctor[5] else None
 
             doctor_list.append(
                 {
@@ -113,12 +115,38 @@ def profile_picture(request, username):
 def book_appointment(request, doctor_username):
     if request.method == "POST":
         booking_date = request.POST.get("booking_date")
-        booking_time = request.POST.get("booking_time")
+        patient_username = request.session.get("patient_username")
 
-        # Handle form submission and create appointment logic here
-        # ...
+        try:
+            with connection.cursor() as cursor:
+                # Call the schedule_appointment function
+                cursor.execute(
+                    """
+                    SELECT public.schedule_appointment(%s, %s, %s)
+                    """,
+                    [patient_username, doctor_username, booking_date],
+                )
+                # Fetch the appointment time
+                cursor.execute(
+                    """
+                    SELECT appointment_time
+                    FROM appointments
+                    WHERE patient_username = %s
+                      AND doctor_username = %s
+                      AND appointment_date = %s
+                    """,
+                    [patient_username, doctor_username, booking_date],
+                )
+                appointment_time = cursor.fetchone()[0]
 
-        return redirect("appointment_success")
+            return JsonResponse(
+                {
+                    "success": True,
+                    "appointment_time": appointment_time.strftime("%H:%M"),
+                }
+            )
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)}, status=400)
     else:
         # Fetch doctor information
         with connection.cursor() as cursor:
@@ -129,7 +157,7 @@ def book_appointment(request, doctor_username):
                        specialization, fee, degrees
                 FROM doctors
                 WHERE username = %s
-            """,
+                """,
                 [doctor_username],
             )
             doctor = cursor.fetchone()
