@@ -452,7 +452,7 @@
                     <th>Blood Group</th>
                     <th>Complexities</th>
                     <th>Last Donation</th>
-                    <th>General Location</th>
+                    <th>Approximate Distance</th>
                 </tr>
             </thead>
             <tbody id="table-body">
@@ -461,36 +461,60 @@
         </table>
     </div>
 
+
+    <!-- Modal for donor details -->
+    <div class="modal fade" id="donorModal" tabindex="-1" aria-labelledby="donorModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="donorModalLabel">Donor Details</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Name:</strong> <span id="modalName"></span></p>
+                    <p><strong>Blood Group:</strong> <span id="modalBloodGroup"></span></p>
+                    <p><strong>Complexities:</strong> <span id="modalComplexities"></span></p>
+                    <p><strong>Last Donation:</strong> <span id="modalLastDonation"></span></p>
+                    <p><strong>Approximate Distance:</strong> <span id="modalApproximateDistance"></span></p>
+                    <p><strong>Contact Info:</strong> <span id="modalContactInfo"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success">Accepted</button>
+                    <button type="button" class="btn btn-danger">Rejected</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Add Bootstrap JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-    <!-- Add Bootstrap JS and dependencies -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <!-- Script to dynamically generate table rows -->
     <script>
         const navBar = document.querySelector("nav"),
             menuBtns = document.querySelectorAll(".menu-icon"),
             overlay = document.querySelector(".overlay");
-    
+
         menuBtns.forEach((menuBtn) => {
             menuBtn.addEventListener("click", () => {
                 navBar.classList.toggle("open");
             });
         });
-    
+
         overlay.addEventListener("click", () => {
             navBar.classList.remove("open");
         });
-    
+
         document.addEventListener('DOMContentLoaded', function () {
             const tableBody = document.getElementById('table-body');
             const bloodGroupSelect = document.getElementById('blood-group-select');
-    
+
             async function fetchData(bloodGroup = '') {
                 let url = '/api/blood_repo/';
                 if (bloodGroup) {
@@ -500,7 +524,7 @@
                 const data = await response.json();
                 renderTable(data);
             }
-    
+
             function renderTable(data) {
                 tableBody.innerHTML = '';
                 data.forEach(item => {
@@ -512,15 +536,24 @@
                         <td>${item.last_donation}</td>
                         <td>${item.approximate_distance}</td>
                     `;
+                    row.addEventListener('click', () => {
+                        document.getElementById('modalName').innerText = item.name;
+                        document.getElementById('modalBloodGroup').innerText = item.blood_group;
+                        document.getElementById('modalComplexities').innerText = item.complexities;
+                        document.getElementById('modalLastDonation').innerText = item.last_donation;
+                        document.getElementById('modalApproximateDistance').innerText = item.approximate_distance;
+                        document.getElementById('modalContactInfo').innerText = item.phone_no.join(', ');
+                        $('#donorModal').modal('show');
+                    });
                     tableBody.appendChild(row);
                 });
             }
-    
+
             bloodGroupSelect.addEventListener('change', function () {
                 const selectedGroup = this.value;
                 fetchData(selectedGroup);
             });
-    
+
             fetchData();
         });
     </script>
