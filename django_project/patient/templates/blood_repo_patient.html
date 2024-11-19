@@ -471,32 +471,34 @@
         const navBar = document.querySelector("nav"),
             menuBtns = document.querySelectorAll(".menu-icon"),
             overlay = document.querySelector(".overlay");
-
+    
         menuBtns.forEach((menuBtn) => {
             menuBtn.addEventListener("click", () => {
                 navBar.classList.toggle("open");
             });
         });
-
+    
         overlay.addEventListener("click", () => {
             navBar.classList.remove("open");
         });
-
-
+    
         document.addEventListener('DOMContentLoaded', function () {
-            const data = [
-                { name: 'John Doe', blood_group: 'A+', complexities: 'None', last_donation: '2023-01-15 10:00:00', general_location: '(40.7128, -74.0060)' },
-                { name: 'Jane Smith', blood_group: 'B-', complexities: 'Anemia', last_donation: '2023-02-20 14:30:00', general_location: '(34.0522, -118.2437)' },
-                { name: 'Sam Brown', blood_group: 'O+', complexities: 'Diabetes', last_donation: '2023-03-10 09:15:00', general_location: '(41.8781, -87.6298)' },
-                { name: 'Lisa White', blood_group: 'AB-', complexities: 'Hypertension', last_donation: '2023-04-05 16:45:00', general_location: '(51.5074, -0.1278)' }
-            ];
-
             const tableBody = document.getElementById('table-body');
             const bloodGroupSelect = document.getElementById('blood-group-select');
-
-            function renderTable(filteredData) {
+    
+            async function fetchData(bloodGroup = '') {
+                let url = '/api/blood_repo/';
+                if (bloodGroup) {
+                    url += `?blood_group=${bloodGroup}`;
+                }
+                const response = await fetch(url);
+                const data = await response.json();
+                renderTable(data);
+            }
+    
+            function renderTable(data) {
                 tableBody.innerHTML = '';
-                filteredData.forEach(item => {
+                data.forEach(item => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${item.name}</td>
@@ -508,14 +510,13 @@
                     tableBody.appendChild(row);
                 });
             }
-
+    
             bloodGroupSelect.addEventListener('change', function () {
                 const selectedGroup = this.value;
-                const filteredData = selectedGroup ? data.filter(item => item.blood_group === selectedGroup) : data;
-                renderTable(filteredData);
+                fetchData(selectedGroup);
             });
-
-            renderTable(data);
+    
+            fetchData();
         });
     </script>
 </body>

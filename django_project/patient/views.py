@@ -1,7 +1,7 @@
 # django_project/patient/views.py
 from django.shortcuts import render
 from django.db import connection
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 
 
 def index(request):
@@ -72,3 +72,15 @@ def profile_picture(request, username):
 
 def blood_repo(request):
     return render(request, 'blood_repo_patient.html')
+
+
+def fetch_blood_repo_data(request):
+    blood_group = request.GET.get('blood_group', '')
+    with connection.cursor() as cursor:
+        if blood_group:
+            cursor.execute("SELECT * FROM blood_repo WHERE blood_group = %s", [blood_group])
+        else:
+            cursor.execute("SELECT * FROM blood_repo")
+        columns = [col[0] for col in cursor.description]
+        data = [dict(zip(columns, row)) for row in cursor.fetchall()]
+    return JsonResponse(data, safe=False)

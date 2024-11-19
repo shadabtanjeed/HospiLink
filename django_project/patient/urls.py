@@ -9,5 +9,6 @@ urlpatterns = [
     path(
         "profile_picture/<str:username>/", views.profile_picture, name="profile_picture"
     ),
-    path("blood_repo/", views.blood_repo, name="blood_repo")
+    path("blood_repo/", views.blood_repo, name="blood_repo"),
+    path("api/blood_repo/", views.fetch_blood_repo_data, name="fetch_blood_repo_data")
 ]
