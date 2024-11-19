@@ -339,6 +339,20 @@
             justify-content: center;
             align-items: center;
         }
+
+        .container.mt-3 {
+            margin-top: 100px !important;
+            /* Moves dropdown lower */
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        #blood-group-select {
+            width: 200px !important;
+            /* Optional: set a specific width */
+            margin-right: 20px;
+            /* Optional: add some right margin */
+        }
     </style>
 
     <title>Blood Repo</title>
@@ -412,7 +426,7 @@
     <section class="overlay"></section>
 
     <!-- Dropdown for blood group selection -->
-    <div class="container mt-3">
+    <div class="container mt-3" id="select_blood_group">
         <div class="d-flex justify-content-end">
             <select id="blood-group-select" class="form-control w-25">
                 <option value="">Select Blood Group</option>
@@ -420,10 +434,10 @@
                 <option value="A-">A-</option>
                 <option value="B+">B+</option>
                 <option value="B-">B-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
                 <option value="AB+">AB+</option>
                 <option value="AB-">AB-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
             </select>
         </div>
     </div>
@@ -454,17 +468,32 @@
 
     <!-- Script to dynamically generate table rows -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        const navBar = document.querySelector("nav"),
+            menuBtns = document.querySelectorAll(".menu-icon"),
+            overlay = document.querySelector(".overlay");
+
+        menuBtns.forEach((menuBtn) => {
+            menuBtn.addEventListener("click", () => {
+                navBar.classList.toggle("open");
+            });
+        });
+
+        overlay.addEventListener("click", () => {
+            navBar.classList.remove("open");
+        });
+
+
+        document.addEventListener('DOMContentLoaded', function () {
             const data = [
                 { name: 'John Doe', blood_group: 'A+', complexities: 'None', last_donation: '2023-01-15 10:00:00', general_location: '(40.7128, -74.0060)' },
                 { name: 'Jane Smith', blood_group: 'B-', complexities: 'Anemia', last_donation: '2023-02-20 14:30:00', general_location: '(34.0522, -118.2437)' },
                 { name: 'Sam Brown', blood_group: 'O+', complexities: 'Diabetes', last_donation: '2023-03-10 09:15:00', general_location: '(41.8781, -87.6298)' },
                 { name: 'Lisa White', blood_group: 'AB-', complexities: 'Hypertension', last_donation: '2023-04-05 16:45:00', general_location: '(51.5074, -0.1278)' }
             ];
-    
+
             const tableBody = document.getElementById('table-body');
             const bloodGroupSelect = document.getElementById('blood-group-select');
-    
+
             function renderTable(filteredData) {
                 tableBody.innerHTML = '';
                 filteredData.forEach(item => {
@@ -479,16 +508,16 @@
                     tableBody.appendChild(row);
                 });
             }
-    
-            bloodGroupSelect.addEventListener('change', function() {
+
+            bloodGroupSelect.addEventListener('change', function () {
                 const selectedGroup = this.value;
                 const filteredData = selectedGroup ? data.filter(item => item.blood_group === selectedGroup) : data;
                 renderTable(filteredData);
             });
-    
+
             renderTable(data);
         });
     </script>
 </body>
+
 </html>
-    
