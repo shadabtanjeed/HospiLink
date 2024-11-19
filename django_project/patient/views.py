@@ -69,3 +69,6 @@ def profile_picture(request, username):
         cursor.execute("SELECT public.get_profile_pic(%s)", [username])
         profile_picture = cursor.fetchone()[0]
     return HttpResponse(profile_picture, content_type="image/png")
+
+def blood_repo(request):
+    return render(request, 'blood_repo_patient.html')

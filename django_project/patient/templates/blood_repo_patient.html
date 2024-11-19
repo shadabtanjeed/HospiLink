@@ -8,6 +8,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" href="{% static 'app_logo_3.png' %}" type="image/png">
     <link href="https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+
 
     <style>
         /* Google Fonts - Poppins */
@@ -338,7 +341,7 @@
         }
     </style>
 
-    <title>Search Doctor</title>
+    <title>Blood Repo</title>
 </head>
 
 <body>
@@ -408,70 +411,84 @@
 
     <section class="overlay"></section>
 
-    <div class="content">
-        <h1>Search Doctor</h1>
-        <div class=search_container>
-
-
-            <div class="filter_section">
-                This is the filter section
-            </div>
-            <div class="list_section">
-                <!-- search doctor input with a search logo as button -->
-
-                <div class="search-container">
-                    <form action="" method="GET" class="search-wrapper">
-                        {% csrf_token %}
-                        <button type="submit" class="search-btn">
-                            <i class="bx bx-search"></i>
-                        </button>
-                        <input type="search" class="search-input" placeholder="Search for doctors by name"
-                            name="search_query" autocomplete="off">
-                    </form>
-                </div>
-
-
-                {% for doctor in doctors %}
-                <div class="card">
-                    <div class="card_img">
-                        <img src="{% url 'profile_picture' doctor.username %}" width="100px" height="100px"
-                            alt="Profile Picture">
-                    </div>
-                    <div class="card_identity">
-                        <h4 class="card-title">{{ doctor.username }}</h4>
-                        <p class="card-text">{{ doctor.specialization }}</p>
-                        <p class="card-text">{{ doctor.degrees|join:", " }}</p>
-                    </div>
-                    <div class="card_details">
-                        <p class="card-text"><b>Available on:</b> {{ doctor.visiting_days|join:", " }}</p>
-                        <p class="card-text"><b>Visiting hours:</b> {{ doctor.visiting_time_start }} to {{
-                            doctor.visiting_time_end }}</p>
-                    </div>
-                    <div class="card_appointment">
-                        <p>Tk. {{ doctor.fee }}/=</p>
-                        <button type="button" class="btn"><b>Book Appointment</b></button>
-                    </div>
-                </div>
-                {% endfor %}
-
-            </div>
+    <!-- Dropdown for blood group selection -->
+    <div class="container mt-3">
+        <div class="d-flex justify-content-end">
+            <select id="blood-group-select" class="form-control w-25">
+                <option value="">Select Blood Group</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+            </select>
         </div>
+    </div>
 
-        <script>
-            const navBar = document.querySelector("nav"),
-                menuBtns = document.querySelectorAll(".menu-icon"),
-                overlay = document.querySelector(".overlay");
+    <!-- New table container -->
+    <div class="container mt-5">
+        <h2>Blood Donors</h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Blood Group</th>
+                    <th>Complexities</th>
+                    <th>Last Donation</th>
+                    <th>General Location</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <!-- Dynamic rows will be inserted here -->
+            </tbody>
+        </table>
+    </div>
 
-            menuBtns.forEach((menuBtn) => {
-                menuBtn.addEventListener("click", () => {
-                    navBar.classList.toggle("open");
+    <!-- Add Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Script to dynamically generate table rows -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const data = [
+                { name: 'John Doe', blood_group: 'A+', complexities: 'None', last_donation: '2023-01-15 10:00:00', general_location: '(40.7128, -74.0060)' },
+                { name: 'Jane Smith', blood_group: 'B-', complexities: 'Anemia', last_donation: '2023-02-20 14:30:00', general_location: '(34.0522, -118.2437)' },
+                { name: 'Sam Brown', blood_group: 'O+', complexities: 'Diabetes', last_donation: '2023-03-10 09:15:00', general_location: '(41.8781, -87.6298)' },
+                { name: 'Lisa White', blood_group: 'AB-', complexities: 'Hypertension', last_donation: '2023-04-05 16:45:00', general_location: '(51.5074, -0.1278)' }
+            ];
+    
+            const tableBody = document.getElementById('table-body');
+            const bloodGroupSelect = document.getElementById('blood-group-select');
+    
+            function renderTable(filteredData) {
+                tableBody.innerHTML = '';
+                filteredData.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.name}</td>
+                        <td>${item.blood_group}</td>
+                        <td>${item.complexities}</td>
+                        <td>${item.last_donation}</td>
+                        <td>${item.general_location}</td>
+                    `;
+                    tableBody.appendChild(row);
                 });
+            }
+    
+            bloodGroupSelect.addEventListener('change', function() {
+                const selectedGroup = this.value;
+                const filteredData = selectedGroup ? data.filter(item => item.blood_group === selectedGroup) : data;
+                renderTable(filteredData);
             });
-
-            overlay.addEventListener("click", () => {
-                navBar.classList.remove("open");
-            });
-        </script>
+    
+            renderTable(data);
+        });
+    </script>
 </body>
-
 </html>
+    
