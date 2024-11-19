@@ -466,6 +466,11 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
+    <!-- Add Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
     <!-- Script to dynamically generate table rows -->
     <script>
         const navBar = document.querySelector("nav"),
@@ -489,7 +494,7 @@
             async function fetchData(bloodGroup = '') {
                 let url = '/api/blood_repo/';
                 if (bloodGroup) {
-                    url += `?blood_group=${bloodGroup}`;
+                    url += `?blood_group=${encodeURIComponent(bloodGroup)}`;
                 }
                 const response = await fetch(url);
                 const data = await response.json();
@@ -505,7 +510,7 @@
                         <td>${item.blood_group}</td>
                         <td>${item.complexities}</td>
                         <td>${item.last_donation}</td>
-                        <td>${item.general_location}</td>
+                        <td>${item.approximate_distance}</td>
                     `;
                     tableBody.appendChild(row);
                 });
