@@ -8,6 +8,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" href="{% static 'app_logo_3.png' %}" type="image/png">
     <link href="https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+
 
     <style>
         /* Google Fonts - Poppins */
@@ -20,7 +23,7 @@
             align-items: center;
             margin-top: 20px;
             border-radius: 20px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             padding: 15px 20px;
             width: 95%;
             min-height: 120px;
@@ -63,11 +66,6 @@
             flex: 0 0 100px;
             /* Fixed width of 100px, won't grow or shrink */
 
-        }
-
-        .card_img img {
-            border-radius: 20px;
-            /* Adjust the value as needed */
         }
 
         .card_identity {
@@ -342,42 +340,22 @@
             align-items: center;
         }
 
-        /* Pagination Styles */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-            gap: 10px;
+        .container.mt-3 {
+            margin-top: 100px !important;
+            /* Moves dropdown lower */
+            padding-left: 20px;
+            padding-right: 20px;
         }
 
-        .pagination a,
-        .pagination span {
-            padding: 8px 16px;
-            text-decoration: none;
-            border: 1px solid #ddd;
-            color: #333;
-            border-radius: 5px;
-        }
-
-        .pagination a:hover {
-            background-color: #f0f0f0;
-        }
-
-        .pagination .active {
-            background-color: #c5555e;
-            ;
-            color: white;
-            border: 1px solid #c5555e;
-            ;
-        }
-
-        .pagination .disabled {
-            color: #ccc;
-            border: 1px solid #ddd;
+        #blood-group-select {
+            width: 200px !important;
+            /* Optional: set a specific width */
+            margin-right: 20px;
+            /* Optional: add some right margin */
         }
     </style>
 
-    <title>Search Doctor</title>
+    <title>Blood Repo</title>
 </head>
 
 <body>
@@ -447,86 +425,83 @@
 
     <section class="overlay"></section>
 
-    <div class="content">
-        <h1>Search Doctor</h1>
-        <div class="search_container">
+    <!-- Dropdown for blood group selection -->
+    <div class="container mt-3" id="select_blood_group">
+        <div class="d-flex justify-content-end">
+            <select id="blood-group-select" class="form-control w-25">
+                <option value="">Select Blood Group</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+            </select>
+        </div>
+    </div>
 
-            <div class="filter_section">
-                This is the filter section
-            </div>
-            <div class="list_section">
-                <!-- Search form -->
-                <div class="search-container">
-                    <form action="" method="GET" class="search-wrapper">
-                        {% csrf_token %}
-                        <button type="submit" class="search-btn">
-                            <i class="bx bx-search"></i>
-                        </button>
-                        <input type="search" class="search-input" placeholder="Search for doctors by name"
-                            name="search_query" autocomplete="off">
-                    </form>
+    <!-- New table container -->
+    <div class="container mt-5">
+        <h2>Blood Donors</h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Blood Group</th>
+                    <th>Complexities</th>
+                    <th>Last Donation</th>
+                    <th>Approximate Distance</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <!-- Dynamic rows will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+
+    <!-- Modal for donor details -->
+    <div class="modal fade" id="donorModal" tabindex="-1" aria-labelledby="donorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="donorModalLabel">Donor Details</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-
-                <!-- Doctor Cards -->
-                {% for doctor in page_obj.object_list %}
-                <div class="card">
-                    <div class="card_img">
-                        <img src="{% url 'profile_picture' doctor.username %}" width="100px" height="100px"
-                            alt="Profile Picture">
-                    </div>
-                    <div class="card_identity">
-                        <h4 class="card-title">Dr. {{ doctor.name }}</h4>
-                        <p class="card-text">{{ doctor.specialization }}</p>
-                        <p class="card-text">{{ doctor.degrees|join:", " }}</p>
-                    </div>
-                    <div class="card_details">
-                        <p class="card-text"><b>Available on:</b> {{ doctor.visiting_days|join:", " }}</p>
-                        <p class="card-text"><b>Visiting hours:</b> {{ doctor.visiting_time_start }} to {{
-                            doctor.visiting_time_end }}</p>
-                    </div>
-                    <div class="card_appointment">
-                        <p>Tk. {{ doctor.fee }}/=</p>
-                        <!-- In search_doctor.html -->
-                        <button type="button" class="btn"
-                            onclick="window.location.href='{% url 'book_appointment' doctor.username %}'"><b>Book
-                                Appointment</b></button>
-                    </div>
+                <div class="modal-body">
+                    <p><strong>Name:</strong> <span id="modalName"></span></p>
+                    <p><strong>Blood Group:</strong> <span id="modalBloodGroup"></span></p>
+                    <p><strong>Complexities:</strong> <span id="modalComplexities"></span></p>
+                    <p><strong>Last Donation:</strong> <span id="modalLastDonation"></span></p>
+                    <p><strong>Approximate Distance:</strong> <span id="modalApproximateDistance"></span></p>
+                    <p><strong>Contact Info:</strong> <span id="modalContactInfo"></span></p>
                 </div>
-                {% empty %}
-                <p>No doctors found.</p>
-                {% endfor %}
-
-                <!-- Pagination Controls -->
-                {% if page_obj.has_other_pages %}
-                <div class="pagination">
-                    <!-- Previous Page Link -->
-                    {% if page_obj.has_previous %}
-                    <a href="?page={{ page_obj.previous_page_number }}">&#171; Previous</a>
-                    {% else %}
-                    <span class="disabled">&#171; Previous</span>
-                    {% endif %}
-
-                    <!-- Page Number Links -->
-                    {% for num in page_obj.paginator.page_range %}
-                    {% if page_obj.number == num %}
-                    <span class="active">{{ num }}</span>
-                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <a
-                        href="?page={{ num }}">{{ num }}</a>
-                        {% endif %}
-                        {% endfor %}
-
-                        <!-- Next Page Link -->
-                        {% if page_obj.has_next %}
-                        <a href="?page={{ page_obj.next_page_number }}">Next &#187;</a>
-                        {% else %}
-                        <span class="disabled">Next &#187;</span>
-                        {% endif %}
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success">Accepted</button>
+                    <button type="button" class="btn btn-danger" id="rejectedButton" data-dismiss="modal">Rejected</button>
                 </div>
-                {% endif %}
             </div>
         </div>
     </div>
 
+    <!-- Add Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Hovering Effect -->
+    <style>
+        tbody tr:hover {
+            background-color: #74b9e9;
+            cursor: pointer;
+        }
+    </style>
+
+    <!-- Script to dynamically generate table rows -->
     <script>
         const navBar = document.querySelector("nav"),
             menuBtns = document.querySelectorAll(".menu-icon"),
@@ -540,6 +515,52 @@
 
         overlay.addEventListener("click", () => {
             navBar.classList.remove("open");
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const tableBody = document.getElementById('table-body');
+            const bloodGroupSelect = document.getElementById('blood-group-select');
+
+            async function fetchData(bloodGroup = '') {
+                let url = '/api/blood_repo/';
+                if (bloodGroup) {
+                    url += `?blood_group=${encodeURIComponent(bloodGroup)}`;
+                }
+                const response = await fetch(url);
+                const data = await response.json();
+                renderTable(data);
+            }
+
+            function renderTable(data) {
+                tableBody.innerHTML = '';
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.name}</td>
+                        <td>${item.blood_group}</td>
+                        <td>${item.complexities}</td>
+                        <td>${item.last_donation}</td>
+                        <td>${item.approximate_distance}</td>
+                    `;
+                    row.addEventListener('click', () => {
+                        document.getElementById('modalName').innerText = item.name;
+                        document.getElementById('modalBloodGroup').innerText = item.blood_group;
+                        document.getElementById('modalComplexities').innerText = item.complexities;
+                        document.getElementById('modalLastDonation').innerText = item.last_donation;
+                        document.getElementById('modalApproximateDistance').innerText = item.approximate_distance;
+                        document.getElementById('modalContactInfo').innerText = item.phone_no.join(', ');
+                        $('#donorModal').modal('show');
+                    });
+                    tableBody.appendChild(row);
+                });
+            }
+
+            bloodGroupSelect.addEventListener('change', function () {
+                const selectedGroup = this.value;
+                fetchData(selectedGroup);
+            });
+
+            fetchData();
         });
     </script>
 </body>
