@@ -4,6 +4,8 @@ from django.db import connection
 from django.http import HttpResponse
 import json
 from datetime import datetime
+from datetime import date, time
+
 
 def index(request):
     # Your existing index view code
@@ -71,12 +73,13 @@ def profile_picture(request, username):
         profile_picture = cursor.fetchone()[0]
     return HttpResponse(profile_picture, content_type="image/png")
 
+
 def blood_repo(request):
-    return render(request, 'blood_repo_patient.html')
+    return render(request, "blood_repo_patient.html")
 
 
 def fetch_blood_repo_data(request):
-    blood_group = request.GET.get('blood_group', '')
+    blood_group = request.GET.get("blood_group", "")
     with connection.cursor() as cursor:
         if blood_group:
             cursor.execute("SELECT * FROM search_donor(%s)", [blood_group])
@@ -85,7 +88,34 @@ def fetch_blood_repo_data(request):
         columns = [col[0] for col in cursor.description]
         data = [dict(zip(columns, row)) for row in cursor.fetchall()]
         for item in data:
-            if isinstance(item['last_donation'], datetime):
-                item['last_donation'] = item['last_donation'].strftime('%Y-%m-%d %H:%M:%S')
+            if isinstance(item["last_donation"], datetime):
+                item["last_donation"] = item["last_donation"].strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
+    response_data = json.dumps(data)
+    return HttpResponse(response_data, content_type="application/json")
+
+
+# django_project/patient/views.py
+
+
+def fetch_upcoming_appointments(request):
+    username = request.session.get("login_form_data", {}).get("username")
+    user_type = request.session.get("login_form_data", {}).get("user_type")
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT * FROM show_upcoming_appointments(%s, %s)", [username, user_type]
+        )
+        columns = [col[0] for col in cursor.description]
+        data = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+        # Convert date and time objects to strings
+        for item in data:
+            if isinstance(item["appointment_date"], date):
+                item["appointment_date"] = item["appointment_date"].strftime("%Y-%m-%d")
+            if isinstance(item["appointment_time"], time):
+                item["appointment_time"] = item["appointment_time"].strftime("%H:%M:%S")
+
     response_data = json.dumps(data)
     return HttpResponse(response_data, content_type="application/json")
