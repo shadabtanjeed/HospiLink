@@ -701,63 +701,36 @@
                 </div>
 
                 <!-- Doctor Cards -->
-                {% for doctor in page_obj.object_list %}
-                <div class="card">
-                    <div class="card_img">
-                        <img src="{% url 'profile_picture' doctor.username %}" width="100px" height="100px"
-                            alt="Profile Picture">
+                <div id="doctorCardsContainer">
+                    {% for doctor in doctors %}
+                    <div class="card" style="display: none">
+                        <div class="card_img" data-gender="{{ doctor.gender|lower }}">
+                            <img src="{% url 'profile_picture' doctor.username %}" width="100px" height="100px"
+                                alt="Profile Picture">
+                        </div>
+                        <div class="card_identity">
+                            <h4 class="card-title">Dr. {{ doctor.name }}</h4>
+                            <p class="card-text">{{ doctor.specialization }}</p>
+                            <p class="card-text">{{ doctor.degrees|join:", " }}</p>
+                        </div>
+                        <div class="card_details">
+                            <p class="card-text"><b>Available on:</b> {{ doctor.visiting_days|join:", " }}</p>
+                            <p class="card-text"><b>Visiting hours:</b>
+                                {{ doctor.visiting_time_start }} to {{ doctor.visiting_time_end }}
+                            </p>
+                        </div>
+                        <div class="card_appointment">
+                            <p>Tk. {{ doctor.fee }}/=</p>
+                            <button type="button" class="btn"
+                                onclick="window.location.href='{% url 'book_appointment' doctor.username %}'">
+                                <b>Book Appointment</b>
+                            </button>
+                        </div>
                     </div>
-                    <div class="card_identity">
-                        <h4 class="card-title">Dr. {{ doctor.name }}</h4>
-                        <p class="card-text">{{ doctor.specialization }}</p>
-                        <p class="card-text">{{ doctor.degrees|join:", " }}</p>
-                    </div>
-                    <div class="card_details">
-                        <p class="card-text"><b>Available on:</b> {{ doctor.visiting_days|join:", " }}</p>
-                        <p class="card-text"><b>Visiting hours:</b>
-                            {{ doctor.visiting_time_start }} to {{ doctor.visiting_time_end }}
-                        </p>
-                    </div>
-                    <div class="card_appointment">
-                        <p>Tk. {{ doctor.fee }}/=</p>
-                        <!-- In search_doctor.html -->
-                        <button type="button" class="btn"
-                            onclick="window.location.href='{% url 'book_appointment' doctor.username %}'">
-                            <b>Book Appointment</b>
-                        </button>
-                    </div>
+                    {% endfor %}
                 </div>
-                {% empty %}
-                <p>No doctors found.</p>
-                {% endfor %}
 
-                <!-- Pagination Controls -->
-                {% if page_obj.has_other_pages %}
-                <div class="pagination">
-                    <!-- Previous Page Link -->
-                    {% if page_obj.has_previous %}
-                    <a href="?page={{ page_obj.previous_page_number }}">&#171; Previous</a>
-                    {% else %}
-                    <span class="disabled">&#171; Previous</span>
-                    {% endif %}
 
-                    <!-- Page Number Links -->
-                    {% for num in page_obj.paginator.page_range %}
-                    {% if page_obj.number == num %}
-                    <span class="active">{{ num }}</span>
-                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <a
-                        href="?page={{ num }}">{{ num }}</a>
-                        {% endif %}
-                        {% endfor %}
-
-                        <!-- Next Page Link -->
-                        {% if page_obj.has_next %}
-                        <a href="?page={{ page_obj.next_page_number }}">Next &#187;</a>
-                        {% else %}
-                        <span class="disabled">Next &#187;</span>
-                        {% endif %}
-                </div>
-                {% endif %}
             </div>
         </div>
     </div>
@@ -777,6 +750,10 @@
             navBar.classList.remove("open");
         });
 
+        const DOCTORS_PER_PAGE = 10;
+        let currentPage = 0;
+        let filteredCards = [];
+
 
         function filterDoctors() {
             const gender = document.querySelector('input[name="gender"]:checked').value;
@@ -788,6 +765,7 @@
             const searchQuery = document.querySelector('.search-input').value.toLowerCase();
 
             const cards = document.querySelectorAll('.card');
+            filteredCards = [];
 
             cards.forEach(card => {
                 let showCard = true;
@@ -828,25 +806,51 @@
                     if (!doctorName.includes(searchQuery)) showCard = false;
                 }
 
-                card.style.display = showCard ? 'flex' : 'none';
+                card.style.display = 'none';
+                if (showCard) {
+                    filteredCards.push(card);
+                }
             });
+
+            currentPage = 0;
+            loadMoreDoctors();
         }
+
+        function loadMoreDoctors() {
+            const start = currentPage * DOCTORS_PER_PAGE;
+            const end = start + DOCTORS_PER_PAGE;
+
+            for (let i = start; i < end && i < filteredCards.length; i++) {
+                filteredCards[i].style.display = 'flex';
+            }
+            currentPage++;
+        }
+
+        function handleScroll() {
+            const container = document.getElementById('doctorCardsContainer');
+            if (container.getBoundingClientRect().bottom <= window.innerHeight) {
+                loadMoreDoctors();
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            filterDoctors(); // Initial load
+            window.addEventListener('scroll', handleScroll);
+        });
+
+        // Add event listeners
+        document.querySelectorAll('#filter-form input, #filter-form select').forEach(input => {
+            input.addEventListener('change', filterDoctors);
+        });
+        document.querySelector('.search-input').addEventListener('input', filterDoctors);
 
         function clearFilters() {
             document.getElementById('filter-form').reset();
             document.querySelector('input[name="gender"][value="any"]').checked = true;
             document.querySelector('.search-input').value = '';
-            const cards = document.querySelectorAll('.card');
-            cards.forEach(card => card.style.display = 'flex');
+            filterDoctors();
         }
-
-        // Add event listeners to all filter inputs
-        document.querySelectorAll('#filter-form input, #filter-form select').forEach(input => {
-            input.addEventListener('change', filterDoctors);
-        });
-
-        // Add event listener to search input
-        document.querySelector('.search-input').addEventListener('input', filterDoctors);
     </script>
 </body>
 

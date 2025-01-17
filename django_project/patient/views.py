@@ -90,26 +90,8 @@ def fetch_doctors():
 
 
 def search_doctor(request):
-    doctors = fetch_doctors()
-
-    # Set up pagination: 5 doctors per page
-    paginator = Paginator(doctors, 5)  # Change to 5 as per your requirement
-    page_number = request.GET.get("page")
-
-    if not page_number:
-        # Redirect to the same view with ?page=1 if 'page' is not present
-        return redirect(f"{reverse('search_doctor')}?page=1")
-
-    try:
-        page_obj = paginator.get_page(page_number)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        page_obj = paginator.get_page(1)
-    except EmptyPage:
-        # If page is out of range (e.g., 9999), deliver last page of results.
-        page_obj = paginator.get_page(paginator.num_pages)
-
-    context = {"page_obj": page_obj}
+    doctors = fetch_doctors()  # Get all doctors
+    context = {"doctors": doctors}  # Send complete list
     return render(request, "search_doctor.html", context)
 
 
