@@ -460,6 +460,7 @@
                     <th>Date</th>
                     <th>Time</th>
                     <th>With</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody id="table-body">
@@ -507,7 +508,13 @@
             async function fetchAppointments() {
                 const response = await fetch('/api/upcoming_appointments/');
                 const data = await response.json();
-                renderTable(data);
+                const futureAppointments = data.filter(item => {
+                    const appointmentDate = new Date(item.appointment_date);
+                    const appointmentTime = item.appointment_time.split(':');
+                    appointmentDate.setHours(appointmentTime[0], appointmentTime[1], appointmentTime[2]);
+                    return appointmentDate > new Date();
+                });
+                renderTable(futureAppointments);
             }
 
             function renderTable(data) {
