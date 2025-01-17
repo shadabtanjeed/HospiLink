@@ -426,7 +426,7 @@
     <section class="overlay"></section>
 
     <div class="content">
-        <h1>Welcome, {{ name }}</h1>
+        <h2>Welcome, {{ name }}</h2>
     </div>
 
     <div class="container mt-5">
@@ -458,9 +458,9 @@
     <!-- Hovering Effect -->
     <style>
         tbody tr:hover {
-            background-color: #dd636e;
-            cursor: pointer;
-            color: white;
+            /* background-color: #dd636e; */
+            /* cursor: pointer; */
+            /* color: white; */
         }
     </style>
 
@@ -497,7 +497,7 @@
                     <td>${item.appointment_id}</td>
                     <td>${item.appointment_date}</td>
                     <td>${item.appointment_time}</td>
-                    <td>${item.with_user}</td>
+                    <td>Dr. ${item.doctor_name}</td>
                 `;
                     tableBody.appendChild(row);
                 });

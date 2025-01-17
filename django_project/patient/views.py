@@ -235,5 +235,12 @@ def fetch_upcoming_appointments(request):
             if isinstance(item["appointment_time"], time):
                 item["appointment_time"] = item["appointment_time"].strftime("%H:%M:%S")
 
+            doctor_username = item["with_user"]
+            cursor.execute("SELECT public.get_name(%s)", [doctor_username])
+
+            doctor_name = cursor.fetchone()[0]
+
+            item["doctor_name"] = doctor_name
+
     response_data = json.dumps(data)
     return HttpResponse(response_data, content_type="application/json")
