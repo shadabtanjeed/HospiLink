@@ -113,13 +113,34 @@
         }
 
         .btn {
-            margin-top: 10px;
-            padding: 8px 16px;
-            background-color: #dd636e;
-            color: white;
+            padding: 4px 8px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            transition: background-color 0.2s;
+
+            font-size: 15px;
+        }
+
+        .modify-btn {
+            background-color: #7b8fde;
+            color: white;
+            margin-right: 5px;
+        }
+
+        .modify-btn:hover {
+            background-color: #617be4;
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #dd636e;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background-color: #c5555e;
+            color: white;
         }
 
         /* search button styling */
@@ -498,6 +519,10 @@
                     <td>${item.appointment_date}</td>
                     <td>${item.appointment_time}</td>
                     <td>Dr. ${item.doctor_name}</td>
+                    <td>
+                        <button class="btn modify-btn">Modify</button>
+                        <button class="btn delete-btn">Delete</button>
+                    </td>
                 `;
                     tableBody.appendChild(row);
                 });
