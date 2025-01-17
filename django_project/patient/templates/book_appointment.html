@@ -428,15 +428,27 @@
 
         // Date Validation
         const availableDays = {{ doctor.visiting_days| safe }};
+        const today = new Date();
         const dateInput = document.getElementById('booking_date');
+
+        dateInput.addEventListener('focus', function () {
+            const minDate = today.toISOString().split('T')[0];
+            this.setAttribute('min', minDate);
+            const maxDate = new Date();
+            maxDate.setDate(maxDate.getDate() + 30); // Example: limit booking to 30 days from today
+            this.setAttribute('max', maxDate.toISOString().split('T')[0]);
+        });
+
         dateInput.addEventListener('change', function () {
             const selectedDate = new Date(this.value);
             const dayName = selectedDate.toLocaleString('en-us', { weekday: 'long' });
+
             if (!availableDays.includes(dayName)) {
-                alert('Doctor is not available on this day.');
+                alert('Doctor is not available on this day. Select based on availability calendar.');
                 this.value = '';
             }
         });
+
 
 
         document.getElementById('appointmentForm').addEventListener('submit', function (event) {
