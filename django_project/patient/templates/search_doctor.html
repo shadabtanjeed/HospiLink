@@ -166,6 +166,79 @@
             border-radius: 10px;
             border: 1px solid #e0e0e0;
             height: fit-content;
+            margin-right: 20px;
+        }
+
+        .filter-group {
+            margin-bottom: 20px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .filter-group select,
+        .filter-group input[type="number"],
+        .filter-group input[type="time"] {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #333;
+            background-color: white;
+            transition: all 0.3s ease;
+        }
+
+        .filter-group select:focus,
+        .filter-group input[type="number"]:focus,
+        .filter-group input[type="time"]:focus {
+            outline: none;
+            border-color: #dd636e;
+            box-shadow: 0 0 0 2px rgba(221, 99, 110, 0.1);
+        }
+
+        .filter-group .radio-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 5px;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 400;
+            cursor: pointer;
+            margin-bottom: 0;
+        }
+
+        .radio-group input[type="radio"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #dd636e;
+        }
+
+        /* Clear Filters Button */
+        .clear-filters {
+            width: 100%;
+            padding: 8px 16px;
+            background-color: #dd636e;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .clear-filters:hover {
+            background-color: #c5555e;
         }
 
         /* List Section */
@@ -247,7 +320,7 @@
         /* Doctor Cards */
         .card {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 20px;
             margin-bottom: 20px;
             padding: 20px;
@@ -255,7 +328,6 @@
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
             background: white;
             width: 100%;
-            min-height: 120px;
         }
 
         .card_img {
@@ -274,13 +346,15 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            min-width: 0;
         }
 
         .card_details {
-            flex: 0 0 300px;
+            flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            min-width: 0;
         }
 
         .card_appointment {
@@ -289,7 +363,6 @@
             flex-direction: column;
             justify-content: center;
             align-items: flex-end;
-            margin-left: auto;
         }
 
         .card-title {
@@ -397,6 +470,8 @@
 
             .filter_section {
                 width: 100%;
+                margin-right: 0;
+                margin-bottom: 20px;
             }
 
             .card {
@@ -418,6 +493,16 @@
 
             .card_appointment {
                 margin-top: 15px;
+            }
+
+            .radio-group {
+                justify-content: space-between;
+            }
+
+            .filter-group select,
+            .filter-group input[type="number"],
+            .filter-group input[type="time"] {
+                padding: 10px 12px;
             }
         }
 
@@ -516,8 +601,75 @@
         <div class="search_container">
 
             <div class="filter_section">
-                This is the filter section
+                <!-- Replace the existing filter form with this -->
+                <form id="filter-form">
+                    <!-- Gender Filter -->
+                    <div class="filter-group">
+                        <label>Gender:</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="gender" value="any" checked> Any
+                            </label>
+                            <label>
+                                <input type="radio" name="gender" value="male"> Male
+                            </label>
+                            <label>
+                                <input type="radio" name="gender" value="female"> Female
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Specialization Filter -->
+                    <div class="filter-group">
+                        <label for="specialization">Specialization:</label>
+                        <select name="specialization" id="specialization">
+                            <option value="">Any</option>
+                            <option value="Cardiologist">Cardiologist</option>
+                            <option value="Dentist">Dentist</option>
+                            <option value="Dermatologist">Dermatologist</option>
+                            <!-- Keep all other specialization options -->
+                        </select>
+                    </div>
+
+                    <!-- Day Filter -->
+                    <div class="filter-group">
+                        <label for="day">Day:</label>
+                        <select name="day" id="day">
+                            <option value="">Any</option>
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                            <option value="Sunday">Sunday</option>
+                        </select>
+                    </div>
+
+                    <!-- Visiting Time Filter -->
+                    <div class="filter-group">
+                        <label for="visiting_time">Preferred Visiting Time:</label>
+                        <input type="time" name="visiting_time" id="visiting_time">
+                    </div>
+
+                    <!-- Fee Filter -->
+                    <div class="filter-group">
+                        <label for="min_fee">Min Fee:</label>
+                        <input type="number" name="min_fee" id="min_fee" min="0">
+                    </div>
+                    <div class="filter-group">
+                        <label for="max_fee">Max Fee:</label>
+                        <input type="number" name="max_fee" id="max_fee" min="0">
+                    </div>
+
+                    <!-- Clear Filters Button -->
+                    <button type="button" class="clear-filters" onclick="clearFilters()">
+                        Clear All Filters
+                    </button>
+                </form>
             </div>
+
+
             <div class="list_section">
                 <!-- Search form -->
                 <div class="search-container">
@@ -607,6 +759,77 @@
         overlay.addEventListener("click", () => {
             navBar.classList.remove("open");
         });
+
+
+        function filterDoctors() {
+            const gender = document.querySelector('input[name="gender"]:checked').value;
+            const specialization = document.getElementById('specialization').value;
+            const day = document.getElementById('day').value;
+            const visitingTime = document.getElementById('visiting_time').value;
+            const minFee = document.getElementById('min_fee').value;
+            const maxFee = document.getElementById('max_fee').value;
+            const searchQuery = document.querySelector('.search-input').value.toLowerCase();
+
+            const cards = document.querySelectorAll('.card');
+
+            cards.forEach(card => {
+                let showCard = true;
+
+                // Gender filter
+                if (gender !== 'any') {
+                    const doctorGender = card.querySelector('.card_img').getAttribute('data-gender').toLowerCase();
+                    if (doctorGender !== gender) showCard = false;
+                }
+
+                // Specialization filter
+                if (specialization) {
+                    const doctorSpecialization = card.querySelector('.card_identity .card-text').textContent;
+                    if (!doctorSpecialization.toLowerCase().includes(specialization.toLowerCase())) showCard = false;
+                }
+
+                // Day filter
+                if (day) {
+                    const availableDays = card.querySelector('.card_details .card-text').textContent;
+                    if (!availableDays.toLowerCase().includes(day.toLowerCase())) showCard = false;
+                }
+
+                // Time filter
+                if (visitingTime) {
+                    const timeText = card.querySelector('.card_details .card-text:last-child').textContent;
+                    const [start, end] = timeText.match(/\d{2}:\d{2}/g);
+                    if (visitingTime < start || visitingTime > end) showCard = false;
+                }
+
+                // Fee filter
+                const fee = parseInt(card.querySelector('.card_appointment p').textContent.match(/\d+/)[0]);
+                if (minFee && fee < parseInt(minFee)) showCard = false;
+                if (maxFee && fee > parseInt(maxFee)) showCard = false;
+
+                // Search query
+                if (searchQuery) {
+                    const doctorName = card.querySelector('.card-title').textContent.toLowerCase();
+                    if (!doctorName.includes(searchQuery)) showCard = false;
+                }
+
+                card.style.display = showCard ? 'flex' : 'none';
+            });
+        }
+
+        function clearFilters() {
+            document.getElementById('filter-form').reset();
+            document.querySelector('input[name="gender"][value="any"]').checked = true;
+            document.querySelector('.search-input').value = '';
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => card.style.display = 'flex');
+        }
+
+        // Add event listeners to all filter inputs
+        document.querySelectorAll('#filter-form input, #filter-form select').forEach(input => {
+            input.addEventListener('change', filterDoctors);
+        });
+
+        // Add event listener to search input
+        document.querySelector('.search-input').addEventListener('input', filterDoctors);
     </script>
 </body>
 

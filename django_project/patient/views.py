@@ -37,7 +37,8 @@ def fetch_doctors():
                 visiting_time_end, 
                 specialization, 
                 fee, 
-                degrees
+                degrees,
+                gender
             FROM doctors
         """
         )
@@ -68,6 +69,9 @@ def fetch_doctors():
             visiting_time_start = doctor[4].strftime("%H:%M") if doctor[4] else None
             visiting_time_end = doctor[5].strftime("%H:%M") if doctor[5] else None
 
+            # Ensure gender is appended correctly
+            gender = doctor[9].capitalize() if doctor[9] else None
+
             doctor_list.append(
                 {
                     "username": doctor[0],
@@ -79,6 +83,7 @@ def fetch_doctors():
                     "specialization": doctor[6],
                     "fee": doctor[7],
                     "degrees": degrees,
+                    "gender": gender,
                 }
             )
     return doctor_list
@@ -88,7 +93,7 @@ def search_doctor(request):
     doctors = fetch_doctors()
 
     # Set up pagination: 5 doctors per page
-    paginator = Paginator(doctors, 3)  # Change to 3 as per your requirement
+    paginator = Paginator(doctors, 5)  # Change to 5 as per your requirement
     page_number = request.GET.get("page")
 
     if not page_number:
