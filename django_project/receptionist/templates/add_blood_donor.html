@@ -153,10 +153,29 @@
             padding-right: 20px;
         }
 
+        .btn-primary {
+            background-color: #dd636e;
+            border-color: #dd636e;
+
+            &:hover {
+                background-color: #c5555e;
+                border-color: #c5555e;
+            }
+        }
+
+
         #map {
             height: 400px;
             width: 100%;
             margin-top: 20px;
+        }
+
+        #submit-button {
+            display: flex;
+            justify-content: center;
+            margin-top: 50px;
+            margin-bottom: 50px;
+
         }
     </style>
 </head>
@@ -277,7 +296,14 @@
                 <div id="mapContainer">
                     <div id="map"></div>
                 </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
+
+                <p></p>
+
+                <div id="submit-button">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+
+
             </form>
         </div>
     </div>
