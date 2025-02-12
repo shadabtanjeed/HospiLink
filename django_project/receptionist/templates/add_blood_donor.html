@@ -331,6 +331,7 @@
     <script src="https://unpkg.com/leaflet-search@2.9.8/dist/leaflet-search.min.js"></script>
 
     <script>
+        // Navbar functionality
         const navBar = document.querySelector("nav"),
             menuBtns = document.querySelectorAll(".menu-icon"),
             overlay = document.querySelector(".overlay");
@@ -345,6 +346,7 @@
             navBar.classList.remove("open");
         });
 
+        // Mobile number management
         function updateMobileNumberButtons() {
             const mobileNumberGroups = document.querySelectorAll('#mobileNumbers .input-group');
             mobileNumberGroups.forEach((group, index) => {
@@ -366,7 +368,7 @@
                 const newInputGroup = document.createElement('div');
                 newInputGroup.classList.add('input-group', 'mb-2');
                 newInputGroup.innerHTML = `
-                    <input type="text" class="form-control" placeholder="Enter mobile number">
+                    <input type="text" class="form-control mobile-number" placeholder="Enter mobile number" required>
                     <div class="input-group-append">
                         <button class="btn btn-outline-secondary add-mobile-number" type="button">
                             <i class="fas fa-plus"></i>
@@ -381,16 +383,16 @@
             }
         });
 
-        updateMobileNumberButtons();
-
-        // Set max date-time for last donation date to current date-time
+        // Date validation
         const lastDonationDateInput = document.getElementById('lastDonationDate');
         const now = new Date();
         const formattedDate = now.toISOString().slice(0, 16);
         lastDonationDateInput.max = formattedDate;
 
-        // Initialize the map
-        const map = L.map('map').setView([23.8103, 90.4125], 13); // Set default view to Dhaka
+        // Map initialization
+        const map = L.map('map').setView([23.8103, 90.4125], 13);
+        let currentLat = 23.8103;
+        let currentLng = 90.4125;
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -398,40 +400,41 @@
 
         const marker = L.marker([23.8103, 90.4125]).addTo(map);
 
+        // Map search functionality
         document.getElementById("searchInput").addEventListener("input", function () {
             let query = this.value;
             if (query.length > 2) {
-                fetch(`https://nominatim.openstreetmap.org/search?format=json&bounded=1&viewbox=88.03,26.63,92.68,20.55&q=${query}`) // Restrict search to Bangladesh
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&bounded=1&viewbox=88.03,26.63,92.68,20.55&q=${query}`)
                     .then(response => response.json())
                     .then(data => {
                         if (data.length > 0) {
                             let place = data[0];
-                            let lat = place.lat;
-                            let lon = place.lon;
-                            map.setView([lat, lon], 13);
-                            marker.setLatLng([lat, lon]).setOpacity(1);
-                            marker.bindPopup(`${lat}<br> ${lon}`).openPopup();
+                            currentLat = place.lat;
+                            currentLng = place.lon;
+                            map.setView([currentLat, currentLng], 13);
+                            marker.setLatLng([currentLat, currentLng]).setOpacity(1);
+                            marker.bindPopup(`${currentLat}<br>${currentLng}`).openPopup();
                         }
                     });
             }
         });
 
-        // Handle map clicks
+        // Map click handling
         map.on("click", function (e) {
-            let lat = e.latlng.lat;
-            let lng = e.latlng.lng;
+            currentLat = e.latlng.lat;
+            currentLng = e.latlng.lng;
 
-            // Reverse geocode to get the location name
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentLat}&lon=${currentLng}`)
                 .then(response => response.json())
                 .then(data => {
-                    let displayName = `${lat}, ${lng}`;
+                    let displayName = `${currentLat}, ${currentLng}`;
                     document.getElementById("searchInput").value = data.display_name || displayName;
-                    marker.setLatLng([lat, lng]).setOpacity(1);
+                    marker.setLatLng([currentLat, currentLng]).setOpacity(1);
                     marker.bindPopup(displayName).openPopup();
                 });
         });
 
+        // Update the form submission part:
         document.getElementById('bloodDonorForm').addEventListener('submit', async function (event) {
             event.preventDefault();
 
@@ -439,8 +442,11 @@
             const bloodGroup = document.getElementById('bloodGroup').value;
             const complexities = document.getElementById('complexities').value.trim();
             const lastDonationDate = document.getElementById('lastDonationDate').value;
-            const mobileNumbers = Array.from(document.querySelectorAll('.mobile-number'))
-                .map(input => input.value.trim());
+
+            // Fix: Collect all mobile numbers from inputs
+            const mobileNumbers = Array.from(document.querySelectorAll('#mobileNumbers .input-group input'))
+                .map(input => input.value.trim())
+                .filter(number => number !== ''); // Remove empty values
 
             // Validate phone numbers
             const phoneRegex = /^01[0-9]{9}$/;
@@ -453,12 +459,12 @@
 
             // Check for empty fields
             if (!name || !bloodGroup || !complexities || !lastDonationDate || mobileNumbers.length === 0) {
-                alert('Please fill out all fields.');
+                alert('Please fill out all fields including at least one mobile number.');
                 return;
             }
 
             try {
-                const response = await fetch('/receptionist/store_blood_donor_details', {
+                const response = await fetch('/receptionist/store_blood_donor_details/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -469,7 +475,9 @@
                         blood_group: bloodGroup,
                         complexities: complexities,
                         last_donation_date: lastDonationDate,
-                        mobile_numbers: mobileNumbers
+                        mobile_numbers: mobileNumbers,
+                        latitude: currentLat,
+                        longitude: currentLng
                     })
                 });
 
@@ -485,6 +493,9 @@
                 alert('Failed to add blood donor. Please try again.');
             }
         });
+
+        // Initialize
+        updateMobileNumberButtons();
     </script>
 </body>
 
