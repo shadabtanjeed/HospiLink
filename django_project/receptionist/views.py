@@ -12,6 +12,12 @@ def index(request):
     return render(
         request, "receptionist_page.html", {"username": username, "name": name}
     )
-    
+
+
 def add_blood_donor(request):
-    return render(request, 'add_blood_donor.html')
+    return render(request, "add_blood_donor.html")
+
+
+def store_blood_donor_details(request):
+
+    return void

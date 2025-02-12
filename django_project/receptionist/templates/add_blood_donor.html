@@ -253,15 +253,18 @@
 
     <div class="content">
         <div class="container mt-3">
+
             <h2 class="page-title">Add Blood Donor</h2>
-            <form>
+
+            {% csrf_token %}
+            <form id="bloodDonorForm">
                 <div class="form-group">
                     <label for="name">Name</label>
-                    <input type="text" class="form-control" id="name" placeholder="Enter name">
+                    <input type="text" class="form-control" id="name" placeholder="Enter name" required>
                 </div>
                 <div class="form-group">
                     <label for="bloodGroup">Blood Group</label>
-                    <select class="form-control" id="bloodGroup">
+                    <select class="form-control" id="bloodGroup" required>
                         <option>A+</option>
                         <option>A-</option>
                         <option>B+</option>
@@ -274,17 +277,19 @@
                 </div>
                 <div class="form-group">
                     <label for="complexities">Complexities</label>
-                    <input type="text" class="form-control" id="complexities" placeholder="Enter your complexities">
+                    <input type="text" class="form-control" id="complexities" placeholder="Enter your complexities"
+                        required>
                 </div>
                 <div class="form-group">
                     <label for="lastDonationDate">Last Donation Date</label>
-                    <input type="datetime-local" class="form-control" id="lastDonationDate" max="">
+                    <input type="datetime-local" class="form-control" id="lastDonationDate" max="" required>
                 </div>
                 <div class="form-group">
                     <label for="mobileNumbers">Mobile Numbers</label>
                     <div id="mobileNumbers">
                         <div class="input-group mb-2">
-                            <input type="text" class="form-control" placeholder="Enter mobile number">
+                            <input type="text" class="form-control" id="mobileNumbers" placeholder="Enter mobile number"
+                                required>
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary add-mobile-number" type="button">
                                     <i class="fas fa-plus"></i>
@@ -295,8 +300,14 @@
                 </div>
                 <div class="form-group">
                     <label for="searchInput">Location</label>
-                    <input type="text" class="form-control" id="searchInput" placeholder="Search donor's location...">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search donor's location..."
+                        required>
                 </div>
+
+                <!-- Add these hidden fields after your form fields -->
+                <input type="hidden" id="latitude" name="latitude">
+                <input type="hidden" id="longitude" name="longitude">
+
                 <div id="mapContainer">
                     <div id="map"></div>
                 </div>
@@ -419,6 +430,60 @@
                     marker.setLatLng([lat, lng]).setOpacity(1);
                     marker.bindPopup(displayName).openPopup();
                 });
+        });
+
+        document.getElementById('bloodDonorForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const name = document.getElementById('name').value.trim();
+            const bloodGroup = document.getElementById('bloodGroup').value;
+            const complexities = document.getElementById('complexities').value.trim();
+            const lastDonationDate = document.getElementById('lastDonationDate').value;
+            const mobileNumbers = Array.from(document.querySelectorAll('.mobile-number'))
+                .map(input => input.value.trim());
+
+            // Validate phone numbers
+            const phoneRegex = /^01[0-9]{9}$/;
+            const validPhones = mobileNumbers.every(number => phoneRegex.test(number));
+
+            if (!validPhones) {
+                alert('Please enter valid 11-digit phone numbers starting with 01.');
+                return;
+            }
+
+            // Check for empty fields
+            if (!name || !bloodGroup || !complexities || !lastDonationDate || mobileNumbers.length === 0) {
+                alert('Please fill out all fields.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/receptionist/store_blood_donor_details', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        blood_group: bloodGroup,
+                        complexities: complexities,
+                        last_donation_date: lastDonationDate,
+                        mobile_numbers: mobileNumbers
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Blood donor added successfully!');
+                    window.location.reload();
+                } else {
+                    const data = await response.json();
+                    alert(`Error: ${data.message || 'Something went wrong'}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to add blood donor. Please try again.');
+            }
         });
     </script>
 </body>
