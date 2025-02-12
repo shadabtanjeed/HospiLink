@@ -1,0 +1,502 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" href="{% static 'app_logo_3.png' %}" type="image/png">
+    <link href="https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-search@2.9.8/dist/leaflet-search.min.css" />
+    <title>Add Blood Donor</title>
+
+    <style>
+        /* Google Fonts - Poppins */
+        @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap");
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Poppins", sans-serif;
+        }
+
+        body {
+            min-height: 100%;
+            background: #ffffff;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 70px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        nav .logo {
+            display: flex;
+            align-items: center;
+            margin: 0 24px;
+        }
+
+        .logo .menu-icon {
+            color: #dd636e;
+            font-size: 24px;
+            margin-right: 14px;
+            cursor: pointer;
+        }
+
+        .logo .logo-name {
+            color: #dd636e;
+            font-size: 22px;
+            font-weight: 500;
+        }
+
+        nav .sidebar {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            height: 100%;
+            width: 260px;
+            padding: 20px 0;
+            background-color: #ffffff;
+            box-shadow: 0 5px 1px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s ease;
+            z-index: 1000;
+        }
+
+        nav.open .sidebar {
+            left: 0;
+        }
+
+        .sidebar .sidebar-content {
+            display: flex;
+            height: 100%;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 30px 16px;
+        }
+
+        .sidebar-content .list {
+            list-style: none;
+        }
+
+        .list .nav-link {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            padding: 14px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+        }
+
+        .lists .nav-link:hover {
+            background-color: #c5555e;
+        }
+
+        .nav-link .icon {
+            margin-right: 14px;
+            font-size: 20px;
+            color: #000000;
+        }
+
+        .nav-link .link {
+            font-size: 16px;
+            color: #000000;
+            font-weight: 400;
+        }
+
+        .lists .nav-link:hover .icon,
+        .lists .nav-link:hover .link {
+            color: #fff;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            height: 1000vh;
+            width: 200%;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s ease;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 999;
+        }
+
+        nav.open~.overlay {
+            opacity: 1;
+            left: 260px;
+            pointer-events: auto;
+        }
+
+        .content {
+            margin-top: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container.mt-3 {
+            margin-top: 100px !important;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        .btn-primary {
+            background-color: #dd636e;
+            border-color: #dd636e;
+
+            &:hover {
+                background-color: #c5555e;
+                border-color: #c5555e;
+            }
+        }
+
+
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        #submit-button {
+            display: flex;
+            justify-content: center;
+            margin-top: 50px;
+            margin-bottom: 50px;
+
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="logo">
+            <i class="bx bx-menu menu-icon"></i>
+        </div>
+        <div class="sidebar">
+            <div class="logo">
+                <i class="bx bx-menu menu-icon"></i>
+                <span class="logo-name"><b>HospiLink</b></span>
+            </div>
+
+            <div class="sidebar-content">
+                <ul class="lists">
+                    <li class="list">
+                        <a href="{% url 'index' %}" class="nav-link">
+                            <i class="bx bx-home-alt icon"></i>
+                            <span class="link">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="list">
+                        <a href="{% url 'search_doctor' %}" class="nav-link">
+                            <i class="bx bx-search icon"></i>
+                            <span class="link">Search Doctor</span>
+                        </a>
+                    </li>
+                    <li class="list">
+                        <a href="#" class="nav-link">
+                            <i class="bx bx-calendar icon"></i>
+                            <span class="link">Appointment Management</span>
+                        </a>
+                    </li>
+                    <li class="list">
+                        <a href="#" class="nav-link">
+                            <i class="bx bx-capsule icon"></i>
+                            <span class="link">Medicine Corner</span>
+                        </a>
+                    </li>
+                    <li class="list">
+                        <a href="{% url 'blood_repo' %}" class="nav-link">
+                            <i class="bx bx-droplet icon"></i>
+                            <span class="link">Blood Repo</span>
+                        </a>
+                    </li>
+                    <li class="list">
+                        <a href="{% url 'add_blood_donor' %}" class="nav-link">
+                            <i class="bx bx-user icon"></i>
+                            <span class="link">Add Blood Donor</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="bottom-content">
+                    <li class="list">
+                        <a href="#" class="nav-link">
+                            <i class="bx bx-cog icon"></i>
+                            <span class="link">Settings</span>
+                        </a>
+                    </li>
+                    <li class="list">
+                        <a href="#" class="nav-link" onclick="window.location.href='/user_authentication/'">
+                            <i class="bx bx-log-out icon"></i>
+                            <span class="link">Logout</span>
+                        </a>
+                    </li>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="overlay"></section>
+
+    <div class="content">
+        <div class="container mt-3">
+
+            <h2 class="page-title">Add Blood Donor</h2>
+
+            {% csrf_token %}
+            <form id="bloodDonorForm">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" class="form-control" id="name" placeholder="Enter name" required>
+                </div>
+                <div class="form-group">
+                    <label for="bloodGroup">Blood Group</label>
+                    <select class="form-control" id="bloodGroup" required>
+                        <option>A+</option>
+                        <option>A-</option>
+                        <option>B+</option>
+                        <option>B-</option>
+                        <option>AB+</option>
+                        <option>AB-</option>
+                        <option>O+</option>
+                        <option>O-</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="complexities">Complexities</label>
+                    <input type="text" class="form-control" id="complexities" placeholder="Enter your complexities"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label for="lastDonationDate">Last Donation Date</label>
+                    <input type="datetime-local" class="form-control" id="lastDonationDate" max="" required>
+                </div>
+                <div class="form-group">
+                    <label for="mobileNumbers">Mobile Numbers</label>
+                    <div id="mobileNumbers">
+                        <div class="input-group mb-2">
+                            <input type="text" class="form-control" id="mobileNumbers" placeholder="Enter mobile number"
+                                required>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary add-mobile-number" type="button">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="searchInput">Location</label>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search donor's location..."
+                        required>
+                </div>
+
+                <!-- Add these hidden fields after your form fields -->
+                <input type="hidden" id="latitude" name="latitude">
+                <input type="hidden" id="longitude" name="longitude">
+
+                <div id="mapContainer">
+                    <div id="map"></div>
+                </div>
+
+                <p></p>
+
+                <div id="submit-button">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-search@2.9.8/dist/leaflet-search.min.js"></script>
+
+    <script>
+        // Navbar functionality
+        const navBar = document.querySelector("nav"),
+            menuBtns = document.querySelectorAll(".menu-icon"),
+            overlay = document.querySelector(".overlay");
+
+        menuBtns.forEach((menuBtn) => {
+            menuBtn.addEventListener("click", () => {
+                navBar.classList.toggle("open");
+            });
+        });
+
+        overlay.addEventListener("click", () => {
+            navBar.classList.remove("open");
+        });
+
+        // Mobile number management
+        function updateMobileNumberButtons() {
+            const mobileNumberGroups = document.querySelectorAll('#mobileNumbers .input-group');
+            mobileNumberGroups.forEach((group, index) => {
+                const button = group.querySelector('.btn');
+                if (index === mobileNumberGroups.length - 1) {
+                    button.innerHTML = '<i class="fas fa-plus"></i>';
+                    button.classList.remove('remove-mobile-number');
+                    button.classList.add('add-mobile-number');
+                } else {
+                    button.innerHTML = '<i class="fas fa-minus"></i>';
+                    button.classList.remove('add-mobile-number');
+                    button.classList.add('remove-mobile-number');
+                }
+            });
+        }
+
+        document.addEventListener('click', function (event) {
+            if (event.target.closest('.add-mobile-number')) {
+                const newInputGroup = document.createElement('div');
+                newInputGroup.classList.add('input-group', 'mb-2');
+                newInputGroup.innerHTML = `
+                    <input type="text" class="form-control mobile-number" placeholder="Enter mobile number" required>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary add-mobile-number" type="button">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                `;
+                document.getElementById('mobileNumbers').appendChild(newInputGroup);
+                updateMobileNumberButtons();
+            } else if (event.target.closest('.remove-mobile-number')) {
+                event.target.closest('.input-group').remove();
+                updateMobileNumberButtons();
+            }
+        });
+
+        // Date validation
+        const lastDonationDateInput = document.getElementById('lastDonationDate');
+        const now = new Date();
+        const formattedDate = now.toISOString().slice(0, 16);
+        lastDonationDateInput.max = formattedDate;
+
+        // Map initialization
+        const map = L.map('map').setView([23.8103, 90.4125], 13);
+        let currentLat = 23.8103;
+        let currentLng = 90.4125;
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        const marker = L.marker([23.8103, 90.4125]).addTo(map);
+
+        // Map search functionality
+        document.getElementById("searchInput").addEventListener("input", function () {
+            let query = this.value;
+            if (query.length > 2) {
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&bounded=1&viewbox=88.03,26.63,92.68,20.55&q=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            let place = data[0];
+                            currentLat = place.lat;
+                            currentLng = place.lon;
+                            map.setView([currentLat, currentLng], 13);
+                            marker.setLatLng([currentLat, currentLng]).setOpacity(1);
+                            marker.bindPopup(`${currentLat}<br>${currentLng}`).openPopup();
+                        }
+                    });
+            }
+        });
+
+        // Map click handling
+        map.on("click", function (e) {
+            currentLat = e.latlng.lat;
+            currentLng = e.latlng.lng;
+
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentLat}&lon=${currentLng}`)
+                .then(response => response.json())
+                .then(data => {
+                    let displayName = `${currentLat}, ${currentLng}`;
+                    document.getElementById("searchInput").value = data.display_name || displayName;
+                    marker.setLatLng([currentLat, currentLng]).setOpacity(1);
+                    marker.bindPopup(displayName).openPopup();
+                });
+        });
+
+        // Update the form submission part:
+        document.getElementById('bloodDonorForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const name = document.getElementById('name').value.trim();
+            const bloodGroup = document.getElementById('bloodGroup').value;
+            const complexities = document.getElementById('complexities').value.trim();
+            const lastDonationDate = document.getElementById('lastDonationDate').value;
+
+            // Fix: Collect all mobile numbers from inputs
+            const mobileNumbers = Array.from(document.querySelectorAll('#mobileNumbers .input-group input'))
+                .map(input => input.value.trim())
+                .filter(number => number !== ''); // Remove empty values
+
+            // Validate phone numbers
+            const phoneRegex = /^01[0-9]{9}$/;
+            const validPhones = mobileNumbers.every(number => phoneRegex.test(number));
+
+            if (!validPhones) {
+                alert('Please enter valid 11-digit phone numbers starting with 01.');
+                return;
+            }
+
+            // Check for empty fields
+            if (!name || !bloodGroup || !complexities || !lastDonationDate || mobileNumbers.length === 0) {
+                alert('Please fill out all fields including at least one mobile number.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/receptionist/store_blood_donor_details/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        blood_group: bloodGroup,
+                        complexities: complexities,
+                        last_donation_date: lastDonationDate,
+                        mobile_numbers: mobileNumbers,
+                        latitude: currentLat,
+                        longitude: currentLng
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Blood donor added successfully!');
+                    window.location.href = '/receptionist/';
+                } else {
+                    const data = await response.json();
+                    alert(`Error: ${data.message || 'Something went wrong'}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to add blood donor. Please try again.');
+            }
+        });
+
+        // Initialize
+        updateMobileNumberButtons();
+    </script>
+</body>
+
+</html>
