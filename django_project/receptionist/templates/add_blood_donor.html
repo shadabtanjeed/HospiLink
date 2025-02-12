@@ -483,7 +483,7 @@
 
                 if (response.ok) {
                     alert('Blood donor added successfully!');
-                    window.location.reload();
+                    window.location.href = '/receptionist/';
                 } else {
                     const data = await response.json();
                     alert(`Error: ${data.message || 'Something went wrong'}`);
