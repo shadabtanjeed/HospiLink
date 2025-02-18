@@ -52,8 +52,8 @@ def store_blood_donor_details(request):
 
             # Store blood donor details in the database
             with connection.cursor() as cursor:
-                # Create point from latitude and longitude
-                point = f"({latitude},{longitude})"
+                # Create point from latitude and longitude (swap latitude and longitude)
+                point = f"({longitude},{latitude})"
 
                 # Convert mobile numbers list to SQL array
                 phone_numbers_array = "{" + ",".join(mobile_numbers) + "}"
