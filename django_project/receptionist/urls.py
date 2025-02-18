@@ -11,4 +11,5 @@ urlpatterns = [
         views.store_blood_donor_details,
         name="store_blood_donor_details",
     ),
+    path('blood_repo_receptionist/', views.blood_repo_receptionist, name='blood_repo_receptionist'),
 ]

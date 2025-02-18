@@ -90,3 +90,6 @@ def store_blood_donor_details(request):
             )
 
     return JsonResponse({"success": False, "message": "Method not allowed"}, status=405)
+
+def blood_repo_receptionist(request):
+    return render(request, 'blood_repo_receptionist.html')

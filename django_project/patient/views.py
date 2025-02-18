@@ -244,3 +244,6 @@ def fetch_upcoming_appointments(request):
 
     response_data = json.dumps(data)
     return HttpResponse(response_data, content_type="application/json")
+
+def blood_repo_receptionist(request):
+    return render(request, 'blood_repo_receptionist.html')
