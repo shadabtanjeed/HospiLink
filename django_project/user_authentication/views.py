@@ -250,6 +250,10 @@ def login_success(request):
     if user_type == "receptionist":
         request.session["receptionist_username"] = username
         return redirect(f"/receptionist/?username={username}")
+    
+    if user_type == "doctor":
+        request.session["doctor_username"] = username
+        return redirect(f"/doctor/?username={username}")
 
     else:
         return HttpResponse("Login successful, but you are not a patient.")
