@@ -297,7 +297,7 @@
     </style>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Signup Page</title>
+    <title>Patient Account Creation Page</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
 </head>
@@ -309,17 +309,12 @@
             <img src="{% static 'app_logo.png' %}" width="125" height="125" alt="App Logo"
                 style="margin-top: 10px; margin-bottom: 40px;">
 
-            <header>Signup</header>
+            <header>Patient Account</header>
 
             <form id="signupForm" method="post" action="{% url 'signup' %}" enctype="multipart/form-data"
                 style="width: 100%;">
                 {% csrf_token %}
                 <div id="segment1">
-                    <select name="user_type" id="user_type">
-                        <option value="" disabled selected>Choose the user type</option>
-                        <option value="patient">Patient</option>
-                        <option value="doctor">Doctor</option>
-                    </select>
                     <input type="text" name="name" id="name" placeholder="Enter your name">
                     <input type="text" name="username" id="username" placeholder="Enter your username">
                     <div id="usernameWarning" class="password-warning" style="display: none;">
@@ -328,7 +323,6 @@
                     <div class="password-container">
                         <input type="password" name="password" id="password" placeholder="Create a password">
                         <i class="toggle-password fas fa-eye" onclick=" togglePassword()"></i>
-
                     </div>
                     <div id="passwordWarning" class="password-warning">
                         Password must be at least 8 characters long and contain uppercase, lowercase, number and special
@@ -343,138 +337,28 @@
                         <option value="" disabled selected>Choose your gender</option>
                         <option value="Male">Male</option>
                         <option value="Female">Female</option>
-
                     </select>
 
                     <input type="button" class="button" value="Next" onclick="showNextSegment(1)">
-
-
                 </div>
 
                 <div id="segment2" class="hidden">
-                    <div id="patientFields" class="hidden">
-                        <select name="blood_group" id="blood_group">
-                            <option value="" disabled selected>Choose your blood group</option>
-                            <option value="A+">A+</option>
-                            <option value="A-">A-</option>
-                            <option value="B+">B+</option>
-                            <option value="B-">B-</option>
-                            <option value="AB+">AB+</option>
-                            <option value="AB-">AB-</option>
-                            <option value="O+">O+</option>
-                            <option value="O-">O-</option>
-                        </select>
-                        <input type="date" name="dob" id="dob" placeholder="Enter your date of birth">
-                        <div id="dobWarning" class="password-warning" style="display: none;">Date of birth cannot be in
-                            the
-                            future.</div>
-                        <!-- <select name="p_gender" id="blood_group">
-                            <option value="" disabled selected>Choose your gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-
-                        </select> -->
-                        <textarea name="complexities" placeholder="Write about your complexities"></textarea>
-                    </div>
-
-                    <div id="doctorFields" class="hidden">
-
-                        <div class="file-input-container">
-                            <label for="image" class="file-input-label">Upload your profile picture</label>
-                            <input type="file" name="image" id="image" class="file-input" accept="image/*">
-                            <span id="file-name" class="file-name"></span>
-                        </div>
-
-                        <select name="specialization" id="specialization">
-                            <option value="" disabled selected>Choose your specialization</option>
-                            <option value="Cardiologist">Cardiologist</option>
-                            <option value="Dentist">Dentist</option>
-                            <option value="Dermatologist">Dermatologist</option>
-                            <option value="Endocrinologist">Endocrinologist</option>
-                            <option value="Gastroenterologist">Gastroenterologist</option>
-                            <option value="Gynecologist">Gynecologist</option>
-                            <option value="Hematologist">Hematologist</option>
-                            <option value="Nephrologist">Nephrologist</option>
-                            <option value="Neurologist">Neurologist</option>
-                            <option value="Oncologist">Oncologist</option>
-                            <option value="Ophthalmologist">Ophthalmologist</option>
-                            <option value="Orthopedic">Orthopedic</option>
-                            <option value="Otolaryngologist">Otolaryngologist</option>
-                            <option value="Pediatrician">Pediatrician</option>
-                            <option value="Physiatrist">Physiatrist</option>
-                            <option value="Psychiatrist">Psychiatrist</option>
-                            <option value="Pulmonologist">Pulmonologist</option>
-                            <option value="Radiologist">Radiologist</option>
-                            <option value="Rheumatologist">Rheumatologist</option>
-                            <option value="Urologist">Urologist</option>
-
-                            <!-- Add other specializations here -->
-                        </select>
-
-                        <div id="doctorDegreesContainer">
-                            <div class="doctor-degree">
-                                <select name="doctor_degrees" class="doctor_degrees">
-                                    <option value="" disabled selected>Choose your degree</option>
-                                    <option value="MBBS">MBBS</option>
-                                    <option value="BDS">BDS</option>
-                                    <option value="FCPS">FCPS</option>
-                                    <option value="MD">MD</option>
-                                    <option value="MS">MS</option>
-                                    <option value="MDS">MDS</option>
-                                    <option value="DM">DM</option>
-                                    <option value="MCh">MCh</option>
-                                    <option value="DNB">DNB</option>
-                                    <option value="M.Phil">M.Phil</option>
-                                    <option value="Diploma">Diploma</option>
-                                </select>
-                            </div>
-                        </div>
-                        <button type="button" class="button" onclick="addDegreeField()">Add Another Degree</button>
-
-                        <p><b>Choose your visiting days</b></p>
-                        <div class="days-checkboxes">
-                            <input type="checkbox" id="mon" name="available_days" value="mon">
-                            <label for="mon">Mon</label>
-                            <input type="checkbox" id="tue" name="available_days" value="tue">
-                            <label for="tue">Tue</label>
-                            <input type="checkbox" id="wed" name="available_days" value="wed">
-                            <label for="wed">Wed</label>
-                            <input type="checkbox" id="thu" name="available_days" value="thu">
-                            <label for="thu">Thu</label>
-                            <input type="checkbox" id="fri" name="available_days" value="fri">
-                            <label for="fri">Fri</label>
-                            <input type="checkbox" id="sat" name="available_days" value="sat">
-                            <label for="sat">Sat</label>
-                            <input type="checkbox" id="sun" name="available_days" value="sun">
-                            <label for="sun">Sun</label>
-                        </div>
-
-                        <p></p>
-                        <p><b>Choose your visiting hours</b></p>
-                        <div class="time-picker">
-                            <input type="time" name="from_time" placeholder="From">
-                            <input type="time" name="to_time" placeholder="To">
-                        </div>
-
-                        <input type="text" name="doctor_fee" id="doctor_fee" placeholder="Enter your fee">
-                        <div id="doctorFeeWarning" class="password-warning" style="display: none;">Invalid amount.
-                            Only
-                            digits are allowed.</div>
-
-                        <p></p>
-                        <p><b>Estimate the average duration of a patient consultation (in mins)</b></p>
-                        <input type="text" name="avg_time" id="avg_time" placeholder="Estimated Duration">
-                        <div id="doctorFeeWarning" class="password-warning" style="display: none;">
-                            Only
-                            digits are allowed.</div>
-
-                        <!-- <select name="d_gender" id="blood_group">
-                            <option value="" disabled selected>Choose your gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-
-                        </select> -->
-                    </div>
+                    <select name="blood_group" id="blood_group">
+                        <option value="" disabled selected>Choose your blood group</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                    </select>
+                    <input type="date" name="dob" id="dob" placeholder="Enter your date of birth">
+                    <div id="dobWarning" class="password-warning" style="display: none;">Date of birth cannot be in
+                        the
+                        future.</div>
+                    <textarea name="complexities" placeholder="Write about your complexities"></textarea>
 
                     <div class="button-container">
                         <input type="button" class="button" value="Back" onclick="showPreviousSegment(1)">
@@ -492,7 +376,6 @@
                 </div>
             </form>
 
-
             <div class="login">
                 <span class="login">Already have an account?
                     <label for="check">Login</label>
@@ -505,29 +388,18 @@
         let isPasswordValid = false;
         let isUsernameValid = false;
 
-
-
         // Update showNextSegment to include validations
         function showNextSegment(currentSegment) {
             if (currentSegment === 1) {
-                const userType = document.getElementById('user_type').value;
                 const username = document.getElementById('username').value.trim();
 
-                if (!userType || !username || !isPasswordValid || !isUsernameValid) {
+                if (!username || !isPasswordValid || !isUsernameValid) {
                     alert("Please fill all fields correctly before proceeding.");
                     return;
                 }
 
                 document.getElementById('segment1').classList.add('hidden');
                 document.getElementById('segment2').classList.remove('hidden');
-
-                if (userType === 'patient') {
-                    document.getElementById('patientFields').classList.remove('hidden');
-                    document.getElementById('doctorFields').classList.add('hidden');
-                } else if (userType === 'doctor') {
-                    document.getElementById('doctorFields').classList.remove('hidden');
-                    document.getElementById('patientFields').classList.add('hidden');
-                }
             } else if (currentSegment === 2) {
                 document.getElementById('segment2').classList.add('hidden');
                 document.getElementById('segment3').classList.remove('hidden');
@@ -648,13 +520,8 @@
         // Function to update Next button state
         function updateNextButton() {
             const nextButton = document.querySelector('input[value="Next"]');
-            const userType = document.getElementById('user_type').value;
-
-            nextButton.disabled = !(isPasswordValid && isUsernameValid && userType);
+            nextButton.disabled = !(isPasswordValid && isUsernameValid);
         }
-
-        // Add event listener for user type selection
-        document.getElementById('user_type').addEventListener('change', updateNextButton);
 
         document.addEventListener('DOMContentLoaded', function () {
             // Set the max attribute of the date input to today's date
@@ -676,98 +543,12 @@
                     this.style.borderColor = '#ddd';
                 }
             });
-
-            // doctor_fee validation
-            document.getElementById('doctor_fee').addEventListener('input', function () {
-                const doctorFee = this.value;
-                const doctorFeeWarning = document.getElementById('doctorFeeWarning');
-
-                const isValiddoctorFee = /^[0-9]*$/.test(doctorFee);
-
-                if (!isValiddoctorFee) {
-                    doctorFeeWarning.style.display = 'block';
-                    this.style.borderColor = '#dc3545';
-                } else {
-                    doctorFeeWarning.style.display = 'none';
-                    this.style.borderColor = '#ddd';
-                }
-            });
-
-            // Date of birth validation
-            document.getElementById('dob').addEventListener('input', function () {
-                const dob = this.value;
-                const dobWarning = document.getElementById('dobWarning');
-
-                const currentDate = new Date();
-                const selectedDate = new Date(dob);
-
-                if (selectedDate > currentDate) {
-                    dobWarning.style.display = 'block';
-                    this.style.borderColor = '#dc3545';
-                } else {
-                    dobWarning.style.display = 'none';
-                    this.style.borderColor = '#ddd';
-                }
-            });
-
-            document.getElementById('image').addEventListener('change', function () {
-                const fileName = this.files[0] ? this.files[0].name : '';
-                document.getElementById('file-name').textContent = fileName;
-            });
-        });
-
-        function addDegreeField() {
-            const container = document.getElementById('doctorDegreesContainer');
-            const degreeOptions = document.querySelector('.doctor_degrees').innerHTML;
-            const newField = document.createElement('div');
-            newField.classList.add('doctor-degree');
-            newField.innerHTML = `
-            <select name="doctor_degrees" class="doctor_degrees">
-                ${degreeOptions}
-            </select>
-            <button type="button" class="remove-button" onclick="removeDegreeField(this)">Remove</button>
-        `;
-            container.appendChild(newField);
-            updateDegreeOptions();
-        }
-
-        function removeDegreeField(button) {
-            const field = button.parentElement;
-            field.remove();
-            updateDegreeOptions();
-        }
-
-        function updateDegreeOptions() {
-            const selectedDegrees = Array.from(document.querySelectorAll('.doctor_degrees'))
-                .map(select => select.value)
-                .filter(value => value);
-            document.querySelectorAll('.doctor_degrees').forEach(select => {
-                Array.from(select.options).forEach(option => {
-                    if (selectedDegrees.includes(option.value) && option.value !== select.value) {
-                        option.style.display = 'none';
-                    } else {
-                        option.style.display = '';
-                    }
-                });
-            });
-        }
-
-        document.addEventListener('change', function (event) {
-            if (event.target.classList.contains('doctor_degrees')) {
-                updateDegreeOptions();
-            }
         });
 
         document.getElementById('signupForm').addEventListener('submit', function (event) {
             event.preventDefault();  // Prevent the default form submission
 
-            // Collect degrees
-            const degrees = Array.from(document.querySelectorAll('.doctor_degrees'))
-                .map(select => select.value)
-                .filter(value => value);
-
             const formData = new FormData(this);
-            formData.append('degrees', JSON.stringify(degrees));
 
             fetch(this.action, {
                 method: 'POST',

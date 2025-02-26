@@ -12,4 +12,5 @@ urlpatterns = [
     ),
     path('blood_repo_receptionist/', views.blood_repo_receptionist, name='blood_repo_receptionist'),
     path('check_patient_exists/', views.check_patient_exists, name='check_patient_exists'),
+    path('create_patient_account/', views.create_patient_account, name='create_patient_account'),
 ]

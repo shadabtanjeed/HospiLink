@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.db import connection
 from django.http import JsonResponse
 import json
@@ -102,3 +102,6 @@ def check_patient_exists(request):
         exists = cursor.fetchone()[0]
 
     return JsonResponse({'exists': exists})
+
+def create_patient_account(request):
+    return render(request, 'recptions_signing_up_patient.html')

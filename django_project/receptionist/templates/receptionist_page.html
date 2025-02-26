@@ -249,6 +249,7 @@
                                 resultElement.textContent = 'Patient exists';
                             } else {
                                 resultElement.textContent = 'Patient does not exist';
+                                window.location.href = "{% url 'create_patient_account' %}";
                             }
                         })
                         .catch(error => {
