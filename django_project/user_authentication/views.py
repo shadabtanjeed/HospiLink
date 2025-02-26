@@ -125,8 +125,27 @@ def signup_view(request):
                     avg_time = request.POST.get("avg_time")
 
                     # convert into number
-                    doctor_fee = int(doctor_fee)
-                    avg_time = int(avg_time)
+                    if doctor_fee is not None:
+                        try:
+                            doctor_fee = int(doctor_fee)
+                        except ValueError:
+                            return JsonResponse(
+                                {"success": False, "message": "Invalid doctor fee."},
+                                status=400,
+                            )
+                    else:
+                        doctor_fee = 0
+
+                    if avg_time is not None:
+                        try:
+                            avg_time = int(avg_time)
+                        except ValueError:
+                            return JsonResponse(
+                                {"success": False, "message": "Invalid average time."},
+                                status=400,
+                            )
+                    else:
+                        avg_time = 0
 
                     # Map short day names to enum values
                     day_mapping = {

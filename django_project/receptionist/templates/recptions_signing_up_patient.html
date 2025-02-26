@@ -499,6 +499,7 @@
                 style="width: 100%;">
                 {% csrf_token %}
                 <div id="segment1">
+                    <input type="hidden" name="user_type" value="patient">
                     <input type="text" name="name" id="name" placeholder="Enter your name">
                     <input type="text" name="username" id="username" placeholder="Enter your username">
                     <div id="usernameWarning" class="password-warning" style="display: none;">
