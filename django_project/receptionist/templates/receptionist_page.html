@@ -230,13 +230,34 @@
 
     <section class="overlay"></section>
 
-
     <div class="content">
         <h2>Welcome {{ name }}</h2>
+        <div>
+            <h3>Patient Appointment</h3>
+            <input type="text" id="phone-number" placeholder="Enter phone number">
+            <button onclick="checkUserExists()">Check</button>
+            <p id="user-exists-result"></p>
+
+            <script>
+                function checkUserExists() {
+                    const phoneNumber = document.getElementById('phone-number').value;
+                    fetch("{% url 'check_patient_exists' %}?phone_number=" + phoneNumber)
+                        .then(response => response.json())
+                        .then(data => {
+                            const resultElement = document.getElementById('user-exists-result');
+                            if (data.exists) {
+                                resultElement.textContent = 'Patient exists';
+                            } else {
+                                resultElement.textContent = 'Patient does not exist';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                }
+            </script>
+        </div>
     </div>
-
-
-
 
     <!-- Add Bootstrap JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

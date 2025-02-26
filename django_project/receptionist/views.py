@@ -93,3 +93,12 @@ def store_blood_donor_details(request):
 
 def blood_repo_receptionist(request):
     return render(request, 'blood_repo_receptionist.html')
+
+def check_patient_exists(request):
+    phone_number = request.GET.get('phone_number', '')
+
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT public.check_patient_exists(%s)", [phone_number])
+        exists = cursor.fetchone()[0]
+
+    return JsonResponse({'exists': exists})

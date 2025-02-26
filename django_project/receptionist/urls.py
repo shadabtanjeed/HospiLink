@@ -1,4 +1,3 @@
-# django_project/patient/urls.py
 from django.urls import path
 from . import views
 
@@ -12,4 +11,5 @@ urlpatterns = [
         name="store_blood_donor_details",
     ),
     path('blood_repo_receptionist/', views.blood_repo_receptionist, name='blood_repo_receptionist'),
+    path('check_patient_exists/', views.check_patient_exists, name='check_patient_exists'),
 ]
