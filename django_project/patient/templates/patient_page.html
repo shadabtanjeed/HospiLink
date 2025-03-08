@@ -380,6 +380,7 @@
 </head>
 
 <body>
+    {% csrf_token %}
     <nav>
         <div class="logo">
             <i class="bx bx-menu menu-icon"></i>
@@ -467,7 +468,31 @@
                 <!-- Dynamic rows will be inserted here -->
             </tbody>
         </table>
+
+        <!-- Add this modal HTML right before your closing </body> tag -->
+        <div class="modal fade" id="cancelModal" tabindex="-1" role="dialog" aria-labelledby="cancelModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="cancelModalLabel">Cancel Appointment</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to cancel this appointment?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">No, Keep It</button>
+                        <button type="button" class="btn delete-btn" id="confirmCancel">Yes, Cancel Appointment</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+
 
 
 
@@ -546,17 +571,57 @@
 
                     // Add event listener for delete button (we'll implement this later)
                     row.querySelector('.delete-btn').addEventListener('click', function () {
-                        if (confirm('Are you sure you want to cancel this appointment?')) {
-                            const doctorUsername = this.getAttribute('data-doctor');
-                            const appointmentDate = this.getAttribute('data-date');
-                            // Call API to cancel appointment
-                            // You can implement this later
-                        }
+                        const doctorUsername = this.getAttribute('data-doctor');
+                        const appointmentDate = this.getAttribute('data-date');
+
+                        // Store the data for the modal to use
+                        document.getElementById('confirmCancel').setAttribute('data-doctor', doctorUsername);
+                        document.getElementById('confirmCancel').setAttribute('data-date', appointmentDate);
+
+                        // Show the modal
+                        $('#cancelModal').modal('show');
                     });
                 });
             }
 
             fetchAppointments();
+
+            document.getElementById('confirmCancel').addEventListener('click', async function () {
+                const doctorUsername = this.getAttribute('data-doctor');
+                const appointmentDate = this.getAttribute('data-date');
+
+                try {
+                    const response = await fetch('/patient/cancel_appointment/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        },
+                        body: JSON.stringify({
+                            doctor_username: doctorUsername,
+                            appointment_date: appointmentDate
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Hide the modal
+                        $('#cancelModal').modal('hide');
+
+                        // Show success message
+                        alert('Appointment cancelled successfully');
+
+                        // Refresh the appointments table
+                        fetchAppointments();
+                    } else {
+                        alert('Failed to cancel appointment: ' + result.message);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred while cancelling the appointment');
+                }
+            });
         });
 
     </script>

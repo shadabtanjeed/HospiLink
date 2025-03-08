@@ -26,4 +26,5 @@ urlpatterns = [
         views.modify_appointment,
         name="modify_appointment",
     ),
+    path("cancel_appointment/", views.cancel_appointment, name="cancel_appointment"),
 ]

@@ -12,6 +12,8 @@ from django.http import JsonResponse
 import json
 from datetime import datetime
 from datetime import date, time
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.http import require_POST
 
 
 def index(request):
@@ -344,3 +346,32 @@ def modify_appointment(request, doctor_username, appointment_date):
         else:
             # Handle case when doctor is not found
             return HttpResponse("Doctor not found.")
+
+
+@require_POST
+def cancel_appointment(request):
+    try:
+        data = json.loads(request.body)
+        doctor_username = data.get("doctor_username")
+        appointment_date = data.get("appointment_date")
+        patient_username = request.session.get(
+            "patient_username"
+        ) or request.session.get("login_form_data", {}).get("username")
+
+        if not all([doctor_username, appointment_date, patient_username]):
+            return JsonResponse(
+                {"success": False, "message": "Missing required data"}, status=400
+            )
+
+        with connection.cursor() as cursor:
+            # Call the cancel_appointment function
+            cursor.execute(
+                """
+                SELECT public.cancel_appointment(%s, %s, %s)
+                """,
+                [patient_username, doctor_username, appointment_date],
+            )
+
+        return JsonResponse({"success": True})
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
