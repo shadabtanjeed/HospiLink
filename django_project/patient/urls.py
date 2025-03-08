@@ -21,4 +21,9 @@ urlpatterns = [
         views.fetch_upcoming_appointments,
         name="fetch_upcoming_appointments",
     ),
+    path(
+        "modify_appointment/<str:doctor_username>/<str:appointment_date>/",
+        views.modify_appointment,
+        name="modify_appointment",
+    ),
 ]

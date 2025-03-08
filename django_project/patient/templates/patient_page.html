@@ -522,16 +522,37 @@
                 data.forEach(item => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                    <td>${item.appointment_id}</td>
-                    <td>${item.appointment_date}</td>
-                    <td>${item.appointment_time}</td>
-                    <td>Dr. ${item.doctor_name}</td>
-                    <td>
-                        <button class="btn modify-btn">Modify</button>
-                        <button class="btn delete-btn">Delete</button>
-                    </td>
-                `;
+        <td>${item.appointment_id}</td>
+        <td>${item.appointment_date}</td>
+        <td>${item.appointment_time}</td>
+        <td>Dr. ${item.doctor_name}</td>
+        <td>
+            <button class="btn modify-btn" 
+                data-doctor="${item.with_user}" 
+                data-date="${item.appointment_date}">Modify</button>
+            <button class="btn delete-btn" 
+                data-doctor="${item.with_user}" 
+                data-date="${item.appointment_date}">Delete</button>
+        </td>
+    `;
                     tableBody.appendChild(row);
+
+                    // Add event listener to the modify button
+                    row.querySelector('.modify-btn').addEventListener('click', function () {
+                        const doctorUsername = this.getAttribute('data-doctor');
+                        const appointmentDate = this.getAttribute('data-date');
+                        window.location.href = `/patient/modify_appointment/${doctorUsername}/${appointmentDate}/`;
+                    });
+
+                    // Add event listener for delete button (we'll implement this later)
+                    row.querySelector('.delete-btn').addEventListener('click', function () {
+                        if (confirm('Are you sure you want to cancel this appointment?')) {
+                            const doctorUsername = this.getAttribute('data-doctor');
+                            const appointmentDate = this.getAttribute('data-date');
+                            // Call API to cancel appointment
+                            // You can implement this later
+                        }
+                    });
                 });
             }
 
