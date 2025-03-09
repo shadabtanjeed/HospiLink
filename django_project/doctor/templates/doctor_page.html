@@ -447,7 +447,7 @@
     <section class="overlay"></section>
 
     <div class="content">
-        <h2>Welcome, {{ name }}</h2>
+        <h2>Welcome, Dr. {{ name }}</h2>
     </div>
 
     <div class="container mt-5">
@@ -459,7 +459,7 @@
                     <th>Appointment ID</th>
                     <th>Date</th>
                     <th>Time</th>
-                    <th>With</th>
+                    <th>Patient</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -506,8 +506,9 @@
             const tableBody = document.getElementById('table-body');
 
             async function fetchAppointments() {
-                const response = await fetch('/api/upcoming_appointments/');
+                const response = await fetch('/doctor/api/upcoming_appointments/');  // Ensure the correct URL
                 const data = await response.json();
+                
                 const futureAppointments = data.filter(item => {
                     const appointmentDate = new Date(item.appointment_date);
                     const appointmentTime = item.appointment_time.split(':');
@@ -525,7 +526,7 @@
                     <td>${item.appointment_id}</td>
                     <td>${item.appointment_date}</td>
                     <td>${item.appointment_time}</td>
-                    <td>Dr. ${item.doctor_name}</td>
+                    <td>${item.patient_name}</td>
                     <td>
                         <button class="btn modify-btn">Modify</button>
                         <button class="btn delete-btn">Delete</button>
