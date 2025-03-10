@@ -374,9 +374,20 @@
             margin-right: 20px;
             /* Optional: add some right margin */
         }
+
+        .view-btn {
+            background-color: #7b8fde;
+            color: white;
+            margin-right: 5px;
+        }
+
+        .view-btn:hover {
+            background-color: #617be4;
+            color: white;
+        }
     </style>
 
-    <title>Doctor Dashboard</title>
+    <title>Previous Appointments</title>
 </head>
 
 <body>
@@ -451,7 +462,7 @@
     </div>
 
     <div class="container mt-5">
-        <h3>Upcoming Appointments</h3>
+        <h3>Previous Appointments</h3>
         <br>
         <table class="table table-bordered">
             <thead>
@@ -460,7 +471,7 @@
                     <th>Date</th>
                     <th>Time</th>
                     <th>Patient</th>
-                    <th>Actions</th>
+                    <th>Prescription</th>
                 </tr>
             </thead>
             <tbody id="table-body">
@@ -506,21 +517,20 @@
             const tableBody = document.getElementById('table-body');
 
             async function fetchAppointments() {
-                const response = await fetch('/doctor/api/upcoming_appointments/');  // Ensure the correct URL
+                const response = await fetch('/doctor/api/previous_appointments/');  // Ensure the correct URL
                 const data = await response.json();
                 
                 const futureAppointments = data.filter(item => {
                     const appointmentDate = new Date(item.appointment_date);
                     const appointmentTime = item.appointment_time.split(':');
                     appointmentDate.setHours(appointmentTime[0], appointmentTime[1], appointmentTime[2]);
-                    // return appointmentDate > new Date(); //it shouldn't make a differnece as the appointments are already filtered through the sql function
                     return appointmentDate;
                 });
                 renderTable(futureAppointments);
             }
 
             function renderTable(data) {
-                console.log(data); //addded for debugging
+                console.log(data); //added for debugging
                 tableBody.innerHTML = '';
                 data.forEach(item => {
                     const row = document.createElement('tr');
@@ -530,12 +540,15 @@
                     <td>${item.appointment_time}</td>
                     <td>${item.patient_name}</td>
                     <td>
-                        <button class="btn modify-btn">Modify</button>
-                        <button class="btn delete-btn">Delete</button>
+                        <button class="btn view-btn" onclick="#">View</button>
                     </td>
-                `;
+                    `;
                     tableBody.appendChild(row);
                 });
+            }
+
+            window.viewAppointment = function(appointmentId) {
+                window.location.href = `#`;
             }
 
             fetchAppointments();
