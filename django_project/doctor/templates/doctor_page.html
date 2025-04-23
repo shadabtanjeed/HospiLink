@@ -531,7 +531,7 @@
                     <td>${item.patient_name}</td>
                     <td>
                         <button class="btn modify-btn">Modify</button>
-                        <button class="btn delete-btn">Delete</button>
+                        <a href="/doctor/attend_appointment/${item.appointment_id}/" class="btn attend-btn">Attend</a>
                     </td>
                 `;
                     tableBody.appendChild(row);

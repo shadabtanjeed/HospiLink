@@ -78,3 +78,24 @@ def fetch_previous_appointments(request):
     response_data = json.dumps(data)
     return HttpResponse(response_data, content_type="application/json")
 
+def attend_appointment(request, appointment_id):
+    with connection.cursor() as cursor:
+        # Fetch appointment details
+        cursor.execute("SELECT * FROM appointments WHERE appointment_id = %s", [appointment_id])
+        appointment = cursor.fetchone()
+
+        # Fetch patient details
+        patient_username = appointment[1]  #patient_username is the second column
+        cursor.execute("SELECT * FROM patients WHERE username = %s", [patient_username])
+        patient = cursor.fetchone()
+
+        # Fetch previous prescriptions
+        cursor.execute("SELECT * FROM prescriptions WHERE prescribed_to = %s", [patient_username])
+        prescriptions = cursor.fetchall()
+
+    context = {
+        "appointment": appointment,
+        "patient": patient,
+        "prescriptions": prescriptions,
+    }
+    return render(request, "attend_appointment.html", context)
