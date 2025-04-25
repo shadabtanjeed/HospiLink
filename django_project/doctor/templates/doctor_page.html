@@ -133,6 +133,17 @@
             color: white;
         }
 
+        .attend-btn {
+            background-color: #7b8fde;
+            color: white;
+            margin-right: 5px;
+        }
+
+        .attend-btn:hover {
+            background-color: #617be4;
+            color: white;
+        }
+
         .delete-btn {
             background-color: #dd636e;
             color: white;
@@ -531,7 +542,7 @@
                     <td>${item.patient_name}</td>
                     <td>
                         <button class="btn modify-btn">Modify</button>
-                        <a href="/doctor/attend_appointment/${item.appointment_id}/" class="btn attend-btn">Attend</a>
+                        <button class="btn attend-btn" onclick="window.location.href='/doctor/attend_appointment/${item.appointment_id}/'">Attend</button>
                     </td>
                 `;
                     tableBody.appendChild(row);
