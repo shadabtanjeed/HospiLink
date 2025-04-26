@@ -324,6 +324,20 @@
                             <span class="link">Medicine Corner</span>
                         </a>
                     </li>
+
+                    <li class="list">
+                        <a href="{% url 'blood_repo' %}" class="nav-link">
+                            <i class="bx bx-droplet icon"></i>
+                            <span class="link">Blood Repo</span>
+                        </a>
+                    </li>
+
+                    <li class="list">
+                        <a href="#" class="nav-link">
+                            <i class="bx bx-bed icon"></i>
+                            <span class="link">Get Admission</span>
+                        </a>
+                    </li>
                 </ul>
                 <div class="bottom-content">
                     <li class="list">
@@ -448,8 +462,6 @@
                 this.value = '';
             }
         });
-
-
 
         document.getElementById('appointmentForm').addEventListener('submit', function (event) {
             event.preventDefault();
