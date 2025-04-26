@@ -186,12 +186,13 @@ nav.open~.overlay {
     color: #333;
 }
 
-/* Buttons */
+/* Buttons - Reduced height of search button */
 .search-btn {
     background-color: #dd636e;
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: 6px 20px;
+    /* Reduced padding for smaller height */
     text-align: center;
     text-decoration: none;
     display: inline-block;
@@ -207,24 +208,29 @@ nav.open~.overlay {
     color: white;
 }
 
-.reserve-btn {
-    background-color: #4CAF50;
+/* Updated reserve button to match color scheme */
+.btn-reserve {
+    background-color: #7b8fde;
     color: white;
     border: none;
-    padding: 6px 12px;
+    padding: 5px 10px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
     font-size: 14px;
     margin: 2px;
-    transition-duration: 0.4s;
+    transition-duration: 0.3s;
     cursor: pointer;
     border-radius: 4px;
 }
 
-.reserve-btn:hover {
-    background-color: #45a049;
+.btn-reserve:hover {
+    background-color: #617be4;
+    color: white;
 }
+
+
+
 
 /* Table Styles */
 .table {
@@ -239,6 +245,8 @@ nav.open~.overlay {
     padding: 0.75rem;
     vertical-align: top;
     border-top: 1px solid #dee2e6;
+    cursor: default;
+    /* Default cursor for cells */
 }
 
 .table thead th {
@@ -247,8 +255,14 @@ nav.open~.overlay {
     background-color: #f8f9fa;
 }
 
+/* Remove hover effect from table rows */
 .table tbody tr:hover {
-    background-color: rgba(0, 0, 0, 0.03);
+    background-color: transparent;
+}
+
+/* Hide the reserve-btn class which is no longer used */
+.reserve-btn {
+    display: none;
 }
 
 /* Responsive design */
@@ -261,4 +275,9 @@ nav.open~.overlay {
     .table-responsive {
         overflow-x: auto;
     }
+}
+
+/* Helper classes */
+.d-none {
+    display: none !important;
 }

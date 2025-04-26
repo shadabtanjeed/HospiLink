@@ -57,7 +57,6 @@ document.addEventListener('DOMContentLoaded', function () {
         bedsTableBody.innerHTML = '<tr><td colspan="6" class="text-center">Loading...</td></tr>';
 
         // Make API request to the correct endpoint
-        // Change this line in bed_admission.js
         fetch(`/patient/api/search_beds/?ward_type=${encodeURIComponent(wardType)}&bed_type=${encodeURIComponent(bedType)}`)
             .then(response => {
                 if (!response.ok) {
