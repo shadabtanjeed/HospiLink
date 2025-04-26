@@ -22,6 +22,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const bedCount = document.getElementById('bed-count');
     const bedsTableBody = document.getElementById('beds-table-body');
 
+    // Modal elements
+    const reserveModal = document.getElementById('reserveModal');
+    const reserveForm = document.getElementById('reserveForm');
+    const patientNameInput = document.getElementById('patientNameInput');
+    let selectedBedId = null;
+
     // Get CSRF token for POST requests
     function getCookie(name) {
         let cookieValue = null;
@@ -95,37 +101,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     // Add event listeners to reserve buttons
                     document.querySelectorAll('.btn-reserve').forEach(button => {
                         button.addEventListener('click', function () {
-                            const bedId = this.getAttribute('data-bed-id');
-                            const wardNo = this.getAttribute('data-ward-no');
-                            const bedNo = this.getAttribute('data-bed-no');
-
-                            if (confirm(`Do you want to reserve Bed #${bedNo} in Ward #${wardNo}?`)) {
-                                // Send reservation request
-                                fetch('/patient/reserve_bed/', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRFToken': csrftoken
-                                    },
-                                    body: JSON.stringify({
-                                        bed_id: bedId
-                                    })
-                                })
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        if (data.success) {
-                                            alert('Bed reserved successfully!');
-                                            // Refresh the search results
-                                            bedSearchForm.dispatchEvent(new Event('submit'));
-                                        } else {
-                                            alert(data.message || 'Failed to reserve bed. Please try again.');
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error('Error:', error);
-                                        alert('An error occurred while reserving the bed. Please try again.');
-                                    });
-                            }
+                            selectedBedId = this.getAttribute('data-bed-id');
+                            // Show the modal (Bootstrap 4)
+                            $('#reserveModal').modal('show');
                         });
                     });
                 }
@@ -135,4 +113,44 @@ document.addEventListener('DOMContentLoaded', function () {
                 bedsTableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Error: ${error.message}</td></tr>`;
             });
     });
+
+    // Handle the modal form submission
+    if (reserveForm) {
+        reserveForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const patientName = patientNameInput.value.trim();
+            if (!patientName) {
+                alert('Please enter the patient name.');
+                return;
+            }
+            // Send reservation request with patient name
+            fetch('/patient/reserve_bed/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    bed_id: selectedBedId,
+                    patient_name: patientName
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    $('#reserveModal').modal('hide');
+                    if (data.success) {
+                        alert('Bed reserved successfully!');
+                        // Refresh the search results
+                        bedSearchForm.dispatchEvent(new Event('submit'));
+                    } else {
+                        alert(data.message || 'Failed to reserve bed. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    $('#reserveModal').modal('hide');
+                    console.error('Error:', error);
+                    alert('An error occurred while reserving the bed. Please try again.');
+                });
+        });
+    }
 });

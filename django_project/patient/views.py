@@ -14,6 +14,7 @@ from datetime import datetime
 from datetime import date, time
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 
 
 def index(request):
@@ -411,3 +412,30 @@ def search_beds(request):
             return JsonResponse(beds_data, safe=False)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+
+@csrf_exempt
+def reserve_bed(request):
+    """Reserve a bed for a patient."""
+    if request.method == "POST":
+        data = json.loads(request.body)
+        bed_id = data.get("bed_id")
+        patient_name = data.get("patient_name")
+        patient_username = request.session.get("patient_username")
+
+        if not bed_id or not patient_username:
+            return JsonResponse(
+                {"error": "Bed ID and patient username are required"}, status=400
+            )
+
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT public.admit_patient(%s, %s, %s)",
+                    [bed_id, patient_username, patient_name],
+                )
+            return JsonResponse({"success": True})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    else:
+        return JsonResponse({"error": "Invalid request method"}, status=405)
