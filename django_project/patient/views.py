@@ -375,3 +375,39 @@ def cancel_appointment(request):
         return JsonResponse({"success": True})
     except Exception as e:
         return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+def bed_admission(request):
+    """Render the bed admission page."""
+    return render(request, "patient_bed_admission.html")
+
+
+def search_beds(request):
+    """API endpoint to search for available beds."""
+    ward_type = request.GET.get("ward_type", "")
+    bed_type = request.GET.get("bed_type", "")
+
+    if not ward_type:
+        return JsonResponse({"error": "Ward type is required"}, status=400)
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT * FROM find_bed_for_patient(%s, %s)", [ward_type, bed_type]
+            )
+            columns = [col[0] for col in cursor.description]
+            result = dict(zip(columns, cursor.fetchone()))
+
+            # Extract the 'beds' field which contains the actual bed data array
+            beds_data = result.get("beds", [])
+
+            # If it's a string (JSONB sometimes gets converted to string), parse it
+            if isinstance(beds_data, str):
+                import json
+
+                beds_data = json.loads(beds_data)
+
+            # Return the array of beds directly
+            return JsonResponse(beds_data, safe=False)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)

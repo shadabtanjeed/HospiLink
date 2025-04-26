@@ -1,0 +1,158 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Bed Admission</title>
+    <link rel="icon" href="{% static 'app_logo_3.png' %}" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/bed_admission.css' %}">
+</head>
+
+<body>
+    <nav>
+        <div class="logo">
+            <i class="bx bx-menu menu-icon"></i>
+        </div>
+        <div class="sidebar">
+            <div class="logo">
+                <i class="bx bx-menu menu-icon"></i>
+                <span class="logo-name"><b>HospiLink</b></span>
+            </div>
+
+            <div class="sidebar-content">
+                <ul class="lists">
+                    <li class="list">
+                        <a href="{% url 'index' %}" class="nav-link">
+                            <i class="bx bx-home-alt icon"></i>
+                            <span class="link">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="list">
+                        <a href="{% url 'search_doctor' %}" class="nav-link">
+                            <i class="bx bx-search icon"></i>
+                            <span class="link">Search Doctor</span>
+                        </a>
+                    </li>
+                    <li class="list">
+                        <a href="#" class="nav-link">
+                            <i class="bx bx-history icon"></i>
+                            <span class="link">Appointment History</span>
+                        </a>
+                    </li>
+                    <li class="list">
+                        <a href="#" class="nav-link">
+                            <i class="bx bx-capsule icon"></i>
+                            <span class="link">Medicine Corner</span>
+                        </a>
+                    </li>
+                    <li class="list">
+                        <a href="{% url 'blood_repo' %}" class="nav-link">
+                            <i class="bx bx-droplet icon"></i>
+                            <span class="link">Blood Repo</span>
+                        </a>
+                    </li>
+                    <li class="list">
+                        <a href="{% url 'bed_admission' %}" class="nav-link">
+                            <i class="bx bx-bed icon"></i>
+                            <span class="link">Get Admission</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="bottom-content">
+                    <li class="list">
+                        <a href="#" class="nav-link">
+                            <i class="bx bx-cog icon"></i>
+                            <span class="link">Settings</span>
+                        </a>
+                    </li>
+                    <li class="list">
+                        <a href="#" class="nav-link" onclick="window.location.href='/user_authentication/'">
+                            <i class="bx bx-log-out icon"></i>
+                            <span class="link">Logout</span>
+                        </a>
+                    </li>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="overlay"></section>
+
+    <div class="content">
+        <h1>Bed Admission</h1>
+
+        <div class="search-container">
+            <h3>Search Available Beds</h3>
+            <form id="bed-search-form">
+                <div class="form-group">
+                    <label for="ward-type">Ward Type:</label>
+                    <select id="ward-type" class="form-control" required>
+                        <option value="">Select Ward Type</option>
+                        <option value="Burn Unit">Burn Unit</option>
+                        <option value="General Ward">General Ward</option>
+                        <option value="Trauma Center">Trauma Center</option>
+                        <option value="Mental Health">Mental Health</option>
+                        <option value="Physiology Department">Physiology Department</option>
+                        <option value="ICU">ICU</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="bed-type">Bed Type:</label>
+                    <select id="bed-type" class="form-control">
+                        <option value="any">Any</option>
+                        <option value="Standard">Standard</option>
+                        <option value="Deluxe">Deluxe</option>
+                        <option value="Premium">Premium</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn search-btn">Search Beds</button>
+            </form>
+        </div>
+
+        <div id="results-container" class="results-container d-none">
+            <h3>Available Beds</h3>
+            <div id="no-results" class="alert alert-info d-none">
+                No beds available matching your criteria. Please try a different search.
+            </div>
+
+            <div id="has-results">
+                <p>Found <span id="bed-count">0</span> available beds matching your criteria:</p>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Bed No</th>
+                                <th>Ward No</th>
+                                <th>Ward Name</th>
+                                <th>Bed Type</th>
+                                <th>Cost Per Day</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="beds-table-body">
+                            <!-- Results will be loaded here dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="{% static 'js/bed_admission.js' %}"></script>
+</body>
+
+</html>

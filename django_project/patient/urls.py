@@ -27,4 +27,6 @@ urlpatterns = [
         name="modify_appointment",
     ),
     path("cancel_appointment/", views.cancel_appointment, name="cancel_appointment"),
+    path("bed_admission/", views.bed_admission, name="bed_admission"),
+    path("api/search_beds/", views.search_beds, name="search_beds"),
 ]
