@@ -499,3 +499,43 @@ def current_admission(request):
         return JsonResponse(
             {"error": str(e), "has_active_admission": False}, status=500
         )
+
+
+def get_admissions(request):
+    """API endpoint to get all admissions for a patient."""
+    patient_username = request.session.get("login_form_data", {}).get(
+        "username"
+    ) or request.session.get("patient_username")
+
+    if not patient_username:
+        return JsonResponse({"error": "Not authenticated"}, status=401)
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT * FROM public.get_patient_admissions(%s)", [patient_username]
+            )
+            columns = [col[0] for col in cursor.description]
+            rows = cursor.fetchall()
+
+            result = []
+            for row in rows:
+                admission = dict(zip(columns, row))
+
+                # Convert datetime objects to string representation
+                if admission.get("check_in_date"):
+                    admission["check_in_date"] = admission["check_in_date"].isoformat()
+                if admission.get("check_out_date"):
+                    admission["check_out_date"] = admission[
+                        "check_out_date"
+                    ].isoformat()
+
+                result.append(admission)
+
+            return JsonResponse(result, safe=False)
+    except Exception as e:
+        print(f"Error in get_admissions: {str(e)}")
+        import traceback
+
+        print(traceback.format_exc())
+        return JsonResponse({"error": str(e)}, status=500)

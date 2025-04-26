@@ -31,20 +31,53 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     const csrftoken = getCookie('csrftoken');
 
-    // Main container for admission details
+    // Main containers for admission details
     const admissionContainer = document.getElementById('admission-container');
+    const previousAdmissionsContainer = document.getElementById('previous-admissions-container');
 
-    // Fetch current admission details
-    async function fetchCurrentAdmission() {
+    // Format date for display
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        return date.toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    // Calculate stay duration
+    function calculateDuration(checkInDate, checkOutDate) {
+        if (!checkInDate || !checkOutDate) return 'N/A';
+
+        const start = new Date(checkInDate);
+        const end = new Date(checkOutDate);
+        const diffTime = Math.abs(end - start);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        return `${diffDays} day${diffDays !== 1 ? 's' : ''}`;
+    }
+
+    // Fetch all admissions for the patient
+    async function fetchAdmissions() {
         try {
-            const response = await fetch('/patient/api/current_admission/');
+            const response = await fetch('/patient/api/get_admissions/');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const data = await response.json();
-            displayCurrentAdmission(data);
+            const admissions = await response.json();
+
+            // Separate current and previous admissions
+            const currentAdmission = admissions.find(a => a.check_out_date === null);
+            const previousAdmissions = admissions.filter(a => a.check_out_date !== null);
+
+            // Display both sections
+            displayCurrentAdmission(currentAdmission);
+            displayPreviousAdmissions(previousAdmissions);
         } catch (error) {
-            console.error('Error fetching current admission:', error);
+            console.error('Error fetching admissions:', error);
             admissionContainer.innerHTML =
                 '<div class="alert alert-danger">Failed to load admission data. Please try again later.</div>';
         }
@@ -52,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Display the current admission details
     function displayCurrentAdmission(data) {
-        if (!data.has_active_admission) {
+        if (!data) {
             admissionContainer.innerHTML = `
                 <div class="no-admission-container">
                     <div class="no-admission-card">
@@ -64,16 +97,6 @@ document.addEventListener('DOMContentLoaded', function () {
             `;
             return;
         }
-
-        // Format date for display
-        const checkInDate = new Date(data.check_in_date);
-        const formattedDate = checkInDate.toLocaleString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
 
         // Display the admission details
         admissionContainer.innerHTML = `
@@ -110,11 +133,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Nurse:</span>
-                            <span class="detail-value">${data.nurse_name || data.nurse_username || 'Not assigned'}</span>
+                            <span class="detail-value">${data.nurse_username || 'Not assigned'}</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Check-in Date:</span>
-                            <span class="detail-value">${formattedDate}</span>
+                            <span class="detail-value">${formatDate(data.check_in_date)}</span>
                         </div>
                     </div>
                 </div>
@@ -136,7 +159,85 @@ document.addEventListener('DOMContentLoaded', function () {
         attachButtonListeners();
     }
 
-    // Attach event listeners to buttons after DOM is updated
+    // Display previous admissions
+    function displayPreviousAdmissions(admissions) {
+        if (!admissions || admissions.length === 0) {
+            previousAdmissionsContainer.innerHTML = `
+                <div class="no-admission-container">
+                    <div class="no-admission-card">
+                        <h4>No Previous Admissions</h4>
+                        <p>You don't have any previous hospital admissions on record.</p>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        // Create header
+        let html = `
+            <h3 class="section-title">Previous Admissions</h3>
+            <div class="previous-admissions-grid">
+        `;
+
+        // Create a card for each previous admission
+        admissions.forEach(admission => {
+            html += `
+                <div class="previous-admission-card">
+                    <div class="card-header">
+                        <h4>Admission #${admission.admission_id}</h4>
+                        <span class="admission-badge completed">Completed</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="admission-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Patient:</span>
+                                <span class="detail-value">${admission.patient_name || 'Not provided'}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Ward:</span>
+                                <span class="detail-value">${admission.ward_name} (${admission.ward_type})</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Doctor:</span>
+                                <span class="detail-value">${admission.doctor_name || admission.doctor_username || 'Not assigned'}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Check-in:</span>
+                                <span class="detail-value">${formatDate(admission.check_in_date)}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Check-out:</span>
+                                <span class="detail-value">${formatDate(admission.check_out_date)}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Duration:</span>
+                                <span class="detail-value">${calculateDuration(admission.check_in_date, admission.check_out_date)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-view-notes" data-admission-id="${admission.admission_id}">
+                            <i class="bx bx-note"></i> View Doctor Notes
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `</div>`;
+        previousAdmissionsContainer.innerHTML = html;
+
+        // Add event listeners to the View Notes buttons in previous admissions
+        document.querySelectorAll('.previous-admission-card .btn-view-notes').forEach(button => {
+            button.addEventListener('click', function () {
+                const admissionId = this.getAttribute('data-admission-id');
+                alert('View doctor notes feature for previous admissions will be implemented later.');
+                // This will be implemented later as per requirements
+            });
+        });
+    }
+
+    // Attach event listeners to buttons
     function attachButtonListeners() {
         const viewNotesBtn = document.getElementById('view-notes-btn');
         const addNotesBtn = document.getElementById('add-notes-btn');
@@ -193,7 +294,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (data.success) {
                         alert('Discharge request submitted successfully!');
                         // Refresh the admission data
-                        fetchCurrentAdmission();
+                        fetchAdmissions();
                     } else {
                         alert(`Failed to submit discharge request: ${data.message || 'Unknown error'}`);
                     }
@@ -239,5 +340,5 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Initialize page
-    fetchCurrentAdmission();
+    fetchAdmissions();
 });

@@ -318,3 +318,72 @@ nav.open~.overlay {
     background-color: #5a6268 !important;
     border-color: #545b62 !important;
 }
+
+/* Previous Admissions Section */
+.section-title {
+    color: #333;
+    margin: 40px 0 20px 0;
+    text-align: center;
+    font-weight: 600;
+}
+
+.previous-admissions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.previous-admission-card {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.previous-admission-card .card-header {
+    background-color: #6c757d;
+    color: white;
+    padding: 12px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.previous-admission-card .card-header h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.previous-admission-card .admission-badge.completed {
+    background-color: #28a745;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.previous-admission-card .card-body {
+    padding: 15px;
+    flex-grow: 1;
+}
+
+.previous-admission-card .btn-view-notes {
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0 auto;
+}
+
+.previous-admission-card .btn-view-notes:hover {
+    background-color: #138496;
+}

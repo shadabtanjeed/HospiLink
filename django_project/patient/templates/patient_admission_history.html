@@ -66,6 +66,13 @@
                             <span class="link">Get Admission</span>
                         </a>
                     </li>
+
+                    <li class="list">
+                        <a href="{% url 'view_admissions' %}" class="nav-link">
+                            <i class="bx bx-history icon"></i>
+                            <span class="link">My Admissions</span>
+                        </a>
+                    </li>
                 </ul>
 
                 <div class="bottom-content">
@@ -91,12 +98,16 @@
     <div class="content">
         <h1>Admission History</h1>
         <div id="admission-container">
-            <!-- Admission details will be loaded here -->
+            <!-- Current admission will be loaded here -->
             <div class="text-center">
                 <div class="spinner-border text-primary" role="status">
                     <span class="sr-only">Loading...</span>
                 </div>
             </div>
+        </div>
+
+        <div id="previous-admissions-container" class="mt-5">
+            <!-- Previous admissions will be loaded here -->
         </div>
     </div>
 
@@ -148,6 +159,27 @@
                             <button type="submit" class="btn btn-primary">Submit Notes</button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add the modals for notes -->
+    <div class="modal fade" id="doctorNotesModal" tabindex="-1" role="dialog" aria-labelledby="doctorNotesModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="doctorNotesModalLabel">Doctor Notes</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="doctor-notes-content">Loading notes...</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
