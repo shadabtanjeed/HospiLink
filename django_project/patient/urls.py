@@ -30,4 +30,8 @@ urlpatterns = [
     path("bed_admission/", views.bed_admission, name="bed_admission"),
     path("api/search_beds/", views.search_beds, name="search_beds"),
     path("reserve_bed/", views.reserve_bed, name="reserve_bed"),
+    path(
+        "view_admissions/", views.patient_admission_record_page, name="view_admissions"
+    ),
+    path("api/current_admission/", views.current_admission, name="current_admission"),
 ]

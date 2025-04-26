@@ -15,6 +15,7 @@ from datetime import date, time
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
+import traceback
 
 
 def index(request):
@@ -439,3 +440,52 @@ def reserve_bed(request):
             return JsonResponse({"error": str(e)}, status=500)
     else:
         return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
+def patient_admission_record_page(request):
+    return render(request, "patient_admission_history.html")
+
+
+def current_admission(request):
+    """API endpoint to get current admission for a patient."""
+    patient_username = request.session.get("login_form_data", {}).get(
+        "username"
+    ) or request.session.get("patient_username")
+
+    if not patient_username:
+        return JsonResponse(
+            {"error": "Not authenticated", "has_active_admission": False}, status=401
+        )
+
+    print(f"Debug: patient_username={patient_username}")  # Add this line
+
+    # Rest of your function...
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT * FROM public.get_current_admission(%s)", [patient_username]
+            )
+            columns = [col[0] for col in cursor.description]
+            row = cursor.fetchone()
+
+            # Handle the case where no data is returned
+            if row is None:
+                return JsonResponse({"has_active_admission": False})
+
+            result = dict(zip(columns, row))
+
+            # Convert datetime objects to string representation
+            if result.get("check_in_date"):
+                result["check_in_date"] = result["check_in_date"].isoformat()
+            if result.get("check_out_date"):
+                result["check_out_date"] = result["check_out_date"].isoformat()
+
+            return JsonResponse(result)
+    except Exception as e:
+        # For debugging, print the error to the console
+
+        print(f"Error in current_admission: {str(e)}")
+        print(traceback.format_exc())
+        return JsonResponse(
+            {"error": str(e), "has_active_admission": False}, status=500
+        )
