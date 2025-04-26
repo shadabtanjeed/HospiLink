@@ -179,6 +179,10 @@ nav.open~.overlay {
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 }
 
+.admission-badge.completed {
+    background-color: #6c757d;
+}
+
 .admission-card .card-body {
     padding: 20px;
 }
@@ -277,7 +281,8 @@ nav.open~.overlay {
     max-width: 500px;
 }
 
-.no-admission-card h3 {
+.no-admission-card h3,
+.no-admission-card h4 {
     color: #dd636e;
     margin-bottom: 15px;
 }
@@ -292,6 +297,153 @@ nav.open~.overlay {
 .no-admission-card .btn-primary:hover {
     background-color: #c5555e;
     border-color: #c5555e;
+}
+
+/* Section Title */
+.section-title {
+    color: #333;
+    margin: 40px 0 20px 0;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* Previous Admissions - Restructured as row-based flex layout */
+.previous-admissions-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 900px;
+}
+
+.previous-admission-card {
+    display: flex;
+    flex-direction: row;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    padding: 15px;
+    width: 100%;
+    align-items: center;
+    transition: box-shadow 0.2s;
+    border-left: 4px solid #dd636e;
+}
+
+.previous-admission-card:hover {
+    box-shadow: 0 4px 8px rgba(221, 99, 110, 0.2);
+}
+
+/* Section 1: Admission number and status */
+.admission-id-section {
+    flex: 0 0 140px;
+    padding-right: 15px;
+    border-right: 1px solid #eee;
+}
+
+.admission-id-section h4 {
+    color: #dd636e;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    margin-bottom: 5px;
+}
+
+.admission-badge.completed {
+    background-color: #6c757d;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    display: inline-block;
+}
+
+/* Section 2: Location info (bed and ward) */
+.location-section {
+    flex: 0 0 160px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 0 15px;
+    border-right: 1px solid #eee;
+}
+
+/* Section 3: People info (patient and doctor) */
+.people-section {
+    flex: 0 0 190px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 0 15px;
+    border-right: 1px solid #eee;
+}
+
+/* Section 4: Dates and duration */
+.dates-section {
+    flex: 0 0 190px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 0 15px;
+    border-right: 1px solid #eee;
+}
+
+/* Section 5: Buttons */
+.actions-section {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    padding-left: 15px;
+}
+
+/* Common styling for all sections */
+.info-row {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    margin-bottom: 3px;
+}
+
+.info-label {
+    color: #888;
+    font-weight: 500;
+    margin-right: 5px;
+    min-width: 60px;
+}
+
+.info-value {
+    color: #333;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* View Notes Button */
+.btn-view-notes {
+    background-color: #15a49d;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 5px;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-view-notes:hover {
+    background-color: #138496;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.15);
+}
+
+.btn-view-notes .bx {
+    font-size: 16px;
 }
 
 /* Modal styling */
@@ -321,7 +473,96 @@ nav.open~.overlay {
 }
 
 /* Responsive design */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
+    .previous-admission-card {
+        flex-wrap: wrap;
+        padding: 12px;
+        border-left: 4px solid #dd636e;
+    }
+
+    .admission-id-section {
+        flex: 0 0 45%;
+        border-right: none;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 8px;
+        margin-bottom: 8px;
+    }
+
+    .location-section {
+        flex: 0 0 45%;
+        border-right: none;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 8px;
+        margin-bottom: 8px;
+    }
+
+    .people-section {
+        flex: 0 0 45%;
+        border-right: none;
+        padding-top: 8px;
+    }
+
+    .dates-section {
+        flex: 0 0 45%;
+        border-right: none;
+        padding-top: 8px;
+    }
+
+    .actions-section {
+        flex: 0 0 100%;
+        justify-content: flex-start;
+        padding-left: 0;
+        margin-top: 10px;
+        border-top: 1px solid #eee;
+        padding-top: 10px;
+    }
+}
+
+@media (max-width: 600px) {
+    .previous-admission-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .admission-id-section,
+    .location-section,
+    .people-section,
+    .dates-section,
+    .actions-section {
+        flex: 0 0 100%;
+        width: 100%;
+        padding: 8px 0;
+        border-right: none;
+    }
+
+    .location-section,
+    .people-section,
+    .dates-section,
+    .actions-section {
+        border-top: 1px solid #eee;
+    }
+
+    .admission-id-section {
+        grid-row: 1;
+    }
+
+    .location-section {
+        grid-row: 2;
+    }
+
+    .people-section {
+        grid-row: 3;
+    }
+
+    .dates-section {
+        grid-row: 4;
+    }
+
+    .actions-section {
+        grid-row: 5;
+        margin-top: 5px;
+    }
+
     .admission-card .card-footer {
         flex-direction: column;
     }
