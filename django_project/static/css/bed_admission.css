@@ -281,3 +281,40 @@ nav.open~.overlay {
 .d-none {
     display: none !important;
 }
+
+/* Modal styling with higher specificity and !important */
+.modal-content .modal-footer .btn-primary,
+#reserveModal .modal-content .modal-footer .btn-primary {
+    background-color: #dd636e !important;
+    border-color: #dd636e !important;
+    color: #fff !important;
+}
+
+.modal-content .modal-footer .btn-primary:hover,
+.modal-content .modal-footer .btn-primary:focus,
+#reserveModal .modal-footer .btn-primary:hover,
+#reserveModal .modal-footer .btn-primary:focus {
+    background-color: #c5555e !important;
+    border-color: #c5555e !important;
+}
+
+/* Modal input focus with !important */
+.modal-body .form-control:focus,
+#reserveModal .modal-body .form-control:focus {
+    border-color: #dd636e !important;
+    box-shadow: 0 0 0 0.2rem rgba(221, 99, 110, 0.25) !important;
+}
+
+/* Modal cancel button */
+.modal-content .modal-footer .btn-secondary,
+#reserveModal .modal-footer .btn-secondary {
+    background-color: #6c757d !important;
+    border-color: #6c757d !important;
+}
+
+/* Modal cancel button hover */
+.modal-content .modal-footer .btn-secondary:hover,
+#reserveModal .modal-footer .btn-secondary:hover {
+    background-color: #5a6268 !important;
+    border-color: #545b62 !important;
+}
