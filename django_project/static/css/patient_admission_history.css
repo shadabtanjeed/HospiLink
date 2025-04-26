@@ -172,10 +172,11 @@ nav.open~.overlay {
 }
 
 .admission-badge {
-    background-color: #28a745;
+    background-color: #e47a83;
     padding: 5px 10px;
     border-radius: 5px;
     font-size: 14px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 }
 
 .admission-card .card-body {
@@ -227,30 +228,33 @@ nav.open~.overlay {
 }
 
 .btn-view-notes {
-    background-color: #17a2b8;
+    background-color: #15a49d;
     color: white;
 }
 
 .btn-view-notes:hover {
     background-color: #138496;
+    color: white;
 }
 
 .btn-add-notes {
-    background-color: #dd636e;
+    background-color: #7b6ad1;
     color: white;
 }
 
 .btn-add-notes:hover {
-    background-color: #c5555e;
+    background-color: #6550cd;
+    color: white;
 }
 
 .btn-discharge {
-    background-color: #dc3545;
+    background-color: #dd636e;
     color: white;
 }
 
 .btn-discharge:hover {
-    background-color: #bd2130;
+    background-color: #c5555e;
+    color: white;
 }
 
 .admission-card .bx {

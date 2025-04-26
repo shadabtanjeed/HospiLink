@@ -31,26 +31,29 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     const csrftoken = getCookie('csrftoken');
 
+    // Main container for admission details
+    const admissionContainer = document.getElementById('admission-container');
+
     // Fetch current admission details
     async function fetchCurrentAdmission() {
         try {
             const response = await fetch('/patient/api/current_admission/');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             const data = await response.json();
-
             displayCurrentAdmission(data);
         } catch (error) {
             console.error('Error fetching current admission:', error);
-            document.getElementById('admission-container').innerHTML =
+            admissionContainer.innerHTML =
                 '<div class="alert alert-danger">Failed to load admission data. Please try again later.</div>';
         }
     }
 
     // Display the current admission details
     function displayCurrentAdmission(data) {
-        const container = document.getElementById('admission-container');
-
         if (!data.has_active_admission) {
-            container.innerHTML = `
+            admissionContainer.innerHTML = `
                 <div class="no-admission-container">
                     <div class="no-admission-card">
                         <h3>No Active Admissions</h3>
@@ -72,75 +75,82 @@ document.addEventListener('DOMContentLoaded', function () {
             minute: '2-digit'
         });
 
-        // Get doctor and nurse names (would be better to have this in the API response)
-        fetchStaffNames(data.doctor_username, data.nurse_username)
-            .then(names => {
-                container.innerHTML = `
-                    <div class="admission-card">
-                        <div class="card-header">
-                            <h3>Current Hospital Admission</h3>
-                            <span class="admission-badge">Active</span>
+        // Display the admission details
+        admissionContainer.innerHTML = `
+            <div class="admission-card">
+                <div class="card-header">
+                    <h3>Current Hospital Admission</h3>
+                    <span class="admission-badge">Active</span>
+                </div>
+                <div class="card-body">
+                    <div class="admission-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Patient Name:</span>
+                            <span class="detail-value">${data.patient_name || 'Not provided'}</span>
                         </div>
-                        <div class="card-body">
-                            <div class="admission-details">
-                                <div class="detail-row">
-                                    <span class="detail-label">Admission ID:</span>
-                                    <span class="detail-value">${data.admission_id}</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Ward:</span>
-                                    <span class="detail-value">${data.ward_name} (${data.ward_type})</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Ward No:</span>
-                                    <span class="detail-value">${data.ward_no}</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Bed ID:</span>
-                                    <span class="detail-value">${data.bed_id}</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Doctor:</span>
-                                    <span class="detail-value">${data.doctor_name || 'Not assigned'}</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Nurse:</span>
-                                    <span class="detail-value">${data.nurse_name || 'Not assigned'}</span>
-                                </div>
-                                <div class="detail-row">
-                                    <span class="detail-label">Check-in Date:</span>
-                                    <span class="detail-value">${formattedDate}</span>
-                                </div>
-                            </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Admission ID:</span>
+                            <span class="detail-value">${data.admission_id}</span>
                         </div>
-                        <div class="card-footer">
-                            <button class="btn btn-view-notes" id="view-notes-btn">
-                                <i class="bx bx-note"></i> View Doctor Notes
-                            </button>
-                            <button class="btn btn-add-notes" id="add-notes-btn">
-                                <i class="bx bx-plus"></i> Add Notes
-                            </button>
-                            <button class="btn btn-discharge" id="discharge-btn">
-                                <i class="bx bx-exit"></i> Request Discharge
-                            </button>
+                        <div class="detail-row">
+                            <span class="detail-label">Ward:</span>
+                            <span class="detail-value">${data.ward_name} (${data.ward_type})</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Ward No:</span>
+                            <span class="detail-value">${data.ward_no}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Bed ID:</span>
+                            <span class="detail-value">${data.bed_id}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Doctor:</span>
+                            <span class="detail-value">${data.doctor_name || data.doctor_username || 'Not assigned'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Nurse:</span>
+                            <span class="detail-value">${data.nurse_name || data.nurse_username || 'Not assigned'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Check-in Date:</span>
+                            <span class="detail-value">${formattedDate}</span>
                         </div>
                     </div>
-                `;
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-view-notes" id="view-notes-btn">
+                        <i class="bx bx-note"></i> View Doctor Notes
+                    </button>
+                    <button class="btn btn-add-notes" id="add-notes-btn">
+                        <i class="bx bx-plus"></i> Add Notes
+                    </button>
+                    <button class="btn btn-discharge" id="discharge-btn">
+                        <i class="bx bx-exit"></i> Request Discharge
+                    </button>
+                </div>
+            </div>
+        `;
 
-                // Add event listeners for the buttons
-                document.getElementById('view-notes-btn').addEventListener('click', viewDoctorNotes);
-                document.getElementById('add-notes-btn').addEventListener('click', addPatientNotes);
-                document.getElementById('discharge-btn').addEventListener('click', requestDischarge);
-            });
+        // Add event listeners for the buttons
+        attachButtonListeners();
     }
 
-    // Helper function to fetch staff names
-    async function fetchStaffNames(doctorUsername, nurseUsername) {
-        // This would ideally be an API call to get names, but for now we'll use placeholder
-        return {
-            doctor: doctorUsername ? `Dr. ${doctorUsername}` : 'Not assigned',
-            nurse: nurseUsername || 'Not assigned'
-        };
+    // Attach event listeners to buttons after DOM is updated
+    function attachButtonListeners() {
+        const viewNotesBtn = document.getElementById('view-notes-btn');
+        const addNotesBtn = document.getElementById('add-notes-btn');
+        const dischargeBtn = document.getElementById('discharge-btn');
+
+        if (viewNotesBtn) {
+            viewNotesBtn.addEventListener('click', viewDoctorNotes);
+        }
+        if (addNotesBtn) {
+            addNotesBtn.addEventListener('click', addPatientNotes);
+        }
+        if (dischargeBtn) {
+            dischargeBtn.addEventListener('click', requestDischarge);
+        }
     }
 
     // Button handler functions
@@ -148,17 +158,17 @@ document.addEventListener('DOMContentLoaded', function () {
         // Open doctor notes modal
         $('#doctorNotesModal').modal('show');
 
-        // Fetch doctor notes - would need an API endpoint
+        // Fetch doctor notes
         fetch('/patient/api/doctor_notes/')
             .then(response => response.json())
             .then(data => {
                 document.getElementById('doctor-notes-content').innerText =
-                    data.notes || 'No notes available';
+                    data.notes || 'No notes available from your doctor.';
             })
             .catch(error => {
                 console.error('Error:', error);
                 document.getElementById('doctor-notes-content').innerText =
-                    'Failed to load doctor notes.';
+                    'Failed to load doctor notes. Please try again later.';
             });
     }
 
@@ -185,7 +195,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         // Refresh the admission data
                         fetchCurrentAdmission();
                     } else {
-                        alert(`Failed to submit discharge request: ${data.message}`);
+                        alert(`Failed to submit discharge request: ${data.message || 'Unknown error'}`);
                     }
                 })
                 .catch(error => {
@@ -195,36 +205,39 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Submit patient notes
-    document.getElementById('patient-notes-form').addEventListener('submit', function (e) {
-        e.preventDefault();
+    // Handle patient notes form submission
+    const patientNotesForm = document.getElementById('patient-notes-form');
+    if (patientNotesForm) {
+        patientNotesForm.addEventListener('submit', function (e) {
+            e.preventDefault();
 
-        const notes = document.getElementById('patient-notes-input').value;
+            const notes = document.getElementById('patient-notes-input').value;
 
-        fetch('/patient/api/add_patient_notes/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrftoken
-            },
-            body: JSON.stringify({ notes: notes })
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Notes added successfully!');
-                    $('#patientNotesModal').modal('hide');
-                    document.getElementById('patient-notes-input').value = '';
-                } else {
-                    alert(`Failed to add notes: ${data.message}`);
-                }
+            fetch('/patient/api/add_patient_notes/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({ notes: notes })
             })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while adding notes. Please try again.');
-            });
-    });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Notes added successfully!');
+                        $('#patientNotesModal').modal('hide');
+                        document.getElementById('patient-notes-input').value = '';
+                    } else {
+                        alert(`Failed to add notes: ${data.message || 'Unknown error'}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while adding notes. Please try again.');
+                });
+        });
+    }
 
-    // Call the function when the page loads
+    // Initialize page
     fetchCurrentAdmission();
 });

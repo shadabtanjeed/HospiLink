@@ -103,6 +103,10 @@
     <!-- Add these modals before the closing </body> tag -->
 
     <!-- Doctor Notes Modal -->
+    <!-- Add CSRF token to the page -->
+    {% csrf_token %}
+
+    <!-- Make sure your modals are properly structured with these IDs -->
     <div class="modal fade" id="doctorNotesModal" tabindex="-1" role="dialog" aria-labelledby="doctorNotesModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -123,7 +127,6 @@
         </div>
     </div>
 
-    <!-- Patient Notes Modal -->
     <div class="modal fade" id="patientNotesModal" tabindex="-1" role="dialog" aria-labelledby="patientNotesModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
