@@ -101,11 +101,11 @@ document.addEventListener('DOMContentLoaded', function () {
                                 </div>
                                 <div class="detail-row">
                                     <span class="detail-label">Doctor:</span>
-                                    <span class="detail-value">${names.doctor}</span>
+                                    <span class="detail-value">${data.doctor_name || 'Not assigned'}</span>
                                 </div>
                                 <div class="detail-row">
                                     <span class="detail-label">Nurse:</span>
-                                    <span class="detail-value">${names.nurse}</span>
+                                    <span class="detail-value">${data.nurse_name || 'Not assigned'}</span>
                                 </div>
                                 <div class="detail-row">
                                     <span class="detail-label">Check-in Date:</span>

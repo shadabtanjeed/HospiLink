@@ -457,9 +457,8 @@ def current_admission(request):
             {"error": "Not authenticated", "has_active_admission": False}, status=401
         )
 
-    print(f"Debug: patient_username={patient_username}")  # Add this line
+    print(f"Debug: patient_username={patient_username}")
 
-    # Rest of your function...
     try:
         with connection.cursor() as cursor:
             cursor.execute(
@@ -474,6 +473,19 @@ def current_admission(request):
 
             result = dict(zip(columns, row))
 
+            # Get actual names for doctor and nurse
+            if result.get("doctor_username"):
+                cursor.execute(
+                    "SELECT public.get_name(%s)", [result["doctor_username"]]
+                )
+                doctor_name = cursor.fetchone()[0]
+                result["doctor_name"] = doctor_name
+
+            if result.get("nurse_username"):
+                cursor.execute("SELECT public.get_name(%s)", [result["nurse_username"]])
+                nurse_name = cursor.fetchone()[0]
+                result["nurse_name"] = nurse_name
+
             # Convert datetime objects to string representation
             if result.get("check_in_date"):
                 result["check_in_date"] = result["check_in_date"].isoformat()
@@ -482,8 +494,6 @@ def current_admission(request):
 
             return JsonResponse(result)
     except Exception as e:
-        # For debugging, print the error to the console
-
         print(f"Error in current_admission: {str(e)}")
         print(traceback.format_exc())
         return JsonResponse(
