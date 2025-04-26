@@ -273,7 +273,7 @@ nav.open~.overlay {
 }
 
 .no-admission-card {
-    background-color: #f8f9fa;
+    background-color: #ffffff;
     border-radius: 10px;
     padding: 30px;
     text-align: center;
@@ -314,18 +314,20 @@ nav.open~.overlay {
     gap: 12px;
     margin-top: 20px;
     width: 100%;
-    max-width: 900px;
+    max-width: 1000px;
 }
 
 .previous-admission-card {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
+    /* Allow wrapping to prevent overlap */
+    align-items: flex-start;
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
     padding: 15px;
     width: 100%;
-    align-items: center;
     transition: box-shadow 0.2s;
     border-left: 4px solid #dd636e;
 }
@@ -405,18 +407,59 @@ nav.open~.overlay {
 }
 
 .info-label {
-    color: #888;
+    color: #555;
+    /* Changed from #ffffff to #555 for visibility */
     font-weight: 500;
     margin-right: 5px;
     min-width: 60px;
+    /* Ensure labels don't collapse */
+    display: inline-block;
 }
 
 .info-value {
     color: #333;
     font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    /* Allow text to wrap to next line instead of masking */
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    display: inline-block;
+    vertical-align: middle;
+    max-width: 140px;
+}
+
+/* Fix flex layout for previous admission card sections */
+.admission-id-section,
+.location-section,
+.people-section,
+.dates-section,
+.actions-section {
+    min-width: 140px;
+    box-sizing: border-box;
+    /* Add margin to separate sections */
+    margin-bottom: 4px;
+}
+
+/* Ensure each section doesn't shrink too much */
+.admission-id-section,
+.location-section,
+.people-section,
+.dates-section {
+    flex: 1 1 160px;
+    min-width: 140px;
+    max-width: 220px;
+}
+
+/* Actions section should not overlap */
+.actions-section {
+    flex: 1 1 180px;
+    min-width: 140px;
+    max-width: 220px;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding-left: 15px;
+    margin-top: 0;
+    border-top: none;
 }
 
 /* View Notes Button */
@@ -480,40 +523,24 @@ nav.open~.overlay {
         border-left: 4px solid #dd636e;
     }
 
-    .admission-id-section {
-        flex: 0 0 45%;
+    .admission-id-section,
+    .location-section,
+    .people-section,
+    .dates-section,
+    .actions-section {
+        flex: 1 1 100%;
+        min-width: 100%;
+        max-width: 100%;
         border-right: none;
         border-bottom: 1px solid #eee;
         padding-bottom: 8px;
         margin-bottom: 8px;
-    }
-
-    .location-section {
-        flex: 0 0 45%;
-        border-right: none;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 8px;
-        margin-bottom: 8px;
-    }
-
-    .people-section {
-        flex: 0 0 45%;
-        border-right: none;
-        padding-top: 8px;
-    }
-
-    .dates-section {
-        flex: 0 0 45%;
-        border-right: none;
-        padding-top: 8px;
     }
 
     .actions-section {
-        flex: 0 0 100%;
-        justify-content: flex-start;
-        padding-left: 0;
-        margin-top: 10px;
+        border-bottom: none;
         border-top: 1px solid #eee;
+        margin-top: 0;
         padding-top: 10px;
     }
 }
@@ -533,45 +560,13 @@ nav.open~.overlay {
         width: 100%;
         padding: 8px 0;
         border-right: none;
+        border-bottom: 1px solid #eee;
     }
 
-    .location-section,
-    .people-section,
-    .dates-section,
     .actions-section {
+        border-bottom: none;
         border-top: 1px solid #eee;
-    }
-
-    .admission-id-section {
-        grid-row: 1;
-    }
-
-    .location-section {
-        grid-row: 2;
-    }
-
-    .people-section {
-        grid-row: 3;
-    }
-
-    .dates-section {
-        grid-row: 4;
-    }
-
-    .actions-section {
-        grid-row: 5;
         margin-top: 5px;
-    }
-
-    .admission-card .card-footer {
-        flex-direction: column;
-    }
-
-    .detail-row {
-        flex-direction: column;
-    }
-
-    .detail-label {
-        margin-bottom: 4px;
+        padding-top: 10px;
     }
 }

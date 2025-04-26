@@ -183,40 +183,55 @@ document.addEventListener('DOMContentLoaded', function () {
         admissions.forEach(admission => {
             html += `
                 <div class="previous-admission-card">
-                    <div class="card-header">
+                    <!-- Section 1: Admission number and status -->
+                    <div class="admission-id-section">
                         <h4>Admission #${admission.admission_id}</h4>
                         <span class="admission-badge completed">Completed</span>
                     </div>
-                    <div class="card-body">
-                        <div class="admission-details">
-                            <div class="detail-row">
-                                <span class="detail-label">Patient:</span>
-                                <span class="detail-value">${admission.patient_name || 'Not provided'}</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Ward:</span>
-                                <span class="detail-value">${admission.ward_name} (${admission.ward_type})</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Doctor:</span>
-                                <span class="detail-value">${admission.doctor_name || admission.doctor_username || 'Not assigned'}</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Check-in:</span>
-                                <span class="detail-value">${formatDate(admission.check_in_date)}</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Check-out:</span>
-                                <span class="detail-value">${formatDate(admission.check_out_date)}</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Duration:</span>
-                                <span class="detail-value">${calculateDuration(admission.check_in_date, admission.check_out_date)}</span>
-                            </div>
+                    
+                    <!-- Section 2: Location info (bed and ward) -->
+                    <div class="location-section">
+                        <div class="info-row">
+                            <span class="info-label">Ward:</span>
+                            <span class="info-value">${admission.ward_name || 'N/A'} (${admission.ward_type || 'N/A'})</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Bed ID:</span>
+                            <span class="info-value">${admission.bed_id || 'N/A'}</span>
                         </div>
                     </div>
-                    <div class="card-footer">
-                        <button class="btn btn-view-notes" data-admission-id="${admission.admission_id}">
+                    
+                    <!-- Section 3: People info (patient and doctor) -->
+                    <div class="people-section">
+                        <div class="info-row">
+                            <span class="info-label">Patient:</span>
+                            <span class="info-value">${admission.patient_name || 'Not provided'}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Doctor:</span>
+                            <span class="info-value">${admission.doctor_name || admission.doctor_username || 'Not assigned'}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Section 4: Dates and duration -->
+                    <div class="dates-section">
+                        <div class="info-row">
+                            <span class="info-label">Check-in:</span>
+                            <span class="info-value">${formatDate(admission.check_in_date)}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Check-out:</span>
+                            <span class="info-value">${formatDate(admission.check_out_date)}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Duration:</span>
+                            <span class="info-value">${calculateDuration(admission.check_in_date, admission.check_out_date)}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Section 5: Buttons -->
+                    <div class="actions-section">
+                        <button class="btn-view-notes" data-admission-id="${admission.admission_id}">
                             <i class="bx bx-note"></i> View Doctor Notes
                         </button>
                     </div>
