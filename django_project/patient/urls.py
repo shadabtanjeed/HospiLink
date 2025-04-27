@@ -41,4 +41,9 @@ urlpatterns = [
         views.get_doctor_notes,
         name="get_doctor_notes",
     ),
+    path(
+        "api/make_discharge_request/",
+        views.make_discharge_request,
+        name="make_discharge_request",
+    ),
 ]

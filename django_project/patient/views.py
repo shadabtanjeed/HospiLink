@@ -621,3 +621,30 @@ def get_doctor_notes(request, admission_id):
         print(f"Error in get_doctor_notes: {str(e)}")
         print(traceback.format_exc())
         return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+def make_discharge_request(request):
+    """API endpoint to make a discharge request."""
+    if request.method == "POST":
+        data = json.loads(request.body)
+        admission_id = data.get("admission_id")
+
+        if not admission_id:
+            return JsonResponse({"error": "Admission ID is required"}, status=400)
+
+        try:
+            with connection.cursor() as cursor:
+                # Call the SQL function to make a discharge request
+                cursor.execute(
+                    "SELECT public.create_discharge_request(%s)", [admission_id]
+                )
+
+            return JsonResponse({"success": True})
+        except Exception as e:
+            print(f"Error making discharge request: {str(e)}")
+            import traceback
+
+            print(traceback.format_exc())
+            return JsonResponse({"error": str(e)}, status=500)
+    else:
+        return JsonResponse({"error": "Invalid request method"}, status=405)

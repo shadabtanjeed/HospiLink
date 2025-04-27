@@ -381,15 +381,23 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function requestDischarge() {
+        // Get the admission ID from the card
+        const admissionId = document.querySelector('.admission-card').getAttribute('data-admission-id');
+
+        if (!admissionId) {
+            alert('Could not find admission ID. Please try again.');
+            return;
+        }
+
         if (confirm('Are you sure you want to request a discharge?')) {
-            // Send discharge request to backend
-            fetch('/patient/api/request_discharge/', {
+            // Send discharge request to backend with the admission ID
+            fetch('/patient/api/make_discharge_request/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': csrftoken
                 },
-                body: JSON.stringify({})
+                body: JSON.stringify({ admission_id: admissionId })
             })
                 .then(response => response.json())
                 .then(data => {
