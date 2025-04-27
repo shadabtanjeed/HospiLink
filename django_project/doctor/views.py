@@ -24,27 +24,51 @@ def fetch_upcoming_appointments(request):
     username = request.session.get("login_form_data", {}).get("username")
     user_type = request.session.get("login_form_data", {}).get("user_type")
 
-    with connection.cursor() as cursor:
-        cursor.execute(
-            "SELECT * FROM show_upcoming_appointments(%s, %s)", [username, user_type]
-        )
-        columns = [col[0] for col in cursor.description]
-        data = [dict(zip(columns, row)) for row in cursor.fetchall()]
+    try:
+        with connection.cursor() as cursor:
+            # First, get the server's timezone-aware current date
+            cursor.execute("SET timezone = 'Asia/Dhaka';")  # Set to your timezone
+            cursor.execute("""
+                SELECT 
+                    a.*,
+                    CASE 
+                        WHEN p.prescription_id IS NOT NULL THEN true 
+                        ELSE false 
+                    END as has_prescription,
+                    CASE 
+                        WHEN DATE(a.appointment_date) = CURRENT_DATE THEN true
+                        ELSE false
+                    END as is_today,
+                    a.appointment_date::date = CURRENT_DATE as appointment_is_today
+                FROM show_upcoming_appointments(%s, %s) a
+                LEFT JOIN prescriptions p ON a.appointment_id = p.appointment_id
+            """, [username, user_type])
+            
+            columns = [col[0] for col in cursor.description]
+            data = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
-        # Convert date and time objects to strings
-        for item in data:
-            if isinstance(item["appointment_date"], date):
-                item["appointment_date"] = item["appointment_date"].strftime("%Y-%m-%d")
-            if isinstance(item["appointment_time"], time):
-                item["appointment_time"] = item["appointment_time"].strftime("%H:%M:%S")
+            # Process the data
+            for item in data:
+                if isinstance(item["appointment_date"], date):
+                    item["appointment_date"] = item["appointment_date"].strftime("%Y-%m-%d")
+                if isinstance(item["appointment_time"], time):
+                    item["appointment_time"] = item["appointment_time"].strftime("%H:%M:%S")
+                
+                # Use the direct boolean comparison from the database
+                item["is_today"] = item["appointment_is_today"]
+                
+                patient_username = item["with_user"]
+                if patient_username:
+                    cursor.execute("SELECT public.get_name(%s)", [patient_username])
+                    patient_name = cursor.fetchone()[0]
+                    item["patient_name"] = patient_name
 
-            patient_username = item["with_user"]
-            cursor.execute("SELECT public.get_name(%s)", [patient_username])
-            patient_name = cursor.fetchone()[0]
-            item["patient_name"] = patient_name
-
-    response_data = json.dumps(data)
-    return HttpResponse(response_data, content_type="application/json")
+            return JsonResponse(data, safe=False)
+    except Exception as e:
+        import traceback
+        print(f"Error in fetch_upcoming_appointments:")
+        print(traceback.format_exc())
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 def previous_appointments(request):
