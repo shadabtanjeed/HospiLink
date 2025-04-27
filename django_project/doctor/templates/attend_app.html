@@ -9,8 +9,7 @@
     <link rel="icon" href="{% static 'app_logo_3.png' %}" type="image/png">
     <link href="https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    {% comment %}
-    <link rel="stylesheet" href="{% static 'style.css' %}"> {% endcomment %}
+    {% comment %} <link rel="stylesheet" href="{% static 'style.css' %}"> {% endcomment %}
 
 
 
@@ -424,40 +423,32 @@
             margin: 0 auto;
             padding: 20px;
             width: 100%;
-            max-width: 800px;
-            /* Constrain the width */
+            max-width: 800px; /* Constrain the width */
             box-shadow: 0px 0px 2.2px rgba(0, 0, 0, 0.07),
-                0px 0px 5.3px rgba(0, 0, 0, 0.05),
-                0px 0px 10px rgba(0, 0, 0, 0.042),
-                0px 0px 17.9px rgba(0, 0, 0, 0.035),
-                0px 0px 33.4px rgba(0, 0, 0, 0.028),
-                0px 0px 80px rgba(0, 0, 0, 0.02);
+                        0px 0px 5.3px rgba(0, 0, 0, 0.05),
+                        0px 0px 10px rgba(0, 0, 0, 0.042),
+                        0px 0px 17.9px rgba(0, 0, 0, 0.035),
+                        0px 0px 33.4px rgba(0, 0, 0, 0.028),
+                        0px 0px 80px rgba(0, 0, 0, 0.02);
             background: white;
-            border-radius: 8px;
-            /* Optional: Add rounded corners */
-            overflow: hidden;
-            /* Prevent content from overflowing */
+            border-radius: 8px; /* Optional: Add rounded corners */
+            overflow: hidden; /* Prevent content from overflowing */
         }
 
         #prescriptionTemplate .container {
             margin: 0 auto;
             padding: 10px 20px;
             width: 100%;
-            box-sizing: border-box;
-            /* Include padding in width calculations */
+            box-sizing: border-box; /* Include padding in width calculations */
         }
 
         #prescriptionTemplate .d-flex {
-            flex-wrap: wrap;
-            /* Ensure content wraps if it exceeds the container width */
-            justify-content: space-between;
-            /* Distribute content evenly */
+            flex-wrap: wrap; /* Ensure content wraps if it exceeds the container width */
+            justify-content: space-between; /* Distribute content evenly */
         }
 
-        #prescriptionTemplate p,
-        #prescriptionTemplate span {
-            word-wrap: break-word;
-            /* Prevent long text from overflowing */
+        #prescriptionTemplate p, #prescriptionTemplate span {
+            word-wrap: break-word; /* Prevent long text from overflowing */
             overflow-wrap: break-word;
         }
 
@@ -481,16 +472,11 @@
         }
 
         @media print {
-
             /* Hide unnecessary elements */
-            nav,
-            .overlay,
-            #title,
-            #prescriptionForm,
-            .btn {
+            nav, .overlay, #title, #prescriptionForm, .btn {
                 display: none !important;
             }
-
+    
             /* Ensure the prescription template is visible */
             #prescriptionTemplate {
                 display: block !important;
@@ -499,42 +485,39 @@
                 width: 100%;
                 box-shadow: none;
             }
-
+    
             /* Center the prescription content */
             #prescriptionTemplate .container {
                 margin: 0 auto;
                 width: 100%;
             }
-
+    
             /* Adjust font sizes for printing */
             body {
                 font-size: 12px;
                 line-height: 1.5;
             }
-
-            h1,
-            h2,
-            h3 {
+    
+            h1, h2, h3 {
                 font-size: 16px;
                 text-align: center;
             }
-
-            p,
-            span {
+    
+            p, span {
                 font-size: 12px;
             }
-
+    
             /* Remove background colors and shadows */
             * {
                 background: none !important;
                 box-shadow: none !important;
             }
-
+    
             /* Ensure the prescription content fits on the page */
             .container {
                 page-break-inside: avoid;
             }
-
+    
             /* Add page breaks for long content */
             .page-break {
                 page-break-before: always;
@@ -545,7 +528,7 @@
             font-family: 'Montserrat', sans-serif !important;
             background-color: #f6f6f6 !important;
         }
-
+        
         #prescription-form,
         #prescriptionTemplate {
             box-shadow:
@@ -555,17 +538,14 @@
                 0px 0px 17.9px rgba(0, 0, 0, 0.035),
                 0px 0px 33.4px rgba(0, 0, 0, 0.028),
                 0px 0px 80px rgba(0, 0, 0, 0.02);
-
+        
             background: white;
-            border-radius: 8px;
-            /* Add rounded corners */
+            border-radius: 8px; /* Add rounded corners */
             padding: 20px;
-            max-width: 800px;
-            /* Constrain the width */
-            margin: 0 auto;
-            /* Center the container */
+            max-width: 800px; /* Constrain the width */
+            margin: 0 auto; /* Center the container */
         }
-
+        
         input,
         textarea,
         select,
@@ -574,36 +554,36 @@
             outline: 0;
             box-shadow: none;
         }
-
+        
         input:focus,
         textarea:focus,
         select:focus {
             border-color: #0d6efd;
         }
-
+        
         #prescriptionTemplate {
             display: none;
         }
-
+        
         #prescriptionTemplate h1 {
             color: rgb(0, 170, 255);
             font-size: 24px;
             text-align: center;
         }
-
+        
         .one,
         .two {
             color: rgb(0, 170, 255);
             height: 0.15rem;
             margin: 10px 0;
         }
-
+        
         #prescriptionTemplate p {
             margin-bottom: 0;
             font-size: 14px;
             line-height: 1.5;
         }
-
+        
         #nameT,
         #ageT,
         #genderT,
@@ -612,18 +592,18 @@
             color: #0d6efd;
             font-weight: bold;
         }
-
+        
         .mail a {
             color: black;
             text-decoration: none;
             cursor: pointer;
         }
-
+        
         .mail a:hover {
             color: #0d6efd;
             text-decoration: underline;
         }
-
+        
         @media (max-width: 767.5px) {
             .prescription {
                 margin-top: 2rem;
@@ -667,21 +647,16 @@
                         </a>
                     </li>
                     <li class="list">
-                        <a href="{% url 'ward_management_page' %}" class="nav-link">
-                            <i class="bx bx-bed icon"></i>
-                            <span class="link">Ward Management</span>
+                        <a href="#" class="nav-link">
+                            <i class="bx bx-capsule icon"></i>
+                            <span class="link">Medicine Corner</span>
                         </a>
                     </li>
+
                     <li class="list">
-                        <a href="#" class="nav-link">
-                            <i class="bx bx-exit icon"></i>
-                            <span class="link">Discharge Requests</span>
-                        </a>
-                    </li>
-                    <li class="list">
-                        <a href="#" class="nav-link">
-                            <i class="bx bx-history icon"></i>
-                            <span class="link">Past Ward Records</span>
+                        <a href="{% url 'blood_repo' %}" class="nav-link">
+                            <i class="bx bx-droplet icon"></i>
+                            <span class="link">Blood Repo</span>
                         </a>
                     </li>
                 </ul>
@@ -721,25 +696,24 @@
                         <label for="name">Patient Name:</label>
                         <input type="text" class="form-control" id="name" value="{{ patient.name }}" disabled>
                     </div>
-
+                    
                     <div class="form-group mt-3">
                         <label for="age">Patient Age:</label>
                         <input type="number" class="form-control" id="age" value="{{ patient.age }}" disabled>
                     </div>
-
+                    
                     <div class="form-group mt-3">
                         <label for="gender">Gender:</label>
                         <select class="form-select" aria-label="Default select example" id="gender" disabled>
-                            <option value="Male" {% if patient.gender=="Male" %}selected{% endif %}>Male</option>
-                            <option value="Female" {% if patient.gender=="Female" %}selected{% endif %}>Female</option>
-                            <option value="Other" {% if patient.gender=="Other" %}selected{% endif %}>Other</option>
+                            <option value="Male" {% if patient.gender == "Male" %}selected{% endif %}>Male</option>
+                            <option value="Female" {% if patient.gender == "Female" %}selected{% endif %}>Female</option>
+                            <option value="Other" {% if patient.gender == "Other" %}selected{% endif %}>Other</option>
                         </select>
                     </div>
 
                     <div class="form-group mt-3">
                         <label for="date">Date :</label>
-                        <input type="date" class="form-control" id="date" value="{{ patient.appointment_date }}"
-                            disabled>
+                        <input type="date" class="form-control" id="date" value="{{ patient.appointment_date }}" disabled>
                     </div>
 
                     <div class="form-group mt-3">
@@ -749,14 +723,12 @@
 
                     <div class="form-group mt-3">
                         <label for="blood_group">Blood Group:</label>
-                        <input type="text" class="form-control" id="blood_group" value="{{ patient.blood_group }}"
-                            disabled>
+                        <input type="text" class="form-control" id="blood_group" value="{{ patient.blood_group }}" disabled>
                     </div>
-
+                    
                     <div class="form-group mt-3">
                         <label for="complexities">Complexities:</label>
-                        <textarea class="form-control" id="complexities" rows="3"
-                            disabled>{{ patient.complexities }}</textarea>
+                        <textarea class="form-control" id="complexities" rows="3" disabled>{{ patient.complexities }}</textarea>
                     </div>
                 </div>
 
@@ -798,8 +770,7 @@
 
         <!-- Prescription Template -->
         <div class="container p-4 mt-2" id="prescriptionTemplate">
-            <button id="goBackButton" onclick="goBackToForm()"
-                class="btn btn-secondary d-flex justify-content-start ms-auto mt-3">
+            <button id="goBackButton" onclick="goBackToForm()" class="btn btn-secondary d-flex justify-content-start ms-auto mt-3">
                 Go Back
             </button>
             <div class="text-center">
@@ -873,7 +844,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-
+    
 
     <!-- Script to dynamically generate table rows -->
     <script>
