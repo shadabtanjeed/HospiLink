@@ -772,6 +772,7 @@
             event.preventDefault();  // Prevent the default form submission
 
             const formData = new FormData(this);
+            const phoneNumber = document.getElementById('phone_number').value; // Get the phone number
 
             fetch(this.action, {
                 method: 'POST',
@@ -783,8 +784,8 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert("Signup successful!");
-                        window.location.href = "{% url 'signup_success' %}";
+                        // redirect to receptionist_search_doctor with the phone number
+                        window.location.href = "{% url 'receptionist_search_doctor' %}?patient_phone_number=" + encodeURIComponent(phoneNumber);
                     } else {
                         // Show the error message from the server response
                         alert(data.message || "Signup failed. Please try again.");
@@ -811,7 +812,7 @@
             }
             return cookieValue;
         }
-
+        
     </script>
 </body>
 
