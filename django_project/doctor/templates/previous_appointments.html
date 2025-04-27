@@ -535,13 +535,13 @@
                 data.forEach(item => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                    <td>${item.appointment_id}</td>
-                    <td>${item.appointment_date}</td>
-                    <td>${item.appointment_time}</td>
-                    <td>${item.patient_name}</td>
-                    <td>
-                        <button class="btn view-btn" onclick="#">View</button>
-                    </td>
+                        <td>${item.appointment_id}</td>
+                        <td>${item.appointment_date}</td>
+                        <td>${item.appointment_time}</td>
+                        <td>${item.patient_name}</td>
+                        <td>
+                            <button class="btn view-btn" onclick="viewPrescription(${item.appointment_id})">View</button>
+                        </td>
                     `;
                     tableBody.appendChild(row);
                 });
