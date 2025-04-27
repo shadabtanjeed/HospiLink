@@ -432,12 +432,35 @@ def discharge_patient(request):
                 {"success": False, "message": "Missing admission_id"}, status=400
             )
 
+        # First, get the bed_id from the admission
         with connection.cursor() as cursor:
-            # Call the PostgreSQL function we created
+            cursor.execute(
+                "SELECT bed_id FROM admissions WHERE admission_id = %s", [admission_id]
+            )
+            result = cursor.fetchone()
+            if not result:
+                return JsonResponse(
+                    {"success": False, "message": "Admission not found"}, status=404
+                )
+            bed_id = result[0]
+
+        # Call the discharge_patient function (which will update admissions and clear patient info)
+        with connection.cursor() as cursor:
             cursor.execute("SELECT public.discharge_patient(%s)", [admission_id])
             result = cursor.fetchone()[0]  # Get the boolean result
 
+        # Now set bed to maintenance status with current timestamp
         if result:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    UPDATE beds 
+                    SET status = 'Maintenance', 
+                        maintenance_start = CURRENT_TIMESTAMP 
+                    WHERE bed_id = %s
+                    """,
+                    [bed_id],
+                )
             return JsonResponse({"success": True})
         else:
             return JsonResponse(
@@ -447,5 +470,29 @@ def discharge_patient(request):
         import traceback
 
         print(f"Error in discharge_patient: {str(e)}")
+        print(traceback.format_exc())
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+@require_POST
+@csrf_exempt
+def update_maintenance_beds(request):
+    """API endpoint to check and update maintenance beds that have been in maintenance for over 15 seconds."""
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE beds
+                SET status = 'Vacant', 
+                    maintenance_start = NULL
+                WHERE status = 'Maintenance'
+                AND maintenance_start < (CURRENT_TIMESTAMP - INTERVAL '15 seconds')
+                """
+            )
+        return JsonResponse({"success": True})
+    except Exception as e:
+        import traceback
+
+        print(f"Error updating maintenance beds: {str(e)}")
         print(traceback.format_exc())
         return JsonResponse({"success": False, "message": str(e)}, status=500)

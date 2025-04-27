@@ -44,4 +44,9 @@ urlpatterns = [
     ),
     path("save_prescription/", views.save_prescription, name="save_prescription"),
     path("api/discharge_patient/", views.discharge_patient, name="discharge_patient"),
+    path(
+        "api/update_maintenance/",
+        views.update_maintenance_beds,
+        name="update_maintenance_beds",
+    ),
 ]
