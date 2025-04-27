@@ -228,12 +228,12 @@ nav.open~.overlay {
 }
 
 .btn-primary {
-    background-color: #007bff;
+    background-color: #7b8fde;
     color: white;
 }
 
 .btn-primary:hover {
-    background-color: #0069d9;
+    background-color: #617be4;
 }
 
 .btn-info {
@@ -246,12 +246,12 @@ nav.open~.overlay {
 }
 
 .btn-danger {
-    background-color: #dc3545;
+    background-color: #dd636e;
     color: white;
 }
 
 .btn-danger:hover {
-    background-color: #c82333;
+    background-color: #c5555e;
 }
 
 .btn-secondary {

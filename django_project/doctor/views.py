@@ -143,7 +143,7 @@ def attend_appointment(request, appointment_id):
 
 def ward_management_page(request):
 
-    return render(request, "ward_management.html")
+    return render(request, "doctor_ward_management.html")
 
 
 def get_assigned_beds(request):
