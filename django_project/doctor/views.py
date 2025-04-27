@@ -253,3 +253,38 @@ def add_doctor_note(request):
         print(f"Error in add_doctor_note: {str(e)}")
         print(traceback.format_exc())
         return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+def discharge_requests_page(request):
+    """Render the discharge requests page."""
+    doctor_username = request.session.get("login_form_data", {}).get("username")
+
+    if not doctor_username:
+        return JsonResponse({"error": "Not authenticated"}, status=401)
+
+    return render(request, "doctor_discharge_requests.html")
+
+
+def get_discharge_requests(request):
+    """API endpoint to get discharge requests for the logged-in doctor."""
+    doctor_username = request.session.get("login_form_data", {}).get("username")
+
+    if not doctor_username:
+        return JsonResponse({"error": "Not authenticated"}, status=401)
+
+    try:
+        with connection.cursor() as cursor:
+            # Call the database function
+            cursor.execute(
+                "SELECT * FROM public.get_discharge_requests(%s)", [doctor_username]
+            )
+            columns = [col[0] for col in cursor.description]
+            discharge_requests = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+        return JsonResponse(discharge_requests, safe=False)
+    except Exception as e:
+        import traceback
+
+        print(f"Error in get_discharge_requests: {str(e)}")
+        print(traceback.format_exc())
+        return JsonResponse({"error": str(e)}, status=500)

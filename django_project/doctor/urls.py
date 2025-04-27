@@ -32,4 +32,14 @@ urlpatterns = [
         name="get_patient_notes",
     ),
     path("api/add_doctor_note/", views.add_doctor_note, name="add_doctor_note"),
+    path(
+        "discharge_requests/",
+        views.discharge_requests_page,
+        name="discharge_requests_page",
+    ),
+    path(
+        "api/discharge_requests/",
+        views.get_discharge_requests,
+        name="get_discharge_requests",
+    ),
 ]
