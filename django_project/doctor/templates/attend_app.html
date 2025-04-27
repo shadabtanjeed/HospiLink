@@ -264,8 +264,7 @@
             width: 100%;
             display: flex;
             align-items: center;
-            /* background: #dd636e; */
-            box-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
+            z-index: 1000; /* Ensure nav is above other elements */
         }
 
         nav .logo {
@@ -295,8 +294,9 @@
             width: 260px;
             padding: 20px 0;
             background-color: #ffffff;
-            box-shadow: 0 5px 1px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
             transition: all 0.4s ease;
+            z-index: 1001; /* Higher than nav */
         }
 
         nav.open .sidebar {
@@ -355,6 +355,7 @@
             pointer-events: none;
             transition: all 0.4s ease;
             background: rgba(0, 0, 0, 0.3);
+            z-index: 999; /* Lower than nav but higher than content */
         }
 
         nav.open~.overlay {
@@ -378,6 +379,11 @@
             /* Moves dropdown lower */
             padding-left: 20px;
             padding-right: 20px;
+        }
+
+        .container.mt-5 {
+            position: relative;
+            z-index: 1; /* Lowest z-index */
         }
 
         #blood-group-select {
@@ -469,6 +475,20 @@
         /* Initially hide the "Go Back" button */
         #goBackButton {
             display: none;
+        }
+
+        #prescriptionForm {
+            position: relative; /* Ensure the form respects z-index */
+            z-index: 1; /* Lower z-index than the sidebar */
+            background: white; /* Ensure the form has a background */
+            box-shadow: 0px 0px 2.2px rgba(0, 0, 0, 0.07),
+                        0px 0px 5.3px rgba(0, 0, 0, 0.05),
+                        0px 0px 10px rgba(0, 0, 0, 0.042),
+                        0px 0px 17.9px rgba(0, 0, 0, 0.035),
+                        0px 0px 33.4px rgba(0, 0, 0, 0.028),
+                        0px 0px 80px rgba(0, 0, 0, 0.02);
+            padding: 20px;
+            border-radius: 8px;
         }
 
         @media print {
