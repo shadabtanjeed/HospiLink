@@ -704,10 +704,12 @@
                         </div>
                         <div class="card_appointment">
                             <p>Tk. {{ doctor.fee }}/=</p>
-                            <button type="button" class="btn"
-                                onclick="window.location.href='{% url 'book_appointment' doctor.username %}'">
-                                <b>Book Appointment</b>
-                            </button>
+                            <form method="GET" action="{% url 'receptionist_book_appointment' doctor.username %}">
+                                <input type="hidden" name="patient_username" value="{{ patient_username }}">
+                                <button type="submit" class="btn">
+                                    <b>Book Appointment</b>
+                                </button>
+                            </form>
                         </div>
                     </div>
                     {% endfor %}

@@ -1,6 +1,12 @@
 from django.shortcuts import render, redirect
 from django.db import connection
+from django.http import HttpResponse
 from django.http import JsonResponse
+from django.utils.dateparse import parse_date
+from django.utils import timezone
+from datetime import datetime
+from datetime import date, time
+from datetime import timedelta, datetime
 import json
 
 
@@ -204,3 +210,101 @@ def receptionist_search_doctor(request):
         "doctors": doctors,
     }
     return render(request, "receptionist_search_doctor.html", context)
+
+def receptionist_book_appointment(request, doctor_username):
+    if request.method == "POST":
+        booking_date = request.POST.get("booking_date")
+        patient_username = request.POST.get("patient_username")
+
+        try:
+            with connection.cursor() as cursor:
+                # Call the schedule_appointment function
+                cursor.execute(
+                    """
+                    SELECT public.schedule_appointment(%s, %s, %s)
+                    """,
+                    [patient_username, doctor_username, booking_date],
+                )
+                # Fetch the appointment time
+                cursor.execute(
+                    """
+                    SELECT appointment_time
+                    FROM appointments
+                    WHERE patient_username = %s
+                      AND doctor_username = %s
+                      AND appointment_date = %s
+                    """,
+                    [patient_username, doctor_username, booking_date],
+                )
+                appointment_time_result = cursor.fetchone()
+                
+                if not appointment_time_result:
+                    return JsonResponse(
+                        {"success": False, "message": "Failed to schedule appointment"}, 
+                        status=400
+                    )
+                    
+                appointment_time = appointment_time_result[0]
+
+            return JsonResponse(
+                {
+                    "success": True,
+                    "appointment_time": appointment_time.strftime("%H:%M"),
+                }
+            )
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)}, status=400)
+    else:
+        # Fetch doctor information
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT username, public.get_name(username) AS name, phone_no,
+                       visiting_days, visiting_time_start, visiting_time_end,
+                       specialization, fee, degrees
+                FROM doctors
+                WHERE username = %s
+                """,
+                [doctor_username],
+            )
+            doctor = cursor.fetchone()
+
+        if doctor:
+            # Process doctor data
+            visiting_days = doctor[3]
+            if isinstance(visiting_days, str):
+                visiting_days = visiting_days.strip("{}").split(",")
+                visiting_days = [day.capitalize() for day in visiting_days]
+            degrees = doctor[8]
+            if isinstance(degrees, str):
+                degrees = degrees.strip("{}").split(",")
+
+            doctor_info = {
+                "username": doctor[0],
+                "name": doctor[1],
+                "phone_no": doctor[2],
+                "visiting_days": visiting_days,
+                "visiting_time_start": doctor[4],
+                "visiting_time_end": doctor[5],
+                "specialization": doctor[6],
+                "fee": doctor[7],
+                "degrees": degrees,
+            }
+
+            # Prepare date range for the next 10 days
+            today = timezone.now().date()
+            end_date = today + timedelta(days=10)
+            date_range = [today + timedelta(days=x) for x in range(0, 11)]
+
+            context = {
+                "doctor": doctor_info,
+                "date_range": date_range,
+                "today": today,
+                "end_date": end_date,
+                "patient_username": request.GET.get("patient_username", ""),
+            }
+
+            return render(request, "receptionist_book_appointment.html", context)
+        else:
+            # Handle case when doctor is not found
+            return HttpResponse("Doctor not found.")
