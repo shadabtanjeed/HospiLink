@@ -666,6 +666,52 @@
             fetchAppointments();
         });
 
+        async function viewPrescription(appointmentId) {
+            try {
+                const response = await fetch(`/doctor/api/prescription/${appointmentId}/`);
+                if (!response.ok) {
+                    throw new Error('No prescription found');
+                }
+                const prescription = await response.json();
+                
+                if (prescription) {
+                    showPrescriptionTemplate(prescription);
+                } else {
+                    alert('No prescription found for this appointment.');
+                }
+            } catch (error) {
+                console.error('Error fetching prescription:', error);
+                alert('No prescription found for this appointment.');
+            }
+        }
+
+        function showPrescriptionTemplate(prescription) {
+            // Hide the table container
+            document.querySelector('.container.mt-5').style.display = 'none';
+            
+            // Update prescription template content
+            document.getElementById('doctorName').textContent = prescription.prescribed_by;
+            document.getElementById('doctorDegrees').textContent = prescription.doctor_degrees;
+            document.getElementById('patientName').textContent = prescription.prescribed_to;
+            document.getElementById('prescriptionDate').textContent = prescription.created_at;
+            document.getElementById('diagnosisText').textContent = prescription.diagnosis;
+            document.getElementById('medicationText').textContent = prescription.medication;
+            document.getElementById('additionalNotesText').textContent = prescription.additional_notes || 'None';
+            document.getElementById('doctorSignature').textContent = `Dr. ${prescription.prescribed_by}`;
+            
+            // Show the prescription template
+            document.getElementById('prescriptionTemplate').style.display = 'block';
+        }
+
+        function goBackToTable() {
+            document.getElementById('prescriptionTemplate').style.display = 'none';
+            document.querySelector('.container.mt-5').style.display = 'block';
+        }
+
+        function printPrescription() {
+            window.print();
+        }
+
     </script>
 </body>
 
