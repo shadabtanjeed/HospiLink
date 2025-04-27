@@ -90,12 +90,13 @@ def attend_appointment(request, appointment_id):
         cursor.execute("SELECT * FROM appointments WHERE appointment_id = %s", [appointment_id])
         appointment = cursor.fetchone()
 
-        # Fetch doctor details
+        # Fetch doctor details (join doctors and users tables to get the actual name)
         doctor_username = appointment[2]  # Assuming the doctor's username is the third column
         cursor.execute("""
-            SELECT username, degrees
-            FROM doctors
-            WHERE username = %s
+            SELECT u.name, d.degrees
+            FROM doctors d
+            INNER JOIN users u ON d.username = u.username
+            WHERE d.username = %s
         """, [doctor_username])
         doctor = cursor.fetchone()
 
@@ -140,12 +141,6 @@ def attend_appointment(request, appointment_id):
         "prescriptions": prescriptions,
     }
     return render(request, "attend_app.html", context)
-
-
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-from django.db import connection
-import json
 
 @csrf_exempt
 def save_prescription(request):
