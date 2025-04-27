@@ -410,12 +410,7 @@
                             <span class="link">Dashboard</span>
                         </a>
                     </li>
-                    <li class="list">
-                        <a href="{% url 'search_doctor' %}" class="nav-link">
-                            <i class="bx bx-search icon"></i>
-                            <span class="link">Search Doctor</span>
-                        </a>
-                    </li>
+
                     <li class="list">
                         <a href="{% url 'previous_appointments' %}" class="nav-link">
                             <i class="bx bx-history icon"></i>
@@ -423,16 +418,21 @@
                         </a>
                     </li>
                     <li class="list">
-                        <a href="#" class="nav-link">
-                            <i class="bx bx-capsule icon"></i>
-                            <span class="link">Medicine Corner</span>
+                        <a href="{% url 'ward_management_page' %}" class="nav-link">
+                            <i class="bx bx-bed icon"></i>
+                            <span class="link">Ward Management</span>
                         </a>
                     </li>
-
                     <li class="list">
-                        <a href="{% url 'blood_repo' %}" class="nav-link">
-                            <i class="bx bx-droplet icon"></i>
-                            <span class="link">Blood Repo</span>
+                        <a href="{% url 'discharge_requests_page' %}" class="nav-link">
+                            <i class="bx bx-exit icon"></i>
+                            <span class="link">Discharge Requests</span>
+                        </a>
+                    </li>
+                    <li class="list">
+                        <a href="#" class="nav-link">
+                            <i class="bx bx-history icon"></i>
+                            <span class="link">Past Ward Records</span>
                         </a>
                     </li>
                 </ul>
@@ -519,7 +519,7 @@
             async function fetchAppointments() {
                 const response = await fetch('/doctor/api/previous_appointments/');  // Ensure the correct URL
                 const data = await response.json();
-                
+
                 const futureAppointments = data.filter(item => {
                     const appointmentDate = new Date(item.appointment_date);
                     const appointmentTime = item.appointment_time.split(':');
@@ -547,7 +547,7 @@
                 });
             }
 
-            window.viewAppointment = function(appointmentId) {
+            window.viewAppointment = function (appointmentId) {
                 window.location.href = `#`;
             }
 

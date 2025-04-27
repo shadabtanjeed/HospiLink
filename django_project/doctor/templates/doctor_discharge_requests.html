@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discharge Requests - HospiLink</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/doctor_sidebar.css">
+    <link rel="stylesheet" href="/static/css/doctor_discharge_requests.css">
+</head>
+
+<body>
+    <nav>
+        <div class="logo">
+            <i class="bx bx-menu menu-icon"></i>
+        </div>
+        <div class="sidebar">
+            <div class="logo">
+                <i class="bx bx-menu menu-icon"></i>
+                <span class="logo-name"><b>HospiLink</b></span>
+            </div>
+
+            <div class="sidebar-content">
+                <ul class="lists">
+                    <li class="list">
+                        <a href="{% url 'index' %}" class="nav-link">
+                            <i class="bx bx-home-alt icon"></i>
+                            <span class="link">Dashboard</span>
+                        </a>
+                    </li>
+
+                    <li class="list">
+                        <a href="{% url 'previous_appointments' %}" class="nav-link">
+                            <i class="bx bx-history icon"></i>
+                            <span class="link">Appointment History</span>
+                        </a>
+                    </li>
+                    <li class="list">
+                        <a href="{% url 'ward_management_page' %}" class="nav-link">
+                            <i class="bx bx-bed icon"></i>
+                            <span class="link">Ward Management</span>
+                        </a>
+                    </li>
+                    <li class="list">
+                        <a href="{% url 'discharge_requests_page' %}" class="nav-link">
+                            <i class="bx bx-exit icon"></i>
+                            <span class="link">Discharge Requests</span>
+                        </a>
+                    </li>
+                    <li class="list">
+                        <a href="#" class="nav-link">
+                            <i class="bx bx-history icon"></i>
+                            <span class="link">Past Ward Records</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="bottom-content">
+                    <li class="list">
+                        <a href="#" class="nav-link">
+                            <i class="bx bx-cog icon"></i>
+                            <span class="link">Settings</span>
+                        </a>
+                    </li>
+                    <li class="list">
+                        <a href="#" class="nav-link" onclick="window.location.href='/user_authentication/'">
+                            <i class="bx bx-log-out icon"></i>
+                            <span class="link">Logout</span>
+                        </a>
+                    </li>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="overlay"></section>
+
+    <div class="content">
+        <h1>Discharge Requests</h1>
+
+        <div class="container mt-4">
+            <div id="loading-indicator" class="text-center my-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
+
+            <div id="no-requests-message" class="alert alert-info d-none">
+                You don't have any discharge requests at this time.
+            </div>
+
+            <div id="requests-table-container" class="table-responsive d-none">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Patient Name</th>
+                            <th>Ward</th>
+                            <th>Bed Number</th>
+                            <th>Request Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requests-table-body">
+                        <!-- Discharge requests will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalLabel">Confirm Action</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="modal-message">
+                    Are you sure you want to proceed with this action?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirm-action-btn">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="/static/js/doctor_discharge_requests.js"></script>
+</body>
+
+</html>

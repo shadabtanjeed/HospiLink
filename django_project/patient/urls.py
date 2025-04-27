@@ -36,4 +36,14 @@ urlpatterns = [
     path("api/current_admission/", views.current_admission, name="current_admission"),
     path("api/get_admissions/", views.get_admissions, name="get_admissions"),
     path("api/add_patient_notes/", views.add_patient_notes, name="add_patient_notes"),
+    path(
+        "api/doctor_notes/<int:admission_id>/",
+        views.get_doctor_notes,
+        name="get_doctor_notes",
+    ),
+    path(
+        "api/make_discharge_request/",
+        views.make_discharge_request,
+        name="make_discharge_request",
+    ),
 ]
