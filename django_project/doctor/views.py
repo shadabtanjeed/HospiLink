@@ -417,3 +417,35 @@ def reject_discharge(request):
         print(f"Error in reject_discharge: {str(e)}")
         print(traceback.format_exc())
         return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+@require_POST
+@csrf_exempt
+def discharge_patient(request):
+    """API endpoint to directly discharge a patient."""
+    try:
+        data = json.loads(request.body)
+        admission_id = data.get("admission_id")
+
+        if not admission_id:
+            return JsonResponse(
+                {"success": False, "message": "Missing admission_id"}, status=400
+            )
+
+        with connection.cursor() as cursor:
+            # Call the PostgreSQL function we created
+            cursor.execute("SELECT public.discharge_patient(%s)", [admission_id])
+            result = cursor.fetchone()[0]  # Get the boolean result
+
+        if result:
+            return JsonResponse({"success": True})
+        else:
+            return JsonResponse(
+                {"success": False, "message": "Failed to discharge patient"}, status=500
+            )
+    except Exception as e:
+        import traceback
+
+        print(f"Error in discharge_patient: {str(e)}")
+        print(traceback.format_exc())
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
