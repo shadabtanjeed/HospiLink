@@ -385,6 +385,63 @@
             background-color: #617be4;
             color: white;
         }
+
+        #prescriptionTemplate {
+            display: none;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0px 0px 2.2px rgba(0, 0, 0, 0.07),
+                        0px 0px 5.3px rgba(0, 0, 0, 0.05),
+                        0px 0px 10px rgba(0, 0, 0, 0.042),
+                        0px 0px 17.9px rgba(0, 0, 0, 0.035),
+                        0px 0px 33.4px rgba(0, 0, 0, 0.028),
+                        0px 0px 80px rgba(0, 0, 0, 0.02);
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        @media print {
+            nav, .overlay, #title, .btn, #prescriptionHeading, .content {
+                display: none !important;
+            }
+        
+            #prescriptionTemplate {
+                display: block !important;
+                margin: 0;
+                padding: 20px;
+                width: 100%;
+                box-shadow: none;
+            }
+        
+            #prescriptionTemplate .container {
+                margin: 0 auto;
+                width: 100%;
+            }
+        
+            body {
+                font-size: 12px;
+                line-height: 1.5;
+            }
+        
+            h1, h2, h3 {
+                font-size: 16px;
+                text-align: center;
+            }
+        
+            p, span {
+                font-size: 12px;
+            }
+        
+            * {
+                background: none !important;
+                box-shadow: none !important;
+            }
+        
+            .container {
+                page-break-inside: avoid;
+            }
+        }
     </style>
 
     <title>Previous Appointments</title>
