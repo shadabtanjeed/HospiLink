@@ -221,11 +221,16 @@
 
         /* Print formatting */
         @media print {
+
             /* Hide unnecessary elements */
-            nav, .overlay, #title, #prescriptionForm, .btn {
+            nav,
+            .overlay,
+            #title,
+            #prescriptionForm,
+            .btn {
                 display: none !important;
             }
-    
+
             /* Ensure the prescription template is visible */
             #prescriptionTemplate {
                 display: block !important;
@@ -234,39 +239,42 @@
                 width: 100%;
                 box-shadow: none;
             }
-    
+
             /* Center the prescription content */
             #prescriptionTemplate .container {
                 margin: 0 auto;
                 width: 100%;
             }
-    
+
             /* Adjust font sizes for printing */
             body {
                 font-size: 12px;
                 line-height: 1.5;
             }
-    
-            h1, h2, h3 {
+
+            h1,
+            h2,
+            h3 {
                 font-size: 16px;
                 text-align: center;
             }
-    
-            p, span {
+
+            p,
+            span {
                 font-size: 12px;
             }
-    
+
             /* Remove background colors and shadows */
             * {
                 background: none !important;
                 box-shadow: none !important;
             }
-    
+
             /* Ensure the prescription content fits on the page */
             .container {
                 page-break-inside: avoid;
             }
-    
+
             /* Add page breaks for long content */
             .page-break {
                 page-break-before: always;
@@ -297,12 +305,7 @@
                             <span class="link">Dashboard</span>
                         </a>
                     </li>
-                    <li class="list">
-                        <a href="{% url 'search_doctor' %}" class="nav-link">
-                            <i class="bx bx-search icon"></i>
-                            <span class="link">Search Doctor</span>
-                        </a>
-                    </li>
+
                     <li class="list">
                         <a href="{% url 'previous_appointments' %}" class="nav-link">
                             <i class="bx bx-history icon"></i>
@@ -310,16 +313,21 @@
                         </a>
                     </li>
                     <li class="list">
-                        <a href="#" class="nav-link">
-                            <i class="bx bx-capsule icon"></i>
-                            <span class="link">Medicine Corner</span>
+                        <a href="{% url 'ward_management_page' %}" class="nav-link">
+                            <i class="bx bx-bed icon"></i>
+                            <span class="link">Ward Management</span>
                         </a>
                     </li>
-
                     <li class="list">
-                        <a href="{% url 'blood_repo' %}" class="nav-link">
-                            <i class="bx bx-droplet icon"></i>
-                            <span class="link">Blood Repo</span>
+                        <a href="#" class="nav-link">
+                            <i class="bx bx-exit icon"></i>
+                            <span class="link">Discharge Requests</span>
+                        </a>
+                    </li>
+                    <li class="list">
+                        <a href="#" class="nav-link">
+                            <i class="bx bx-history icon"></i>
+                            <span class="link">Past Ward Records</span>
                         </a>
                     </li>
                 </ul>
@@ -1129,7 +1137,7 @@
 }
 
         }
-                                            </script>
-                                        </body>
+    </script>
+</body>
 
-                                    </html>
+</html>
