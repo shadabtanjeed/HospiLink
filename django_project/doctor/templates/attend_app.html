@@ -985,6 +985,90 @@
         function printPrescription() {
             window.print();
         }
+
+        function goBackToForm() {
+            const prescriptionTemplate = document.getElementById("prescriptionTemplate");
+            const prescriptionForm = document.getElementById("prescriptionForm");
+            const saveButton = document.getElementById("savePrescriptionButton");
+    
+            // Hide the prescription template and save button
+            prescriptionTemplate.style.display = "none";
+            saveButton.style.display = "none";
+
+            if (saveButton) {
+                saveButton.style.display = "inline-block";
+            }
+    
+            // Show the prescription form
+            prescriptionForm.style.display = "block";
+        }
+    
+        // Function to save the prescription
+        function savePrescription() {
+            const appointmentIdElement = document.getElementById("appointment_id");
+            if (!appointmentIdElement) {
+                alert("Error: Appointment ID is missing.");
+                return;
+            }
+        
+            const prescriptionData = {
+                appointment_id: appointmentIdElement.value,
+                prescribed_by: "{{ appointment.2 }}",
+                prescribed_to: "{{ appointment.1 }}",
+                diagnosis: document.getElementById("medicalNotes")?.value || "",
+                medication: document.getElementById("medicineDetails")?.value || "",
+                additional_notes: document.getElementById("additional_notes")?.value || "",
+            };
+
+            console.log(prescriptionData);
+        
+            fetch("/doctor/save_prescription/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken"),
+                },
+                body: JSON.stringify(prescriptionData),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        alert("Prescription saved successfully!");
+                    } else {
+                        alert("Error: " + data.message);
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error:", error);
+                });
+        }
+    
+        // Utility function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+                const cookies = document.cookie.split(";");
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === name + "=") {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    
+        // Ensure the "Save Prescription" button is hidden initially
+        document.addEventListener("DOMContentLoaded", function () {
+            const prescriptionTemplate = document.getElementById("prescriptionTemplate");
+            const saveButton = document.getElementById("savePrescriptionButton");
+
+            // Ensure the prescription template and save button are hidden initially
+            if (prescriptionTemplate) {
+                prescriptionTemplate.style.display = "none";
+            }
+        });
     </script>
 </body>
 
