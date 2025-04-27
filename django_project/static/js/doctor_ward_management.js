@@ -50,9 +50,17 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Fetch beds assigned to the doctor
     async function fetchAssignedBeds() {
         try {
+            // Before fetching, run the function to update maintenance beds
+            await fetch('/doctor/api/update_maintenance/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                }
+            });
+
             const response = await fetch('/doctor/api/assigned_beds/');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -69,6 +77,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Show table and populate it
                 bedsTableContainer.classList.remove('d-none');
                 displayBeds(beds);
+
+                // Check if any beds are in maintenance status
+                const maintenanceBeds = beds.filter(bed => bed.status === 'Maintenance');
+                if (maintenanceBeds.length > 0) {
+                    // If there are beds in maintenance, poll again in 5 seconds
+                    setTimeout(fetchAssignedBeds, 5000);
+                }
             }
         } catch (error) {
             console.error('Error fetching assigned beds:', error);
@@ -78,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Display beds in the table
+    // Update the displayBeds function to handle maintenance status
     function displayBeds(beds) {
         bedsTableBody.innerHTML = '';
 
@@ -89,37 +104,39 @@ document.addEventListener('DOMContentLoaded', function () {
             let statusClass = '';
             if (bed.status === 'Occupied') {
                 statusClass = 'text-danger';
-            } else if (bed.status === 'Available') {
+            } else if (bed.status === 'Vacant') {
                 statusClass = 'text-success';
+            } else if (bed.status === 'Maintenance') {
+                statusClass = 'text-warning';  // Yellow for maintenance
             }
 
             row.innerHTML = `
-                <td>${bed.ward_name} (${bed.ward_type})</td>
-                <td>${bed.bed_no}</td>
-                <td class="${statusClass}">${bed.status}</td>
-                <td>${bed.bed_type}</td>
-                <td>${bed.patient_name || 'N/A'}</td>
-                <td>${formatDate(bed.check_in_date)}</td>
-                <td>${bed.nurse_name || 'Not assigned'}</td>
-                <td class="action-buttons">
-                    <button class="btn btn-sm btn-primary add-note-btn" 
-                        data-admission-id="${bed.admission_id}" 
-                        ${!bed.admission_id ? 'disabled' : ''}>
-                        <i class="bx bx-plus"></i> Add Note
-                    </button>
-                    
-                    <button class="btn btn-sm btn-info view-notes-btn" 
-                        data-admission-id="${bed.admission_id}" 
-                        ${!bed.admission_id ? 'disabled' : ''}>
-                        <i class="bx bx-note"></i> View Patient Notes
-                    </button>
-                    <button class="btn btn-sm btn-danger discharge-btn" 
-                        data-admission-id="${bed.admission_id}" 
-                        ${!bed.admission_id ? 'disabled' : ''}>
-                        <i class="bx bx-exit"></i> Discharge
-                    </button>
-                </td>
-            `;
+            <td>${bed.ward_name} (${bed.ward_type})</td>
+            <td>${bed.bed_no}</td>
+            <td class="${statusClass}">${bed.status}</td>
+            <td>${bed.bed_type}</td>
+            <td>${bed.patient_name || 'N/A'}</td>
+            <td>${formatDate(bed.check_in_date)}</td>
+            <td>${bed.nurse_name || 'Not assigned'}</td>
+            <td class="action-buttons">
+                <button class="btn btn-sm btn-primary add-note-btn" 
+                    data-admission-id="${bed.admission_id}" 
+                    ${!bed.admission_id ? 'disabled' : ''}>
+                    <i class="bx bx-plus"></i> Add Note
+                </button>
+                
+                <button class="btn btn-sm btn-info view-notes-btn" 
+                    data-admission-id="${bed.admission_id}" 
+                    ${!bed.admission_id ? 'disabled' : ''}>
+                    <i class="bx bx-note"></i> View Patient Notes
+                </button>
+                <button class="btn btn-sm btn-danger discharge-btn" 
+                    data-admission-id="${bed.admission_id}" 
+                    ${(!bed.admission_id || bed.status === 'Maintenance') ? 'disabled' : ''}>
+                    <i class="bx bx-exit"></i> Discharge
+                </button>
+            </td>
+        `;
 
             bedsTableBody.appendChild(row);
         });
@@ -325,8 +342,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (data.success) {
                     alert('Patient discharged successfully!');
                     $('#dischargeModal').modal('hide');
-                    // Refresh the bed data
+
+                    // Refresh immediately to show maintenance status
                     fetchAssignedBeds();
+
+                    // After 15 seconds, the status should change to Vacant
+                    // We'll poll again at that time to show the change
+                    setTimeout(fetchAssignedBeds, 16000);
                 } else {
                     alert(`Failed to discharge patient: ${data.message || 'Unknown error'}`);
                 }

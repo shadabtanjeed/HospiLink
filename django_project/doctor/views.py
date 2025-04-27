@@ -374,16 +374,26 @@ def approve_discharge(request):
         discharge_id = data.get("discharge_id")
         admission_id = data.get("admission_id")
 
-        if not all([discharge_id, admission_id]):
+        if not discharge_id or not admission_id:
             return JsonResponse(
-                {"success": False, "message": "Missing required data"}, status=400
+                {"success": False, "message": "Missing discharge_id or admission_id"},
+                status=400,
             )
 
+        # Use uppercase 'APPROVED' to match the check constraint
         with connection.cursor() as cursor:
             cursor.execute(
-                "SELECT public.approve_discharge_request(%s, %s)",
-                [discharge_id, admission_id],
+                """
+                UPDATE discharge_requests 
+                SET status = 'APPROVED' 
+                WHERE discharge_id = %s
+                """,
+                [discharge_id],
             )
+
+        # Then call the existing discharge_patient function to handle actual discharge
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT public.discharge_patient(%s)", [admission_id])
 
         return JsonResponse({"success": True})
     except Exception as e:
@@ -407,8 +417,16 @@ def reject_discharge(request):
                 {"success": False, "message": "Missing discharge_id"}, status=400
             )
 
+        # Use uppercase 'REJECTED' to match the check constraint
         with connection.cursor() as cursor:
-            cursor.execute("SELECT public.reject_discharge_request(%s)", [discharge_id])
+            cursor.execute(
+                """
+                UPDATE discharge_requests 
+                SET status = 'REJECTED' 
+                WHERE discharge_id = %s
+                """,
+                [discharge_id],
+            )
 
         return JsonResponse({"success": True})
     except Exception as e:
@@ -424,7 +442,8 @@ def get_prescription(request, appointment_id):
     try:
         with connection.cursor() as cursor:
             # Get prescription details
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT 
                     p.diagnosis,
                     p.medication,
@@ -436,23 +455,104 @@ def get_prescription(request, appointment_id):
                 FROM prescriptions p
                 JOIN doctors d ON p.prescribed_by = d.username
                 WHERE p.appointment_id = %s
-            """, [appointment_id])
-            
+            """,
+                [appointment_id],
+            )
+
             result = cursor.fetchone()
-            
+
             if result:
                 prescription_data = {
-                    'diagnosis': result[0],
-                    'medication': result[1],
-                    'additional_notes': result[2],
-                    'created_at': result[3].strftime('%Y-%m-%d'),
-                    'doctor_degrees': ', '.join(result[4]) if result[4] else '',
-                    'prescribed_by': result[5],
-                    'prescribed_to': result[6]
+                    "diagnosis": result[0],
+                    "medication": result[1],
+                    "additional_notes": result[2],
+                    "created_at": result[3].strftime("%Y-%m-%d"),
+                    "doctor_degrees": ", ".join(result[4]) if result[4] else "",
+                    "prescribed_by": result[5],
+                    "prescribed_to": result[6],
                 }
                 return JsonResponse(prescription_data)
             else:
-                return JsonResponse({'error': 'No prescription found'}, status=404)
-                
+                return JsonResponse({"error": "No prescription found"}, status=404)
+
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@require_POST
+@csrf_exempt
+def discharge_patient(request):
+    """API endpoint to directly discharge a patient."""
+    try:
+        data = json.loads(request.body)
+        admission_id = data.get("admission_id")
+
+        if not admission_id:
+            return JsonResponse(
+                {"success": False, "message": "Missing admission_id"}, status=400
+            )
+
+        # First, get the bed_id from the admission
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT bed_id FROM admissions WHERE admission_id = %s", [admission_id]
+            )
+            result = cursor.fetchone()
+            if not result:
+                return JsonResponse(
+                    {"success": False, "message": "Admission not found"}, status=404
+                )
+            bed_id = result[0]
+
+        # Call the discharge_patient function (which will update admissions and clear patient info)
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT public.discharge_patient(%s)", [admission_id])
+            result = cursor.fetchone()[0]  # Get the boolean result
+
+        # Now set bed to maintenance status with current timestamp
+        if result:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    UPDATE beds 
+                    SET status = 'Maintenance', 
+                        maintenance_start = CURRENT_TIMESTAMP 
+                    WHERE bed_id = %s
+                    """,
+                    [bed_id],
+                )
+            return JsonResponse({"success": True})
+        else:
+            return JsonResponse(
+                {"success": False, "message": "Failed to discharge patient"}, status=500
+            )
+    except Exception as e:
+        import traceback
+
+        print(f"Error in discharge_patient: {str(e)}")
+        print(traceback.format_exc())
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+@require_POST
+@csrf_exempt
+def update_maintenance_beds(request):
+    """API endpoint to check and update maintenance beds that have been in maintenance for over 15 seconds."""
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE beds
+                SET status = 'Vacant', 
+                    maintenance_start = NULL
+                WHERE status = 'Maintenance'
+                AND maintenance_start < (CURRENT_TIMESTAMP - INTERVAL '15 seconds')
+                """
+            )
+        return JsonResponse({"success": True})
+    except Exception as e:
+        import traceback
+
+        print(f"Error updating maintenance beds: {str(e)}")
+        print(traceback.format_exc())
+        return JsonResponse({"success": False, "message": str(e)}, status=500)

@@ -48,4 +48,12 @@ urlpatterns = [
         views.get_prescription,
         name="get_prescription",
     ),
+    path("api/discharge_patient/", views.discharge_patient, name="discharge_patient"),
+    path(
+        "api/update_maintenance/",
+        views.update_maintenance_beds,
+        name="update_maintenance_beds",
+    ),
+    path("api/approve_discharge/", views.approve_discharge, name="approve_discharge"),
+    path("api/reject_discharge/", views.reject_discharge, name="reject_discharge"),
 ]
