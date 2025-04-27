@@ -417,3 +417,42 @@ def reject_discharge(request):
         print(f"Error in reject_discharge: {str(e)}")
         print(traceback.format_exc())
         return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+def get_prescription(request, appointment_id):
+    """API endpoint to get prescription details for a specific appointment."""
+    try:
+        with connection.cursor() as cursor:
+            # Get prescription details
+            cursor.execute("""
+                SELECT 
+                    p.diagnosis,
+                    p.medication,
+                    p.additional_notes,
+                    p.prescription_date,
+                    d.degrees,
+                    (SELECT name FROM users WHERE username = p.prescribed_by) as doctor_name,
+                    (SELECT name FROM users WHERE username = p.prescribed_to) as patient_name
+                FROM prescriptions p
+                JOIN doctors d ON p.prescribed_by = d.username
+                WHERE p.appointment_id = %s
+            """, [appointment_id])
+            
+            result = cursor.fetchone()
+            
+            if result:
+                prescription_data = {
+                    'diagnosis': result[0],
+                    'medication': result[1],
+                    'additional_notes': result[2],
+                    'created_at': result[3].strftime('%Y-%m-%d'),
+                    'doctor_degrees': ', '.join(result[4]) if result[4] else '',
+                    'prescribed_by': result[5],
+                    'prescribed_to': result[6]
+                }
+                return JsonResponse(prescription_data)
+            else:
+                return JsonResponse({'error': 'No prescription found'}, status=404)
+                
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

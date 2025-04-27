@@ -385,6 +385,63 @@
             background-color: #617be4;
             color: white;
         }
+
+        #prescriptionTemplate {
+            display: none;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0px 0px 2.2px rgba(0, 0, 0, 0.07),
+                        0px 0px 5.3px rgba(0, 0, 0, 0.05),
+                        0px 0px 10px rgba(0, 0, 0, 0.042),
+                        0px 0px 17.9px rgba(0, 0, 0, 0.035),
+                        0px 0px 33.4px rgba(0, 0, 0, 0.028),
+                        0px 0px 80px rgba(0, 0, 0, 0.02);
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        @media print {
+            nav, .overlay, #title, .btn, #prescriptionHeading, .content {
+                display: none !important;
+            }
+        
+            #prescriptionTemplate {
+                display: block !important;
+                margin: 0;
+                padding: 20px;
+                width: 100%;
+                box-shadow: none;
+            }
+        
+            #prescriptionTemplate .container {
+                margin: 0 auto;
+                width: 100%;
+            }
+        
+            body {
+                font-size: 12px;
+                line-height: 1.5;
+            }
+        
+            h1, h2, h3 {
+                font-size: 16px;
+                text-align: center;
+            }
+        
+            p, span {
+                font-size: 12px;
+            }
+        
+            * {
+                background: none !important;
+                box-shadow: none !important;
+            }
+        
+            .container {
+                page-break-inside: avoid;
+            }
+        }
     </style>
 
     <title>Previous Appointments</title>
@@ -474,7 +531,63 @@
         </table>
     </div>
 
+    <div class="container p-4 mt-2" id="prescriptionTemplate">
+        <h3 id="prescriptionHeading" class="text-center">Prescription</h3>
+        <button onclick="goBackToTable()" class="btn btn-secondary d-flex justify-content-start ms-auto mt-3">
+            Go Back
+        </button>
+        <div class="text-center">
+            <h1 class="fw-bold mb-4">Oblivious Hospital</h1>
+            <span class="fs-3 fw-bolder mt-5"><b>Dr. <span id="doctorName"></span></b></span>
+            <span class="fs-5"><i><span id="doctorDegrees"></span></i></span>
+            <p class="mt-3">45/2 Lake View Road, Dhanmondi</p>
+            <p>Dhaka 1209, Bangladesh</p>
+            <p>PH: +880 1712 345678</p>
+            <p>FAX: +880 2 9111234</p>
+        </div>
+        <hr class="one">
+        <div class="container output mt-5">
+            <div class="container">
+                <div class="d-flex patient-detail col-md-12 gap-2 justify-content-between">
+                    <p>Patient Name: <span id="patientName"></span></p>
+                    <p>Date: <span id="prescriptionDate"></span></p>
+                </div>
 
+                <div class="mt-4">
+                    <span class="fs-1">R</span><span class="fs-4">x</span>
+                </div>
+
+                <div class="mx-5 mt-5">
+                    <p class="fs-4">Diagnosis:</p>
+                    <p id="diagnosisText"></p>
+                </div>
+
+                <div class="mx-5 mt-5">
+                    <p class="fs-4">Medicine Details:</p>
+                    <p id="medicationText"></p>
+                </div>
+
+                <div class="mx-5 mt-5">
+                    <p class="fs-4">Additional Notes:</p>
+                    <p id="additionalNotesText"></p>
+                </div>
+
+                <div class="mt-5 d-flex justify-content-end me-5">
+                    <p>Doctor's Signature: <span class="text-primary" id="doctorSignature"></span></p>
+                </div>
+
+                <hr class="two">
+                <p class="text-center mail">
+                    <a href="mailto:info@obliviousgroup.com">info@obliviousgroup.com</a>
+                </p>
+            </div>
+        </div>
+        <div class="d-flex justify-content-end gap-2 mt-3">
+            <button onclick="printPrescription()" class="btn btn-dark">
+                Print Prescription
+            </button>
+        </div>
+    </div>
 
 
     <!-- Add Bootstrap JS and dependencies -->
@@ -524,18 +637,17 @@
             }
 
             function renderTable(data) {
-                console.log(data); //added for debugging
                 tableBody.innerHTML = '';
                 data.forEach(item => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                    <td>${item.appointment_id}</td>
-                    <td>${item.appointment_date}</td>
-                    <td>${item.appointment_time}</td>
-                    <td>${item.patient_name}</td>
-                    <td>
-                        <button class="btn view-btn" onclick="#">View</button>
-                    </td>
+                        <td>${item.appointment_id}</td>
+                        <td>${item.appointment_date}</td>
+                        <td>${item.appointment_time}</td>
+                        <td>${item.patient_name}</td>
+                        <td>
+                            <button class="btn view-btn" onclick="viewPrescription(${item.appointment_id})">View</button>
+                        </td>
                     `;
                     tableBody.appendChild(row);
                 });
@@ -547,6 +659,52 @@
 
             fetchAppointments();
         });
+
+        async function viewPrescription(appointmentId) {
+            try {
+                const response = await fetch(`/doctor/api/prescription/${appointmentId}/`);
+                if (!response.ok) {
+                    throw new Error('No prescription found');
+                }
+                const prescription = await response.json();
+                
+                if (prescription) {
+                    showPrescriptionTemplate(prescription);
+                } else {
+                    alert('No prescription found for this appointment.');
+                }
+            } catch (error) {
+                console.error('Error fetching prescription:', error);
+                alert('No prescription found for this appointment.');
+            }
+        }
+
+        function showPrescriptionTemplate(prescription) {
+            // Hide the table container
+            document.querySelector('.container.mt-5').style.display = 'none';
+            
+            // Update prescription template content
+            document.getElementById('doctorName').textContent = prescription.prescribed_by;
+            document.getElementById('doctorDegrees').textContent = prescription.doctor_degrees;
+            document.getElementById('patientName').textContent = prescription.prescribed_to;
+            document.getElementById('prescriptionDate').textContent = prescription.created_at;
+            document.getElementById('diagnosisText').textContent = prescription.diagnosis;
+            document.getElementById('medicationText').textContent = prescription.medication;
+            document.getElementById('additionalNotesText').textContent = prescription.additional_notes || 'None';
+            document.getElementById('doctorSignature').textContent = `Dr. ${prescription.prescribed_by}`;
+            
+            // Show the prescription template
+            document.getElementById('prescriptionTemplate').style.display = 'block';
+        }
+
+        function goBackToTable() {
+            document.getElementById('prescriptionTemplate').style.display = 'none';
+            document.querySelector('.container.mt-5').style.display = 'block';
+        }
+
+        function printPrescription() {
+            window.print();
+        }
 
     </script>
 </body>
