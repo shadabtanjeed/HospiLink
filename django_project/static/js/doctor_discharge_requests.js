@@ -48,19 +48,25 @@ document.addEventListener('DOMContentLoaded', function () {
             const requests = await response.json();
 
             // Hide loading indicator
-            loadingIndicator.classList.add('d-none');
+            if (loadingIndicator) {
+                loadingIndicator.classList.add('d-none');
+            }
 
             if (requests.length === 0) {
                 // Show no requests message
                 noRequestsMessage.classList.remove('d-none');
+                requestsTableContainer.classList.add('d-none');
             } else {
                 // Show table and populate it
+                noRequestsMessage.classList.add('d-none');
                 requestsTableContainer.classList.remove('d-none');
                 displayRequests(requests);
             }
         } catch (error) {
             console.error('Error fetching discharge requests:', error);
-            loadingIndicator.classList.add('d-none');
+            if (loadingIndicator) {
+                loadingIndicator.classList.add('d-none');
+            }
             requestsTableContainer.insertAdjacentHTML('beforebegin',
                 `<div class="alert alert-danger">Failed to load discharge requests. Please try again later.</div>`);
         }
@@ -79,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td>${request.bed_number}</td>
                 <td>${request.request_date}</td>
                 <td class="action-buttons">
-                    <button class="btn btn-sm btn-success approve-btn mr-1" 
+                    <button class="btn btn-sm btn-success approve-btn" 
                         data-discharge-id="${request.discharge_id}" 
                         data-admission-id="${request.admission_id}">
                         <i class="bx bx-check"></i> Approve
@@ -134,20 +140,22 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Handle confirmation modal action
-    confirmActionBtn.addEventListener('click', function () {
-        const action = this.getAttribute('data-action');
-        const dischargeId = this.getAttribute('data-discharge-id');
+    if (confirmActionBtn) {
+        confirmActionBtn.addEventListener('click', function () {
+            const action = this.getAttribute('data-action');
+            const dischargeId = this.getAttribute('data-discharge-id');
 
-        if (action === 'approve') {
-            const admissionId = this.getAttribute('data-admission-id');
-            approveDischarge(dischargeId, admissionId);
-        } else if (action === 'reject') {
-            rejectDischarge(dischargeId);
-        }
+            if (action === 'approve') {
+                const admissionId = this.getAttribute('data-admission-id');
+                approveDischarge(dischargeId, admissionId);
+            } else if (action === 'reject') {
+                rejectDischarge(dischargeId);
+            }
 
-        // Hide the modal
-        $('#confirmationModal').modal('hide');
-    });
+            // Hide the modal
+            $('#confirmationModal').modal('hide');
+        });
+    }
 
     // Approve discharge function
     async function approveDischarge(dischargeId, admissionId) {

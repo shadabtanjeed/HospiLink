@@ -374,16 +374,26 @@ def approve_discharge(request):
         discharge_id = data.get("discharge_id")
         admission_id = data.get("admission_id")
 
-        if not all([discharge_id, admission_id]):
+        if not discharge_id or not admission_id:
             return JsonResponse(
-                {"success": False, "message": "Missing required data"}, status=400
+                {"success": False, "message": "Missing discharge_id or admission_id"},
+                status=400,
             )
 
+        # Use uppercase 'APPROVED' to match the check constraint
         with connection.cursor() as cursor:
             cursor.execute(
-                "SELECT public.approve_discharge_request(%s, %s)",
-                [discharge_id, admission_id],
+                """
+                UPDATE discharge_requests 
+                SET status = 'APPROVED' 
+                WHERE discharge_id = %s
+                """,
+                [discharge_id],
             )
+
+        # Then call the existing discharge_patient function to handle actual discharge
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT public.discharge_patient(%s)", [admission_id])
 
         return JsonResponse({"success": True})
     except Exception as e:
@@ -407,8 +417,16 @@ def reject_discharge(request):
                 {"success": False, "message": "Missing discharge_id"}, status=400
             )
 
+        # Use uppercase 'REJECTED' to match the check constraint
         with connection.cursor() as cursor:
-            cursor.execute("SELECT public.reject_discharge_request(%s)", [discharge_id])
+            cursor.execute(
+                """
+                UPDATE discharge_requests 
+                SET status = 'REJECTED' 
+                WHERE discharge_id = %s
+                """,
+                [discharge_id],
+            )
 
         return JsonResponse({"success": True})
     except Exception as e:
