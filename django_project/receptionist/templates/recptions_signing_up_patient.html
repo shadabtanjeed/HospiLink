@@ -513,7 +513,31 @@
                         Password must be at least 8 characters long and contain uppercase, lowercase, number and special
                         character
                     </div>
-                    <input type="text" name="phone_number" id="phone_number" placeholder="Enter your phone number">
+                    <input type="text" name="phone_number" id="phone_number" placeholder="Enter your phone number" class="non-editable">
+                    
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            // retrive phone no from the query param
+                            const urlParams = new URLSearchParams(window.location.search);
+                            const phoneNumber = urlParams.get('phone_number');
+                    
+                            if (phoneNumber) {
+                                // set phone no and make it non-editable
+                                const phoneNumberInput = document.getElementById('phone_number');
+                                phoneNumberInput.value = phoneNumber;
+                                phoneNumberInput.readOnly = true;
+                            }
+                        });
+                    </script>
+
+                    <style>
+                        .non-editable {
+                            color: grey;
+                            pointer-events: none;
+                            user-select: none;
+                        }
+                    </style>
+
                     <div id="phoneNumberWarning" class="password-warning" style="display: none;">Invalid phone number.
                         Only
                         digits and + are allowed.</div>

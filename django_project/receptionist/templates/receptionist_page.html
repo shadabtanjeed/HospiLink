@@ -229,10 +229,28 @@
         <div>
             <h3>Patient Appointment</h3>
             <input type="text" id="phone-number" placeholder="Enter phone number">
-            <button onclick="checkUserExists()">Check</button>
             <p id="user-exists-result"></p>
-
+    
             <script>
+                document.getElementById('phone-number').addEventListener('keypress', function (event) {
+                    if (event.key === 'Enter') {
+                        const phoneNumber = document.getElementById('phone-number').value;
+            
+                        // Check if the phone number is exactly 11 digits
+                        if (/^\d{11}$/.test(phoneNumber)) {
+                            checkUserExists();
+                        } else {
+                            // Show error message if phone number is invalid
+                            const resultElement = document.getElementById('user-exists-result');
+                            resultElement.textContent = 'Phone number must be exactly 11 digits.';
+                            resultElement.style.color = 'red'; // Set the error message color to red
+                        }
+            
+                        // Prevent default form submission behavior
+                        event.preventDefault();
+                    }
+                });
+            
                 function checkUserExists() {
                     const phoneNumber = document.getElementById('phone-number').value;
                     fetch("{% url 'check_patient_exists' %}?phone_number=" + phoneNumber)
@@ -241,9 +259,15 @@
                             const resultElement = document.getElementById('user-exists-result');
                             if (data.exists) {
                                 resultElement.textContent = 'Patient exists';
+                                resultElement.style.color = 'green'; // Set success message color to green
                             } else {
                                 resultElement.textContent = 'Patient does not exist';
-                                window.location.href = "{% url 'create_patient_account' %}";
+                                resultElement.style.color = 'red'; // Set error message color to red
+                           
+                                // Add a 1-second delay before redirecting
+                                setTimeout(() => {
+                                    window.location.href = "{% url 'create_patient_account' %}?phone_number=" + encodeURIComponent(phoneNumber);
+                                }, 500);
                             }
                         })
                         .catch(error => {
