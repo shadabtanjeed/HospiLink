@@ -4,7 +4,7 @@
 
 <head>
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Book Appointment</title>
+    <title>Modify Appointment</title>
     <link rel="icon" href="{% static 'app_logo_3.png' %}" type="image/png">
     <!-- Internal Stylesheet -->
     <style>
@@ -31,8 +31,8 @@
             width: 100%;
             display: flex;
             align-items: center;
-            /* background: #dd636e; */
             box-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
         }
 
         nav .logo {
@@ -64,6 +64,7 @@
             background-color: #ffffff;
             box-shadow: 0 5px 1px rgba(0, 0, 0, 0.1);
             transition: all 0.4s ease;
+            z-index: 1001;
         }
 
         nav.open .sidebar {
@@ -122,6 +123,7 @@
             pointer-events: none;
             transition: all 0.4s ease;
             background: rgba(0, 0, 0, 0.3);
+            z-index: 999;
         }
 
         nav.open~.overlay {
@@ -161,7 +163,6 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            /* Adjust the gap as needed */
             font-size: 16px;
             margin: 5px 0;
             color: #333;
@@ -180,8 +181,7 @@
             color: #333;
         }
 
-        .appointment-form input[type="date"],
-        .appointment-form input[type="time"] {
+        .appointment-form input[type="date"] {
             padding: 10px;
             margin-bottom: 15px;
             width: 100%;
@@ -203,21 +203,7 @@
             background-color: #c5555e;
         }
 
-        .doctor-info p {
-            display: flex;
-            align-items: center;
-            font-size: 16px;
-            margin: 5px 0;
-            color: #333;
-        }
-
-        .doctor-info i {
-            margin-right: 8px;
-            font-size: 20px;
-            /* Adjust icon size if necessary */
-            /* color: #b1545c; */
-        }
-
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -291,7 +277,6 @@
     <nav>
         <div class="logo">
             <i class="bx bx-menu menu-icon"></i>
-            <!-- <span class="logo-name"><b>HospiLink</b></span> -->
         </div>
         <div class="sidebar">
             <div class="logo">
@@ -302,30 +287,26 @@
                 <ul class="lists">
                     <li class="list">
                         <a href="#" class="nav-link">
-                            <a class="nav-link" onclick="window.location.href='/receptionist/'">
                             <i class="bx bx-home-alt icon"></i>
                             <span class="link">Dashboard</span>
                         </a>
                     </li>
-
+                    <li class="list">
+                        <a href="{% url 'search_doctor' %}" class="nav-link">
+                            <i class="bx bx-search icon"></i>
+                            <span class="link">Search Doctor</span>
+                        </a>
+                    </li>
+                    <li class="list">
+                        <a href="#" class="nav-link">
+                            <i class="bx bx-history icon"></i>
+                            <span class="link">Appointment History</span>
+                        </a>
+                    </li>
                     <li class="list">
                         <a href="{% url 'blood_repo' %}" class="nav-link">
                             <i class="bx bx-droplet icon"></i>
                             <span class="link">Blood Repo</span>
-                        </a>
-                    </li>
-
-                    <li class="list">
-                        <a href="#" class="nav-link">
-                            <i class="bx bx-bed icon"></i>
-                            <span class="link">Get Admission</span>
-                        </a>
-                    </li>
-<!-- TODO -->
-                    <li class="list">
-                        <a href="{% url 'view_admissions' %}" class="nav-link">
-                            <i class="bx bx-history icon"></i>
-                            <span class="link">My Admissions</span>
                         </a>
                     </li>
                 </ul>
@@ -342,6 +323,19 @@
                             <span class="link">Logout</span>
                         </a>
                     </li>
+                    <li class="list">
+                        <a href="#" class="nav-link">
+                            <i class="bx bx-bed icon"></i>
+                            <span class="link">Get Admission</span>
+                        </a>
+                    </li>
+
+                    <li class="list">
+                        <a href="{% url 'view_admissions' %}" class="nav-link">
+                            <i class="bx bx-history icon"></i>
+                            <span class="link">My Admissions</span>
+                        </a>
+                    </li>
                 </div>
             </div>
         </div>
@@ -351,7 +345,7 @@
 
     <!-- Main Content -->
     <div class="content">
-        <h1>Book Appointment with Dr. {{ doctor.name }}</h1>
+        <h1>Modify Appointment with Dr. {{ doctor.name }}</h1>
         <div class="doctor-info">
             <img src="{% url 'profile_picture' doctor.username %}" alt="Profile Picture" width="150" height="150">
             <p>
@@ -379,37 +373,38 @@
                 <strong>Visiting Time:</strong>
                 <span>{{ doctor.visiting_time_start }} to {{ doctor.visiting_time_end }}</span>
             </p>
-
             <p>
                 <i class="bx bx-phone"></i>
                 <strong>Phone no:</strong>
                 <span>+{{ doctor.phone_no }}</span>
             </p>
-
             <p>
                 <i class="bx bx-money"></i>
                 <strong>Fee:</strong>
                 <span>Tk. {{ doctor.fee }}/=</span>
             </p>
+            <p>
+                <i class="bx bx-calendar-check"></i>
+                <strong>Current Appointment Date:</strong>
+                <span>{{ current_appointment_date }}</span>
+            </p>
         </div>
 
-        <form id="appointmentForm" method="POST" class="appointment-form">
+        <form id="appointmentForm" method="post" class="appointment-form">
             {% csrf_token %}
-            <label for="booking_date">Select Booking Date:</label>
+            <label for="booking_date">Select New Date:</label>
             <input type="date" id="booking_date" name="booking_date" min="{{ today }}" max="{{ end_date }}" required>
-            <input type="hidden" name="patient_username" value="{{ patient_username }}">
-            <button type="submit" class="btn">Confirm Booking</button>
+            <button type="submit" class="btn">Confirm Changes</button>
         </form>
 
         <div id="confirmationModal" class="modal hidden">
             <div class="modal-content">
                 <span class="close-button">&times;</span>
-                <p>Appointment confirmed at <span class="bold" id="confirmationMessage"></span></p>
+                <p>Appointment rescheduled for <span class="bold" id="confirmationMessage"></span></p>
                 <button class="btn" id="okButton">OK</button>
             </div>
         </div>
     </div>
-
 
     <!-- JavaScript -->
     <script>
@@ -451,47 +446,50 @@
             }
         });
 
+        // Submit Form Handler
         document.getElementById('appointmentForm').addEventListener('submit', function (event) {
             event.preventDefault();
 
             const formData = new FormData(this);
-            fetch(window.location.href, {
+            fetch(window.location.pathname, {
                 method: 'POST',
                 body: formData,
                 headers: {
                     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
                 }
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('confirmationMessage').textContent = data.appointment_time;
-                    document.getElementById('confirmationModal').style.display = 'flex';
-                } else {
-                    alert(data.message || 'Failed to book appointment');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while booking the appointment');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update the confirmation message with new date before showing the modal
+                        document.getElementById('confirmationMessage').textContent = data.new_date;
+                        document.getElementById('confirmationModal').style.display = 'flex';
+                        document.getElementById('confirmationModal').classList.remove('hidden');
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while modifying the appointment.');
+                });
         });
 
         document.querySelector('.close-button').addEventListener('click', function () {
             document.getElementById('confirmationModal').style.display = 'none';
-            window.location.href = '/receptionist/';
+            window.location.href = '/receptionist/patient_appointments/?patient_phone_number={{ patient_phone }}';
         });
 
         document.getElementById('okButton').addEventListener('click', function () {
             document.getElementById('confirmationModal').style.display = 'none';
-            window.location.href = '/receptionist/';
+            window.location.href = '/receptionist/patient_appointments/?patient_phone_number={{ patient_phone }}';
         });
 
         window.onclick = function (event) {
             const modal = document.getElementById('confirmationModal');
             if (event.target == modal) {
                 modal.style.display = 'none';
-                window.location.href = 'http://127.0.0.1:8000/patient/';
+                window.location.href = '/receptionist/patient_appointments/?patient_phone_number={{ patient_phone }}';
             }
         }
     </script>

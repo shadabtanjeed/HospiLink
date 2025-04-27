@@ -10,14 +10,9 @@
     <link href="https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
-
-
     <style>
         /* Google Fonts - Poppins */
         @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap");
-
-
-
 
         * {
             margin: 0;
@@ -39,7 +34,6 @@
             width: 100%;
             display: flex;
             align-items: center;
-            /* background: #dd636e; */
             box-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
         }
 
@@ -140,7 +134,6 @@
 
         .content {
             margin-top: 10px;
-            /* Adjust this value based on your navbar height */
             padding: 20px;
             display: flex;
             flex-direction: column;
@@ -150,20 +143,48 @@
 
         .container.mt-3 {
             margin-top: 100px !important;
-            /* Moves dropdown lower */
             padding-left: 20px;
             padding-right: 20px;
         }
+
+        /* Search input styling */
+        .search-container {
+            width: 100%;
+            max-width: 500px;
+            margin-top: 50px;
+        }
+
+        #phone-number {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            box-sizing: border-box;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        #phone-number:focus {
+            border-color: #dd636e;
+            outline: none;
+        }
+
+        #user-exists-result {
+            margin-top: 10px;
+            font-size: 16px;
+            font-weight: 500;
+        }
     </style>
 
-    <title>Receptionist Repo</title>
+    <title>Search Patient</title>
 </head>
 
 <body>
+    {% csrf_token %}
     <nav>
         <div class="logo">
             <i class="bx bx-menu menu-icon"></i>
-            <!-- <span class="logo-name">HospiLinkdf</span> -->
         </div>
         <div class="sidebar">
             <div class="logo">
@@ -174,16 +195,9 @@
             <div class="sidebar-content">
                 <ul class="lists">
                     <li class="list">
-                        <a href="{% url 'index' %}" class="nav-link">
-                            <a class="nav-link" onclick="window.location.href='/receptionist/'">
+                        <a class="nav-link" onclick="window.location.href='/receptionist/'">
                             <i class="bx bx-home-alt icon"></i>
                             <span class="link">Dashboard</span>
-                        </a>
-                    </li>
-                    <li class="list">
-                        <a href="#" class="nav-link">
-                            <i class="bx bx-calendar icon"></i>
-                            <span class="link">Appointment Management</span>
                         </a>
                     </li>
 
@@ -221,59 +235,12 @@
     <section class="overlay"></section>
 
     <div class="content">
-        <h2>Welcome {{ name }}</h2>
-        <div>
-            <h3>Patient Appointment</h3>
-            <input type="text" id="phone-number" placeholder="Enter phone number">
+        <h2>Welcome, {{ name }}</h2>
+        <div class="search-container">
+            <h3>Patient Appointment Portal</h3>
+            <p>Enter patient's phone number to manage appointments</p>
+            <input type="text" id="phone-number" placeholder="Enter phone number (11 digits)">
             <p id="user-exists-result"></p>
-
-            <script>
-                document.getElementById('phone-number').addEventListener('keypress', function (event) {
-                    if (event.key === 'Enter') {
-                        const phoneNumber = document.getElementById('phone-number').value;
-
-                        // Check if the phone number is exactly 11 digits
-                        if (/^\d{11}$/.test(phoneNumber)) {
-                            checkUserExists();
-                        } else {
-                            // Show error message if phone number is invalid
-                            const resultElement = document.getElementById('user-exists-result');
-                            resultElement.textContent = 'Phone number must be exactly 11 digits.';
-                            resultElement.style.color = 'red'; // Set the error message color to red
-                        }
-
-                        // Prevent default form submission behavior
-                        event.preventDefault();
-                    }
-                });
-
-                function checkUserExists() {
-                    const phoneNumber = document.getElementById('phone-number').value;
-                    fetch("{% url 'check_patient_exists' %}?phone_number=" + phoneNumber)
-                        .then(response => response.json())
-                        .then(data => {
-                            const resultElement = document.getElementById('user-exists-result');
-                            if (data.exists) {
-                                resultElement.textContent = 'Patient exists';
-                                resultElement.style.color = 'green';
-
-                                setTimeout(() => {
-                                    window.location.href = "{% url 'receptionist_search_doctor' %}?patient_phone_number=" + encodeURIComponent(phoneNumber);
-                                }, 500);
-                            } else {
-                                resultElement.textContent = 'Patient does not exist';
-                                resultElement.style.color = 'red';
-
-                                setTimeout(() => {
-                                    window.location.href = "{% url 'create_patient_account' %}?phone_number=" + encodeURIComponent(phoneNumber);
-                                }, 500);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                        });
-                }
-            </script>
         </div>
     </div>
 
@@ -282,9 +249,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-
-
-    <!-- Script to dynamically generate table rows -->
+    <!-- Navigation and search scripts -->
     <script>
         const navBar = document.querySelector("nav"),
             menuBtns = document.querySelectorAll(".menu-icon"),
@@ -300,6 +265,56 @@
             navBar.classList.remove("open");
         });
 
+        document.getElementById('phone-number').addEventListener('keypress', function (event) {
+            if (event.key === 'Enter') {
+                const phoneNumber = document.getElementById('phone-number').value;
+
+                // Check if the phone number is exactly 11 digits
+                if (/^\d{11}$/.test(phoneNumber)) {
+                    checkUserExists();
+                } else {
+                    // Show error message if phone number is invalid
+                    const resultElement = document.getElementById('user-exists-result');
+                    resultElement.textContent = 'Phone number must be exactly 11 digits.';
+                    resultElement.style.color = 'red'; // Set the error message color to red
+                }
+
+                // Prevent default form submission behavior
+                event.preventDefault();
+            }
+        });
+
+        function checkUserExists() {
+            const phoneNumber = document.getElementById('phone-number').value;
+            fetch("{% url 'check_patient_exists' %}?phone_number=" + phoneNumber)
+                .then(response => response.json())
+                .then(data => {
+                    const resultElement = document.getElementById('user-exists-result');
+                    if (data.exists) {
+                        resultElement.textContent = 'Patient exists';
+                        resultElement.style.color = 'green';
+
+                        // redirect to patient_appointments page w the phone number
+                        setTimeout(() => {
+                            window.location.href = "{% url 'patient_appointments' %}?patient_phone_number=" + encodeURIComponent(phoneNumber);
+                        }, 500);
+                    } else {
+                        resultElement.textContent = 'Patient does not exist';
+                        resultElement.style.color = 'red';
+                        
+                        // create new patient
+                        setTimeout(() => {
+                            window.location.href = "{% url 'create_patient_account' %}?phone_number=" + encodeURIComponent(phoneNumber);
+                        }, 1000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const resultElement = document.getElementById('user-exists-result');
+                    resultElement.textContent = 'Error checking patient status';
+                    resultElement.style.color = 'red';
+                });
+        }
     </script>
 </body>
 
