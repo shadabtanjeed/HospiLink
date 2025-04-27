@@ -231,7 +231,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     
                     <!-- Section 5: Buttons -->
                     <div class="actions-section">
-                        <button class="btn-view-notes" data-admission-id="${admission.admission_id}" onclick="viewPreviousAdmissionNotes(${admission.admission_id})">
+                        <button class="btn-view-notes" data-admission-id="${admission.admission_id}">
                             <i class="bx bx-note"></i> View Doctor Notes
                         </button>
                     </div>
@@ -242,37 +242,88 @@ document.addEventListener('DOMContentLoaded', function () {
         html += `</div>`;
         previousAdmissionsContainer.innerHTML = html;
 
-        // Add event listeners to the View Notes buttons in previous admissions
+        // Add event listeners to all View Doctor Notes buttons in previous admissions
         document.querySelectorAll('.previous-admission-card .btn-view-notes').forEach(button => {
             button.addEventListener('click', function () {
                 const admissionId = this.getAttribute('data-admission-id');
-                alert('View doctor notes feature for previous admissions will be implemented later.');
-                // This will be implemented later as per requirements
+                viewPreviousAdmissionNotes(admissionId);
             });
         });
     }
 
-    // Add this new function to handle viewing notes for previous admissions
-    function viewPreviousAdmissionNotes(admissionId) {
+    // Helper function to display doctor notes for any admission
+    function displayDoctorNotes(admissionId) {
         // Open doctor notes modal
         $('#doctorNotesModal').modal('show');
 
         // Reset content and show loading state
         document.getElementById('doctor-notes-content').innerHTML = `
-        <div class="text-center my-4">
-            <div class="spinner-border text-primary" role="status">
-                <span class="sr-only">Loading notes...</span>
+            <div class="text-center my-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Loading notes...</span>
+                </div>
             </div>
-        </div>
-    `;
+        `;
 
         // Fetch doctor notes using the API endpoint
         fetch(`/patient/api/doctor_notes/${admissionId}/`)
             .then(response => response.json())
             .then(data => {
-                // Same rendering code as in viewDoctorNotes function
                 if (data.notes && data.notes.length > 0) {
-                    // Same HTML generation as in viewDoctorNotes
+                    let notesHtml = '<div class="notes-container">';
+
+                    notesHtml += `
+                        <div class="note-section doctor-notes">
+                            <h5 class="section-title"><i class="bx bx-user-voice mr-2"></i>Doctor Notes</h5>
+                            <div class="note-items">
+                    `;
+
+                    data.notes.forEach(note => {
+                        notesHtml += `
+                            <div class="note-item">
+                                <div class="note-time">${formatDate(note.timestamp)}</div>
+                                <div class="note-text">${note.text}</div>
+                            </div>
+                        `;
+                    });
+
+                    notesHtml += '</div></div></div>';
+                    document.getElementById('doctor-notes-content').innerHTML = notesHtml;
+
+                    // Add custom CSS for the notes
+                    const style = document.createElement('style');
+                    style.innerHTML = `
+                        .notes-container {
+                            max-height: 400px;
+                            overflow-y: auto;
+                        }
+                        .section-title {
+                            color: #3c4858;
+                            font-weight: 600;
+                            margin-bottom: 10px;
+                            display: flex;
+                            align-items: center;
+                        }
+                        .note-items {
+                            padding-left: 10px;
+                        }
+                        .note-item {
+                            background: #f8f9fa;
+                            border-left: 3px solid #007bff;
+                            padding: 12px 15px;
+                            margin-bottom: 10px;
+                            border-radius: 4px;
+                        }
+                        .note-time {
+                            font-size: 0.8rem;
+                            color: #6c757d;
+                            margin-bottom: 5px;
+                        }
+                        .note-text {
+                            white-space: pre-line;
+                        }
+                    `;
+                    document.head.appendChild(style);
                 } else {
                     document.getElementById('doctor-notes-content').innerHTML =
                         '<div class="alert alert-info">No notes available from your doctor for this admission.</div>';
@@ -285,6 +336,11 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
+    // Function to view notes for previous admissions
+    function viewPreviousAdmissionNotes(admissionId) {
+        displayDoctorNotes(admissionId);
+    }
+
     // Attach event listeners to buttons
     function attachButtonListeners() {
         const viewNotesBtn = document.getElementById('view-notes-btn');
@@ -292,7 +348,14 @@ document.addEventListener('DOMContentLoaded', function () {
         const dischargeBtn = document.getElementById('discharge-btn');
 
         if (viewNotesBtn) {
-            viewNotesBtn.addEventListener('click', viewDoctorNotes);
+            viewNotesBtn.addEventListener('click', function () {
+                const admissionId = document.querySelector('.admission-card').getAttribute('data-admission-id');
+                if (!admissionId) {
+                    alert('Could not find admission ID. Please try again.');
+                    return;
+                }
+                displayDoctorNotes(admissionId);
+            });
         }
         if (addNotesBtn) {
             addNotesBtn.addEventListener('click', addPatientNotes);
@@ -302,95 +365,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Update the viewDoctorNotes function to use the admission ID and fetch notes
+    // Update the viewDoctorNotes function to use the shared display function
     function viewDoctorNotes() {
         const admissionId = document.querySelector('.admission-card').getAttribute('data-admission-id');
         if (!admissionId) {
             alert('Could not find admission ID. Please try again.');
             return;
         }
-
-        // Open doctor notes modal
-        $('#doctorNotesModal').modal('show');
-
-        // Reset content and show loading state
-        document.getElementById('doctor-notes-content').innerHTML = `
-        <div class="text-center my-4">
-            <div class="spinner-border text-primary" role="status">
-                <span class="sr-only">Loading notes...</span>
-            </div>
-        </div>
-    `;
-
-        // Fetch doctor notes using the API endpoint
-        fetch(`/patient/api/doctor_notes/${admissionId}/`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.notes && data.notes.length > 0) {
-                    let notesHtml = '<div class="notes-container">';
-
-                    notesHtml += `
-                    <div class="note-section doctor-notes">
-                        <h5 class="section-title"><i class="bx bx-user-voice mr-2"></i>Doctor Notes</h5>
-                        <div class="note-items">
-                `;
-
-                    data.notes.forEach(note => {
-                        notesHtml += `
-                        <div class="note-item">
-                            <div class="note-time">${formatDate(note.timestamp)}</div>
-                            <div class="note-text">${note.text}</div>
-                        </div>
-                    `;
-                    });
-
-                    notesHtml += '</div></div></div>';
-                    document.getElementById('doctor-notes-content').innerHTML = notesHtml;
-
-                    // Add custom CSS for the notes
-                    const style = document.createElement('style');
-                    style.innerHTML = `
-                    .notes-container {
-                        max-height: 400px;
-                        overflow-y: auto;
-                    }
-                    .section-title {
-                        color: #3c4858;
-                        font-weight: 600;
-                        margin-bottom: 10px;
-                        display: flex;
-                        align-items: center;
-                    }
-                    .note-items {
-                        padding-left: 10px;
-                    }
-                    .note-item {
-                        background: #f8f9fa;
-                        border-left: 3px solid #007bff;
-                        padding: 12px 15px;
-                        margin-bottom: 10px;
-                        border-radius: 4px;
-                    }
-                    .note-time {
-                        font-size: 0.8rem;
-                        color: #6c757d;
-                        margin-bottom: 5px;
-                    }
-                    .note-text {
-                        white-space: pre-line;
-                    }
-                `;
-                    document.head.appendChild(style);
-                } else {
-                    document.getElementById('doctor-notes-content').innerHTML =
-                        '<div class="alert alert-info">No notes available from your doctor.</div>';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('doctor-notes-content').innerHTML =
-                    '<div class="alert alert-danger">Failed to load notes. Please try again.</div>';
-            });
+        displayDoctorNotes(admissionId);
     }
 
     function addPatientNotes() {
