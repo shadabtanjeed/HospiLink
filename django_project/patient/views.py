@@ -648,3 +648,38 @@ def make_discharge_request(request):
             return JsonResponse({"error": str(e)}, status=500)
     else:
         return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
+def patient_past_appointment_page(request):
+    """Render the past appointment page."""
+    return render(request, "patient_past_appointments_page.html")
+
+
+def fetch_past_appointments(request):
+    """API endpoint to get past appointments for a patient."""
+    username = request.session.get("patient_username") or request.session.get(
+        "login_form_data", {}
+    ).get("username")
+    user_type = "patient"
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT * FROM show_past_appointments(%s, %s)", [username, user_type]
+        )
+        columns = [col[0] for col in cursor.description]
+        data = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+        # Convert date and time objects to strings
+        for item in data:
+            if isinstance(item["appointment_date"], date):
+                item["appointment_date"] = item["appointment_date"].strftime("%Y-%m-%d")
+            if isinstance(item["appointment_time"], time):
+                item["appointment_time"] = item["appointment_time"].strftime("%H:%M:%S")
+
+            doctor_username = item["related_user"]
+            cursor.execute("SELECT public.get_name(%s)", [doctor_username])
+            doctor_name = cursor.fetchone()[0]
+            item["doctor_name"] = doctor_name
+
+    response_data = json.dumps(data)
+    return HttpResponse(response_data, content_type="application/json")

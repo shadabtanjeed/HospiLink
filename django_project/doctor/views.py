@@ -63,6 +63,8 @@ def fetch_previous_appointments(request):
     username = request.session.get("login_form_data", {}).get("username")
     user_type = request.session.get("login_form_data", {}).get("user_type")
 
+    print(f"Username: {username}, User Type: {user_type}")
+
     with connection.cursor() as cursor:
         cursor.execute(
             "SELECT * FROM show_past_appointments(%s, %s)", [username, user_type]

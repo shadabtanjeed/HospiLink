@@ -46,4 +46,14 @@ urlpatterns = [
         views.make_discharge_request,
         name="make_discharge_request",
     ),
+    path(
+        "past_appointments/",
+        views.patient_past_appointment_page,
+        name="past_appointments",
+    ),
+    path(
+        "api/past_appointments/",
+        views.fetch_past_appointments,
+        name="fetch_past_appointments",
+    ),
 ]
