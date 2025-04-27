@@ -162,28 +162,109 @@ document.addEventListener('DOMContentLoaded', function () {
     function viewPatientNotes(admissionId) {
         $('#viewNotesModal').modal('show');
 
-        // Reset content
-        document.getElementById('patient-notes-content').innerHTML = 'Loading notes...';
+        // Reset content and show loading state
+        document.getElementById('patient-notes-content').innerHTML = `
+        <div class="text-center my-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading notes...</span>
+            </div>
+        </div>
+    `;
 
-        // Fetch patient notes
+        // Fetch patient notes using the API endpoint
         fetch(`/doctor/api/patient_notes/${admissionId}/`)
             .then(response => response.json())
             .then(data => {
                 if (data.notes && data.notes.length > 0) {
-                    let notesHtml = '<ul class="list-group">';
-                    data.notes.forEach(note => {
+                    let notesHtml = '<div class="notes-container">';
+
+                    // Group notes by author type (patient or doctor)
+                    const doctorNotes = data.notes.filter(note => note.author_type === 'doctor');
+                    const patientNotes = data.notes.filter(note => note.author_type === 'patient');
+
+                    // Display doctor notes first
+                    if (doctorNotes.length > 0) {
                         notesHtml += `
-                            <li class="list-group-item">
-                                <div class="note-date text-muted">${formatDate(note.timestamp)}</div>
-                                <div class="note-content">${note.text}</div>
-                            </li>
+                        <div class="note-section doctor-notes mb-4">
+                            <h5 class="section-title"><i class="bx bx-user-voice mr-2"></i>Doctor Notes</h5>
+                            <div class="note-items">
+                    `;
+
+                        doctorNotes.forEach(note => {
+                            notesHtml += `
+                            <div class="note-item">
+                                <div class="note-time">${formatDate(note.timestamp)}</div>
+                                <div class="note-text">${note.text}</div>
+                            </div>
                         `;
-                    });
-                    notesHtml += '</ul>';
+                        });
+
+                        notesHtml += '</div></div>';
+                    }
+
+                    // Then display patient notes
+                    if (patientNotes.length > 0) {
+                        notesHtml += `
+                        <div class="note-section patient-notes">
+                            <h5 class="section-title"><i class="bx bx-user mr-2"></i>Patient Notes</h5>
+                            <div class="note-items">
+                    `;
+
+                        patientNotes.forEach(note => {
+                            notesHtml += `
+                            <div class="note-item">
+                                <div class="note-time">${formatDate(note.timestamp)}</div>
+                                <div class="note-text">${note.text}</div>
+                            </div>
+                        `;
+                        });
+
+                        notesHtml += '</div></div>';
+                    }
+
+                    notesHtml += '</div>';
                     document.getElementById('patient-notes-content').innerHTML = notesHtml;
+
+                    // Add custom CSS for the notes
+                    const style = document.createElement('style');
+                    style.innerHTML = `
+                    .notes-container {
+                        max-height: 400px;
+                        overflow-y: auto;
+                    }
+                    .section-title {
+                        color: #3c4858;
+                        font-weight: 600;
+                        margin-bottom: 10px;
+                        display: flex;
+                        align-items: center;
+                    }
+                    .note-items {
+                        padding-left: 10px;
+                    }
+                    .note-item {
+                        background: #f8f9fa;
+                        border-left: 3px solid #dd636e;
+                        padding: 12px 15px;
+                        margin-bottom: 10px;
+                        border-radius: 4px;
+                    }
+                    .doctor-notes .note-item {
+                        border-left-color: #007bff;
+                    }
+                    .note-time {
+                        font-size: 0.8rem;
+                        color: #6c757d;
+                        margin-bottom: 5px;
+                    }
+                    .note-text {
+                        white-space: pre-line;
+                    }
+                `;
+                    document.head.appendChild(style);
                 } else {
                     document.getElementById('patient-notes-content').innerHTML =
-                        '<p class="text-center">No notes available for this patient.</p>';
+                        '<div class="alert alert-info">No notes available for this patient.</div>';
                 }
             })
             .catch(error => {

@@ -26,4 +26,9 @@ urlpatterns = [
     ),
     path("ward_management/", views.ward_management_page, name="ward_management_page"),
     path("api/assigned_beds/", views.get_assigned_beds, name="get_assigned_beds"),
+    path(
+        "api/patient_notes/<int:admission_id>/",
+        views.get_patient_notes,
+        name="get_patient_notes",
+    ),
 ]

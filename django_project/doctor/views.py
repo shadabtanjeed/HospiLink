@@ -185,3 +185,40 @@ def get_assigned_beds(request):
         print(f"Error in get_assigned_beds: {str(e)}")
         print(traceback.format_exc())
         return JsonResponse({"error": str(e)}, status=500)
+
+
+def get_patient_notes(request, admission_id):
+    """API endpoint to get notes for a specific patient admission."""
+    try:
+        with connection.cursor() as cursor:
+            # Call the PostgreSQL function to get patient notes
+            cursor.execute(
+                "SELECT * FROM public.get_patient_notes(%s)",
+                [admission_id],
+            )
+            columns = [col[0] for col in cursor.description]
+            notes = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+            # Convert timestamp objects to strings
+            for note in notes:
+                if note.get("note_timestamp"):
+                    note["timestamp"] = note["note_timestamp"].isoformat()
+                    del note[
+                        "note_timestamp"
+                    ]  # Use standardized field name for frontend
+
+                # Rename note to text for frontend consistency
+                note["text"] = note["note"]
+                del note["note"]
+
+                # Add author_type if needed (you can add default if not present in function result)
+                if "author_type" not in note:
+                    note["author_type"] = "doctor"
+
+        return JsonResponse({"success": True, "notes": notes})
+    except Exception as e:
+        import traceback
+
+        print(f"Error in get_patient_notes: {str(e)}")
+        print(traceback.format_exc())
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
