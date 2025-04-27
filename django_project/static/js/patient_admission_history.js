@@ -329,14 +329,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const notes = document.getElementById('patient-notes-input').value;
 
+
             fetch('/patient/api/add_patient_notes/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': csrftoken
                 },
-                body: JSON.stringify({ notes: notes })
+                body: JSON.stringify({ note: notes })
             })
+
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {

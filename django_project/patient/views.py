@@ -539,3 +539,49 @@ def get_admissions(request):
 
         print(traceback.format_exc())
         return JsonResponse({"error": str(e)}, status=500)
+
+
+def add_patient_notes(request):
+    """API endpoint to add a note for a patient."""
+    if request.method == "POST":
+        data = json.loads(request.body)
+        patient_username = request.session.get("patient_username")
+        note = data.get("note")
+
+        if not patient_username or not note:
+            return JsonResponse(
+                {"error": "Patient username and note are required"}, status=400
+            )
+
+        try:
+            # First, get the current admission ID for the patient
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT * FROM public.get_current_admission(%s)", [patient_username]
+                )
+                columns = [col[0] for col in cursor.description]
+                row = cursor.fetchone()
+
+                if not row:
+                    return JsonResponse(
+                        {"error": "No active admission found"}, status=400
+                    )
+
+                result = dict(zip(columns, row))
+                admission_id = result.get("admission_id")
+
+                if not admission_id:
+                    return JsonResponse({"error": "No admission ID found"}, status=400)
+
+                # Now call the correct function with admission_id and note
+                cursor.execute(
+                    "SELECT public.add_patient_bed_note(%s, %s)", [admission_id, note]
+                )
+
+            return JsonResponse({"success": True})
+        except Exception as e:
+            print(f"Error adding patient note: {str(e)}")
+            print(traceback.format_exc())
+            return JsonResponse({"error": str(e)}, status=500)
+    else:
+        return JsonResponse({"error": "Invalid request method"}, status=405)
