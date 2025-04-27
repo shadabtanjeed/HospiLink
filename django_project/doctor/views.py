@@ -1,7 +1,8 @@
 from datetime import date, time
 import json
 from django.db import connection
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 from datetime import date
 
@@ -122,3 +123,48 @@ def attend_appointment(request, appointment_id):
         "prescriptions": prescriptions,
     }
     return render(request, "attend_app.html", context)
+
+
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.db import connection
+import json
+
+@csrf_exempt
+def save_prescription(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            appointment_id = data.get("appointment_id")
+            prescribed_by = data.get("prescribed_by")
+            prescribed_to = data.get("prescribed_to")
+            diagnosis = data.get("diagnosis")  # String with diagnoses separated by newline
+            medication = data.get("medication")  # String with medications separated by newline
+            additional_notes = data.get("additional_notes")
+
+            if not all([appointment_id, prescribed_by, prescribed_to, diagnosis, medication]):
+                return JsonResponse({"success": False, "message": "Missing required fields"}, status=400)
+
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    INSERT INTO public.prescriptions (
+                        appointment_id, prescribed_by, prescribed_to, 
+                        diagnosis, medication, additional_notes
+                    ) VALUES (%s, %s, %s, %s, %s, %s)
+                    """,
+                    [
+                        appointment_id,
+                        prescribed_by,
+                        prescribed_to,
+                        diagnosis,
+                        medication,
+                        additional_notes,
+                    ],
+                )
+
+            return JsonResponse({"success": True})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)}, status=500)
+    else:
+        return JsonResponse({"success": False, "message": "Invalid request method"}, status=405)

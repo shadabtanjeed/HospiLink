@@ -760,6 +760,10 @@
                             </button>
                         </div>
                     </div>
+                    <div class="form-group mt-3">
+                        <label for="additional_notes">Additional Notes:</label>
+                        <textarea class="form-control" id="additional_notes" rows="3" placeholder="Enter any additional notes"></textarea>
+                    </div>
                 </div>
             </div>
             <hr>
@@ -770,6 +774,7 @@
 
         <!-- Prescription Template -->
         <div class="container p-4 mt-2" id="prescriptionTemplate">
+            <input type="hidden" id="appointment_id" value="{{ appointment.0 }}">
             <button id="goBackButton" onclick="goBackToForm()" class="btn btn-secondary d-flex justify-content-start ms-auto mt-3">
                 Go Back
             </button>

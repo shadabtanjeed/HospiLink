@@ -8,4 +8,5 @@ urlpatterns = [
     path("previous_appointments/", views.previous_appointments, name="previous_appointments"),
     path("api/previous_appointments/", views.fetch_previous_appointments, name="fetch_previous_appointments"),
     path("attend_appointment/<int:appointment_id>/", views.attend_appointment, name="attend_appointment"),
+    path("save_prescription/", views.save_prescription, name="save_prescription"),
 ]
