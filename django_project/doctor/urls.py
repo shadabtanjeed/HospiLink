@@ -31,4 +31,5 @@ urlpatterns = [
         views.get_patient_notes,
         name="get_patient_notes",
     ),
+    path("api/add_doctor_note/", views.add_doctor_note, name="add_doctor_note"),
 ]

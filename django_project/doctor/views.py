@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from datetime import date
 from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 
 
 # Create your views here.
@@ -220,5 +221,35 @@ def get_patient_notes(request, admission_id):
         import traceback
 
         print(f"Error in get_patient_notes: {str(e)}")
+        print(traceback.format_exc())
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+@require_POST
+def add_doctor_note(request):
+    """API endpoint to add a doctor note for a patient admission."""
+    try:
+        data = json.loads(request.body)
+        admission_id = data.get("admission_id")
+        note = data.get("note")
+        doctor_username = request.session.get("login_form_data", {}).get("username")
+
+        if not all([admission_id, note, doctor_username]):
+            return JsonResponse(
+                {"success": False, "message": "Missing required data"}, status=400
+            )
+
+        with connection.cursor() as cursor:
+            # Call the SQL function to add a doctor note
+            cursor.execute(
+                "SELECT public.add_doctor_bed_note(%s, %s)",
+                [admission_id, note],
+            )
+
+        return JsonResponse({"success": True})
+    except Exception as e:
+        import traceback
+
+        print(f"Error in add_doctor_note: {str(e)}")
         print(traceback.format_exc())
         return JsonResponse({"success": False, "message": str(e)}, status=500)
