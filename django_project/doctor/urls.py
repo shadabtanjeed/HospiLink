@@ -43,4 +43,9 @@ urlpatterns = [
         name="get_discharge_requests",
     ),
     path("save_prescription/", views.save_prescription, name="save_prescription"),
+    path(
+        "api/prescription/<int:appointment_id>/",
+        views.get_prescription,
+        name="get_prescription",
+    ),
 ]
