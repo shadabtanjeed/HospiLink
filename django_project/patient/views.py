@@ -585,3 +585,39 @@ def add_patient_notes(request):
             return JsonResponse({"error": str(e)}, status=500)
     else:
         return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
+def get_doctor_notes(request, admission_id):
+    """API endpoint to get doctor notes for a specific admission."""
+    try:
+        with connection.cursor() as cursor:
+            # Call the SQL function to get doctor notes
+            cursor.execute(
+                "SELECT * FROM public.get_doctor_notes(%s)",
+                [admission_id],
+            )
+            columns = [col[0] for col in cursor.description]
+            notes = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+            # Convert timestamp objects to strings
+            for note in notes:
+                if note.get("note_timestamp"):
+                    note["timestamp"] = note["note_timestamp"].isoformat()
+                    del note[
+                        "note_timestamp"
+                    ]  # Use standardized field name for frontend
+
+                # Rename note to text for frontend consistency
+                note["text"] = note["note"]
+                del note["note"]
+
+                # Add author_type for frontend consistency
+                note["author_type"] = "doctor"
+
+        return JsonResponse({"success": True, "notes": notes})
+    except Exception as e:
+        import traceback
+
+        print(f"Error in get_doctor_notes: {str(e)}")
+        print(traceback.format_exc())
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
