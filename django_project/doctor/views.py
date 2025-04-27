@@ -104,13 +104,18 @@ def attend_appointment(request, appointment_id):
         appointment = cursor.fetchone()
 
         # Fetch doctor details (join doctors and users tables to get the actual name)
-        doctor_username = appointment[2]  # Assuming the doctor's username is the third column
-        cursor.execute("""
+        doctor_username = appointment[
+            2
+        ]  # Assuming the doctor's username is the third column
+        cursor.execute(
+            """
             SELECT u.name, d.degrees
             FROM doctors d
             INNER JOIN users u ON d.username = u.username
             WHERE d.username = %s
-        """, [doctor_username])
+        """,
+            [doctor_username],
+        )
         doctor = cursor.fetchone()
 
         # Convert degrees array to a string (e.g., "M.B.B.S., M.S.(Ortho)")
@@ -118,10 +123,9 @@ def attend_appointment(request, appointment_id):
         doctor_degrees = ", ".join(doctor[1])  # Join the array elements with a comma
 
         # Fetch patient details
-        patient_username = appointment[1]  # Assuming the patient's username is the second column
-        cursor.execute("""
-        # Fetch patient details (join users and patients tables)
-        patient_username = appointment[1]  # patient_username is the second column
+        patient_username = appointment[
+            1
+        ]  # Assuming the patient's username is the second column
         cursor.execute(
             """
             SELECT u.name, p.phone_no, p.blood_group, p.complexities, p.date_of_birth, p.gender
@@ -163,6 +167,7 @@ def attend_appointment(request, appointment_id):
     }
     return render(request, "attend_app.html", context)
 
+
 @csrf_exempt
 def save_prescription(request):
     if request.method == "POST":
@@ -171,12 +176,20 @@ def save_prescription(request):
             appointment_id = data.get("appointment_id")
             prescribed_by = data.get("prescribed_by")
             prescribed_to = data.get("prescribed_to")
-            diagnosis = data.get("diagnosis")  # String with diagnoses separated by newline
-            medication = data.get("medication")  # String with medications separated by newline
+            diagnosis = data.get(
+                "diagnosis"
+            )  # String with diagnoses separated by newline
+            medication = data.get(
+                "medication"
+            )  # String with medications separated by newline
             additional_notes = data.get("additional_notes")
 
-            if not all([appointment_id, prescribed_by, prescribed_to, diagnosis, medication]):
-                return JsonResponse({"success": False, "message": "Missing required fields"}, status=400)
+            if not all(
+                [appointment_id, prescribed_by, prescribed_to, diagnosis, medication]
+            ):
+                return JsonResponse(
+                    {"success": False, "message": "Missing required fields"}, status=400
+                )
 
             with connection.cursor() as cursor:
                 cursor.execute(
@@ -200,10 +213,12 @@ def save_prescription(request):
         except Exception as e:
             return JsonResponse({"success": False, "message": str(e)}, status=500)
     else:
-        return JsonResponse({"success": False, "message": "Invalid request method"}, status=405)
+        return JsonResponse(
+            {"success": False, "message": "Invalid request method"}, status=405
+        )
+
 
 def ward_management_page(request):
-
     return render(request, "doctor_ward_management.html")
 
 
@@ -348,3 +363,57 @@ def get_discharge_requests(request):
         print(f"Error in get_discharge_requests: {str(e)}")
         print(traceback.format_exc())
         return JsonResponse({"error": str(e)}, status=500)
+
+
+@require_POST
+@csrf_exempt
+def approve_discharge(request):
+    """API endpoint to approve a discharge request."""
+    try:
+        data = json.loads(request.body)
+        discharge_id = data.get("discharge_id")
+        admission_id = data.get("admission_id")
+
+        if not all([discharge_id, admission_id]):
+            return JsonResponse(
+                {"success": False, "message": "Missing required data"}, status=400
+            )
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT public.approve_discharge_request(%s, %s)",
+                [discharge_id, admission_id],
+            )
+
+        return JsonResponse({"success": True})
+    except Exception as e:
+        import traceback
+
+        print(f"Error in approve_discharge: {str(e)}")
+        print(traceback.format_exc())
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+@require_POST
+@csrf_exempt
+def reject_discharge(request):
+    """API endpoint to reject a discharge request."""
+    try:
+        data = json.loads(request.body)
+        discharge_id = data.get("discharge_id")
+
+        if not discharge_id:
+            return JsonResponse(
+                {"success": False, "message": "Missing discharge_id"}, status=400
+            )
+
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT public.reject_discharge_request(%s)", [discharge_id])
+
+        return JsonResponse({"success": True})
+    except Exception as e:
+        import traceback
+
+        print(f"Error in reject_discharge: {str(e)}")
+        print(traceback.format_exc())
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
