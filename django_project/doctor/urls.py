@@ -25,4 +25,5 @@ urlpatterns = [
         name="attend_appointment",
     ),
     path("ward_management/", views.ward_management_page, name="ward_management_page"),
+    path("api/assigned_beds/", views.get_assigned_beds, name="get_assigned_beds"),
 ]

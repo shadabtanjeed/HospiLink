@@ -4,6 +4,7 @@ from django.db import connection
 from django.http import HttpResponse
 from django.shortcuts import render
 from datetime import date
+from django.http import JsonResponse
 
 
 # Create your views here.
@@ -143,3 +144,44 @@ def attend_appointment(request, appointment_id):
 def ward_management_page(request):
 
     return render(request, "ward_management.html")
+
+
+def get_assigned_beds(request):
+    """API endpoint to get beds assigned to the logged-in doctor."""
+    doctor_username = request.session.get("login_form_data", {}).get("username")
+
+    if not doctor_username:
+        return JsonResponse({"error": "Not authenticated"}, status=401)
+
+    try:
+        with connection.cursor() as cursor:
+            # Call the database function instead of running raw SQL
+            cursor.execute(
+                "SELECT * FROM public.get_doctor_assigned_beds(%s)", [doctor_username]
+            )
+            columns = [col[0] for col in cursor.description]
+            beds = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+            # Get nurse names
+            for bed in beds:
+                if bed.get("nurse_username"):
+                    cursor.execute(
+                        "SELECT public.get_name(%s)", [bed["nurse_username"]]
+                    )
+                    bed["nurse_name"] = cursor.fetchone()[0]
+                else:
+                    bed["nurse_name"] = "Not assigned"
+
+                # Convert datetime objects to string for JSON serialization
+                if bed.get("check_in_date"):
+                    bed["check_in_date"] = bed["check_in_date"].isoformat()
+                if bed.get("check_out_date"):
+                    bed["check_out_date"] = bed["check_out_date"].isoformat()
+
+            return JsonResponse(beds, safe=False)
+    except Exception as e:
+        import traceback
+
+        print(f"Error in get_assigned_beds: {str(e)}")
+        print(traceback.format_exc())
+        return JsonResponse({"error": str(e)}, status=500)
