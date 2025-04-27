@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Sidebar functionality
     const navBar = document.querySelector("nav");
     const menuBtns = document.querySelectorAll(".menu-icon");
     const overlay = document.querySelector(".overlay");
@@ -37,18 +38,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     const csrftoken = getCookie('csrftoken');
 
-    // Format date for display
-    function formatDate(dateString) {
-        const date = new Date(dateString);
-        return new Intl.DateTimeFormat('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        }).format(date);
-    }
-
     // Fetch discharge requests
     async function fetchDischargeRequests() {
         try {
@@ -84,33 +73,21 @@ document.addEventListener('DOMContentLoaded', function () {
         requests.forEach(request => {
             const row = document.createElement('tr');
 
-            // Determine status class
-            let statusClass = '';
-            if (request.status === 'Pending') {
-                statusClass = 'text-warning';
-            } else if (request.status === 'Approved') {
-                statusClass = 'text-success';
-            } else if (request.status === 'Rejected') {
-                statusClass = 'text-danger';
-            }
-
             row.innerHTML = `
                 <td>${request.patient_name}</td>
                 <td>${request.ward_name}</td>
                 <td>${request.bed_number}</td>
                 <td>${request.request_date}</td>
                 <td class="action-buttons">
-                    ${request.status === 'Pending' ? `
-                        <button class="btn btn-sm btn-success approve-btn" 
-                            data-discharge-id="${request.discharge_id}" 
-                            data-admission-id="${request.admission_id}">
-                            <i class="bx bx-check"></i> Approve
-                        </button>
-                        <button class="btn btn-sm btn-danger reject-btn" 
-                            data-discharge-id="${request.discharge_id}">
-                            <i class="bx bx-x"></i> Reject
-                        </button>
-                    ` : 'No actions available'}
+                    <button class="btn btn-sm btn-success approve-btn mr-1" 
+                        data-discharge-id="${request.discharge_id}" 
+                        data-admission-id="${request.admission_id}">
+                        <i class="bx bx-check"></i> Approve
+                    </button>
+                    <button class="btn btn-sm btn-danger reject-btn" 
+                        data-discharge-id="${request.discharge_id}">
+                        <i class="bx bx-x"></i> Reject
+                    </button>
                 </td>
             `;
 
@@ -131,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Set modal message and show it
                 document.getElementById('modal-message').textContent = 'Are you sure you want to approve this discharge request?';
-                $('#confirmationModal').modal('show');
+                $('#confirmationModal').attr('data-action', 'approve').modal('show');
 
                 // Set up confirm button for approval action
                 confirmActionBtn.setAttribute('data-action', 'approve');
@@ -147,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Set modal message and show it
                 document.getElementById('modal-message').textContent = 'Are you sure you want to reject this discharge request?';
-                $('#confirmationModal').modal('show');
+                $('#confirmationModal').attr('data-action', 'reject').modal('show');
 
                 // Set up confirm button for reject action
                 confirmActionBtn.setAttribute('data-action', 'reject');
@@ -173,17 +150,98 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Approve discharge function
-    function approveDischarge(dischargeId, admissionId) {
-        // This will be implemented later
-        alert(`Discharge #${dischargeId} approved (Admission #${admissionId}). API functionality will be implemented later.`);
-        fetchDischargeRequests(); // Refresh the table
+    async function approveDischarge(dischargeId, admissionId) {
+        try {
+            const response = await fetch('/doctor/api/approve_discharge/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    discharge_id: dischargeId,
+                    admission_id: admissionId
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Show success message
+                requestsTableContainer.insertAdjacentHTML('beforebegin',
+                    `<div class="alert alert-success alert-dismissible fade show" role="alert">
+                        Discharge request approved successfully.
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>`);
+
+                // Refresh the discharge requests
+                fetchDischargeRequests();
+            } else {
+                throw new Error(result.message || 'Failed to approve discharge');
+            }
+        } catch (error) {
+            console.error('Error approving discharge:', error);
+            requestsTableContainer.insertAdjacentHTML('beforebegin',
+                `<div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    Failed to approve discharge. ${error.message}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>`);
+        }
     }
 
     // Reject discharge function
-    function rejectDischarge(dischargeId) {
-        // This will be implemented later
-        alert(`Discharge #${dischargeId} rejected. API functionality will be implemented later.`);
-        fetchDischargeRequests(); // Refresh the table
+    async function rejectDischarge(dischargeId) {
+        try {
+            const response = await fetch('/doctor/api/reject_discharge/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    discharge_id: dischargeId
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Show success message
+                requestsTableContainer.insertAdjacentHTML('beforebegin',
+                    `<div class="alert alert-success alert-dismissible fade show" role="alert">
+                        Discharge request rejected successfully.
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>`);
+
+                // Refresh the discharge requests
+                fetchDischargeRequests();
+            } else {
+                throw new Error(result.message || 'Failed to reject discharge');
+            }
+        } catch (error) {
+            console.error('Error rejecting discharge:', error);
+            requestsTableContainer.insertAdjacentHTML('beforebegin',
+                `<div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    Failed to reject discharge. ${error.message}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>`);
+        }
     }
 
     // Initialize the page

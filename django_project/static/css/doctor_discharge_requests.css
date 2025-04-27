@@ -170,15 +170,6 @@ nav.open~.overlay {
     justify-content: center;
 }
 
-.btn-success {
-    background-color: #28a745;
-    border-color: #28a745;
-}
-
-.btn-danger {
-    background-color: #dc3545;
-    border-color: #dc3545;
-}
 
 h1 {
     color: #333;
@@ -189,4 +180,127 @@ h1 {
 .table-responsive {
     border-radius: 8px;
     overflow: hidden;
+}
+
+/* Fix for button color flash and styling modals to match color palette */
+
+/* Make button styles more specific and add !important to prevent flashing */
+.btn-success,
+button.btn-success,
+.table .action-buttons .btn-success {
+    background-color: #7b8fde !important;
+    border-color: #7b8fde !important;
+    color: white !important;
+}
+
+.btn-success:hover,
+.btn-success:focus,
+button.btn-success:hover,
+button.btn-success:focus,
+.table .action-buttons .btn-success:hover,
+.table .action-buttons .btn-success:focus {
+    background-color: #617be4 !important;
+    border-color: #617be4 !important;
+}
+
+.btn-danger,
+button.btn-danger,
+.table .action-buttons .btn-danger {
+    background-color: #dd636e !important;
+    border-color: #dd636e !important;
+    color: white !important;
+}
+
+.btn-danger:hover,
+.btn-danger:focus,
+button.btn-danger:hover,
+button.btn-danger:focus,
+.table .action-buttons .btn-danger:hover,
+.table .action-buttons .btn-danger:focus {
+    background-color: #c5555e !important;
+    border-color: #c5555e !important;
+}
+
+/* Modal styling to match app color palette */
+.modal-header {
+    background-color: #dd636e;
+    color: white;
+    border-bottom: none;
+}
+
+.modal-title {
+    font-weight: 600;
+    color: white;
+}
+
+.modal-header .close {
+    color: white;
+    opacity: 0.8;
+}
+
+.modal-header .close:hover {
+    opacity: 1;
+    color: white;
+}
+
+/* Style the modal buttons */
+.modal-footer .btn-primary {
+    background-color: #7b8fde;
+    border-color: #7b8fde;
+}
+
+.modal-footer .btn-primary:hover,
+.modal-footer .btn-primary:focus {
+    background-color: #617be4;
+    border-color: #617be4;
+}
+
+.modal-footer .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.modal-footer .btn-secondary:hover,
+.modal-footer .btn-secondary:focus {
+    background-color: #5a6268;
+    border-color: #5a6268;
+}
+
+/* For the confirmation modal action buttons */
+#confirmationModal[data-action="approve"] .btn-primary {
+    background-color: #7b8fde !important;
+    border-color: #7b8fde !important;
+}
+
+#confirmationModal[data-action="approve"] .btn-primary:hover,
+#confirmationModal[data-action="approve"] .btn-primary:focus {
+    background-color: #617be4 !important;
+    border-color: #617be4 !important;
+}
+
+#confirmationModal[data-action="reject"] .btn-primary {
+    background-color: #dd636e !important;
+    border-color: #dd636e !important;
+}
+
+#confirmationModal[data-action="reject"] .btn-primary:hover,
+#confirmationModal[data-action="reject"] .btn-primary:focus {
+    background-color: #c5555e !important;
+    border-color: #c5555e !important;
+}
+
+/* You might also want to update the status colors if used */
+.text-success {
+    color: #7b8fde !important;
+    /* Match with button color */
+}
+
+.text-danger {
+    color: #dd636e !important;
+    /* Match with button color */
+}
+
+.text-warning {
+    color: #ffc107 !important;
+    /* Standard warning color */
 }
