@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from datetime import date
 
+
 # Create your views here.
 def index(request):
     username = request.session.get("doctor_username", "")
@@ -14,6 +15,7 @@ def index(request):
         name = cursor.fetchone()[0]
 
     return render(request, "doctor_page.html", {"username": username, "name": name})
+
 
 def fetch_upcoming_appointments(request):
     username = request.session.get("login_form_data", {}).get("username")
@@ -42,7 +44,6 @@ def fetch_upcoming_appointments(request):
     return HttpResponse(response_data, content_type="application/json")
 
 
-
 def previous_appointments(request):
     username = request.session.get("doctor_username", "")
 
@@ -50,7 +51,9 @@ def previous_appointments(request):
         cursor.execute("SELECT public.get_name(%s)", [username])
         name = cursor.fetchone()[0]
 
-    return render(request, 'previous_appointments.html', {"username": username, "name": name})
+    return render(
+        request, "previous_appointments.html", {"username": username, "name": name}
+    )
 
 
 def fetch_previous_appointments(request):
@@ -79,28 +82,41 @@ def fetch_previous_appointments(request):
     response_data = json.dumps(data)
     return HttpResponse(response_data, content_type="application/json")
 
+
 def calculate_age(date_of_birth):
     today = date.today()
-    return today.year - date_of_birth.year - ((today.month, today.day) < (date_of_birth.month, date_of_birth.day))
+    return (
+        today.year
+        - date_of_birth.year
+        - ((today.month, today.day) < (date_of_birth.month, date_of_birth.day))
+    )
+
 
 def attend_appointment(request, appointment_id):
     with connection.cursor() as cursor:
         # Fetch appointment details
-        cursor.execute("SELECT * FROM appointments WHERE appointment_id = %s", [appointment_id])
+        cursor.execute(
+            "SELECT * FROM appointments WHERE appointment_id = %s", [appointment_id]
+        )
         appointment = cursor.fetchone()
 
         # Fetch patient details (join users and patients tables)
         patient_username = appointment[1]  # patient_username is the second column
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT u.name, p.phone_no, p.blood_group, p.complexities, p.date_of_birth, p.gender
             FROM patients p
             INNER JOIN users u ON p.username = u.username
             WHERE p.username = %s
-        """, [patient_username])
+        """,
+            [patient_username],
+        )
         patient = cursor.fetchone()
 
         # Fetch previous prescriptions
-        cursor.execute("SELECT * FROM prescriptions WHERE prescribed_to = %s", [patient_username])
+        cursor.execute(
+            "SELECT * FROM prescriptions WHERE prescribed_to = %s", [patient_username]
+        )
         prescriptions = cursor.fetchall()
 
     # Calculate age
@@ -117,8 +133,13 @@ def attend_appointment(request, appointment_id):
             "date_of_birth": patient[4],
             "gender": patient[5],
             "age": age,
-            "appointment_date": appointment[3].strftime('%Y-%m-%d'),
+            "appointment_date": appointment[3].strftime("%Y-%m-%d"),
         },
         "prescriptions": prescriptions,
     }
     return render(request, "attend_app.html", context)
+
+
+def ward_management_page(request):
+
+    return render(request, "ward_management.html")
