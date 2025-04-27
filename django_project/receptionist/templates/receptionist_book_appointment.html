@@ -472,35 +472,36 @@
             event.preventDefault();
 
             const formData = new FormData(this);
-            fetch(this.action, {
+            fetch(window.location.href, {
                 method: 'POST',
                 body: formData,
                 headers: {
                     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
                 }
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.getElementById('confirmationMessage').textContent = data.appointment_time;
-                        document.getElementById('confirmationModal').style.display = 'flex';
-                    } else {
-                        alert(data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('confirmationMessage').textContent = data.appointment_time;
+                    document.getElementById('confirmationModal').style.display = 'flex';
+                } else {
+                    alert(data.message || 'Failed to book appointment');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while booking the appointment');
+            });
         });
 
         document.querySelector('.close-button').addEventListener('click', function () {
             document.getElementById('confirmationModal').style.display = 'none';
-            window.location.href = 'http://127.0.0.1:8000/patient/';
+            window.location.href = '/receptionist/';
         });
 
         document.getElementById('okButton').addEventListener('click', function () {
             document.getElementById('confirmationModal').style.display = 'none';
-            window.location.href = 'http://127.0.0.1:8000/patient/';
+            window.location.href = '/receptionist/';
         });
 
         window.onclick = function (event) {
