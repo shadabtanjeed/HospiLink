@@ -683,3 +683,71 @@ def fetch_past_appointments(request):
 
     response_data = json.dumps(data)
     return HttpResponse(response_data, content_type="application/json")
+
+
+# Add this function at the end of the file
+
+
+def get_prescription(request, appointment_id):
+    """API endpoint to get a prescription for a specific appointment."""
+    try:
+        with connection.cursor() as cursor:
+            # Get the appointment details first to verify it belongs to this patient
+            patient_username = request.session.get(
+                "patient_username"
+            ) or request.session.get("login_form_data", {}).get("username")
+
+            # Check if the appointment belongs to this patient
+            cursor.execute(
+                """
+                SELECT COUNT(*) 
+                FROM appointments 
+                WHERE appointment_id = %s AND patient_username = %s
+                """,
+                [appointment_id, patient_username],
+            )
+            count = cursor.fetchone()[0]
+            if count == 0:
+                return JsonResponse({"error": "Appointment not found"}, status=404)
+
+            # Fetch the prescription
+            cursor.execute(
+                """
+                SELECT p.*, d.degrees as doctor_degrees
+                FROM prescriptions p
+                JOIN doctors d ON p.prescribed_by = d.username
+                WHERE p.appointment_id = %s
+                """,
+                [appointment_id],
+            )
+            columns = [col[0] for col in cursor.description]
+            row = cursor.fetchone()
+
+            if not row:
+                return JsonResponse({"error": "No prescription found"}, status=404)
+
+            prescription = dict(zip(columns, row))
+
+            # Format dates and arrays
+            if "created_at" in prescription and prescription["created_at"]:
+                prescription["created_at"] = prescription["created_at"].strftime(
+                    "%Y-%m-%d"
+                )
+
+            if "doctor_degrees" in prescription and prescription["doctor_degrees"]:
+                if isinstance(prescription["doctor_degrees"], list):
+                    prescription["doctor_degrees"] = ", ".join(
+                        prescription["doctor_degrees"]
+                    )
+                else:
+                    prescription["doctor_degrees"] = (
+                        prescription["doctor_degrees"].strip("{}").replace(",", ", ")
+                    )
+
+            return JsonResponse(prescription)
+    except Exception as e:
+        print(f"Error fetching prescription: {str(e)}")
+        import traceback
+
+        print(traceback.format_exc())
+        return JsonResponse({"error": str(e)}, status=500)

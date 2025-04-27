@@ -291,17 +291,18 @@
     <nav>
         <div class="logo">
             <i class="bx bx-menu menu-icon"></i>
-            <!-- <span class="logo-name"><b>HospiLink</b></span> -->
+            <!-- <span class="logo-name">HospiLinkdf</span> -->
         </div>
         <div class="sidebar">
             <div class="logo">
                 <i class="bx bx-menu menu-icon"></i>
                 <span class="logo-name"><b>HospiLink</b></span>
             </div>
+
             <div class="sidebar-content">
                 <ul class="lists">
                     <li class="list">
-                        <a href="#" class="nav-link">
+                        <a href="{% url 'patient_index' %}" class="nav-link">
                             <i class="bx bx-home-alt icon"></i>
                             <span class="link">Dashboard</span>
                         </a>
@@ -312,21 +313,22 @@
                             <span class="link">Search Doctor</span>
                         </a>
                     </li>
+                    <!-- ... existing code ... -->
                     <li class="list">
-                        <a href="#" class="nav-link">
+                        <a href="{% url 'past_appointments' %}" class="nav-link">
                             <i class="bx bx-history icon"></i>
                             <span class="link">Appointment History</span>
                         </a>
                     </li>
+                    <!-- ... existing code ... -->
                     <li class="list">
                         <a href="{% url 'blood_repo' %}" class="nav-link">
                             <i class="bx bx-droplet icon"></i>
                             <span class="link">Blood Repo</span>
                         </a>
                     </li>
-
                     <li class="list">
-                        <a href="#" class="nav-link">
+                        <a href="{% url 'bed_admission' %}" class="nav-link">
                             <i class="bx bx-bed icon"></i>
                             <span class="link">Get Admission</span>
                         </a>
@@ -339,6 +341,7 @@
                         </a>
                     </li>
                 </ul>
+
                 <div class="bottom-content">
                     <li class="list">
                         <a href="#" class="nav-link">

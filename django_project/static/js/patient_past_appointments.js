@@ -16,16 +16,17 @@ document.addEventListener('DOMContentLoaded', function () {
     const tableBody = document.getElementById('table-body');
 
     async function fetchAppointments() {
-        const response = await fetch('/doctor/api/previous_appointments/');  // Ensure the correct URL
+        // Changed to use the patient API endpoint
+        const response = await fetch('/patient/api/past_appointments/');
         const data = await response.json();
 
-        const futureAppointments = data.filter(item => {
+        const pastAppointments = data.filter(item => {
             const appointmentDate = new Date(item.appointment_date);
             const appointmentTime = item.appointment_time.split(':');
             appointmentDate.setHours(appointmentTime[0], appointmentTime[1], appointmentTime[2]);
             return appointmentDate;
         });
-        renderTable(futureAppointments);
+        renderTable(pastAppointments);
     }
 
     function renderTable(data) {
@@ -33,20 +34,16 @@ document.addEventListener('DOMContentLoaded', function () {
         data.forEach(item => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                        <td>${item.appointment_id}</td>
-                        <td>${item.appointment_date}</td>
-                        <td>${item.appointment_time}</td>
-                        <td>${item.patient_name}</td>
-                        <td>
-                            <button class="btn view-btn" onclick="viewPrescription(${item.appointment_id})">View</button>
-                        </td>
-                    `;
+                <td>${item.appointment_id}</td>
+                <td>${item.appointment_date}</td>
+                <td>${item.appointment_time}</td>
+                <td>Dr. ${item.doctor_name}</td>
+                <td>
+                    <button class="btn view-btn" onclick="viewPrescription(${item.appointment_id})">View</button>
+                </td>
+            `;
             tableBody.appendChild(row);
         });
-    }
-
-    window.viewAppointment = function (appointmentId) {
-        window.location.href = `#`;
     }
 
     fetchAppointments();
@@ -54,7 +51,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 async function viewPrescription(appointmentId) {
     try {
-        const response = await fetch(`/doctor/api/prescription/${appointmentId}/`);
+        // Update this to use a patient-specific endpoint
+        const response = await fetch(`/patient/api/prescription/${appointmentId}/`);
         if (!response.ok) {
             throw new Error('No prescription found');
         }
