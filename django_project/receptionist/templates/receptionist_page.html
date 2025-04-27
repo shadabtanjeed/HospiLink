@@ -259,12 +259,15 @@
                             const resultElement = document.getElementById('user-exists-result');
                             if (data.exists) {
                                 resultElement.textContent = 'Patient exists';
-                                resultElement.style.color = 'green'; // Set success message color to green
+                                resultElement.style.color = 'green'; 
+                                
+                                setTimeout(() => {
+                                    window.location.href = "{% url 'receptionist_search_doctor' %}";
+                                }, 500);
                             } else {
                                 resultElement.textContent = 'Patient does not exist';
-                                resultElement.style.color = 'red'; // Set error message color to red
+                                resultElement.style.color = 'red';
                            
-                                // Add a 1-second delay before redirecting
                                 setTimeout(() => {
                                     window.location.href = "{% url 'create_patient_account' %}?phone_number=" + encodeURIComponent(phoneNumber);
                                 }, 500);
