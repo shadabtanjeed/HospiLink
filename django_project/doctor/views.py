@@ -90,8 +90,21 @@ def attend_appointment(request, appointment_id):
         cursor.execute("SELECT * FROM appointments WHERE appointment_id = %s", [appointment_id])
         appointment = cursor.fetchone()
 
-        # Fetch patient details (join users and patients tables)
-        patient_username = appointment[1]  # patient_username is the second column
+        # Fetch doctor details
+        doctor_username = appointment[2]  # Assuming the doctor's username is the third column
+        cursor.execute("""
+            SELECT username, degrees
+            FROM doctors
+            WHERE username = %s
+        """, [doctor_username])
+        doctor = cursor.fetchone()
+
+        # Convert degrees array to a string (e.g., "M.B.B.S., M.S.(Ortho)")
+        doctor_name = doctor[0]
+        doctor_degrees = ", ".join(doctor[1])  # Join the array elements with a comma
+
+        # Fetch patient details
+        patient_username = appointment[1]  # Assuming the patient's username is the second column
         cursor.execute("""
             SELECT u.name, p.phone_no, p.blood_group, p.complexities, p.date_of_birth, p.gender
             FROM patients p
@@ -107,9 +120,13 @@ def attend_appointment(request, appointment_id):
     # Calculate age
     age = calculate_age(patient[4])  # Assuming date_of_birth is the 5th column
 
-    # Prepare context with patient details
+    # Prepare context with doctor, patient, and appointment details
     context = {
         "appointment": appointment,
+        "doctor": {
+            "name": doctor_name,
+            "degrees": doctor_degrees,
+        },
         "patient": {
             "name": patient[0],
             "phone_no": patient[1],
