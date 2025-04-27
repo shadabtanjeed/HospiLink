@@ -1030,7 +1030,7 @@
                 alert("Error: Appointment ID is missing.");
                 return;
             }
-        
+
             const prescriptionData = {
                 appointment_id: appointmentIdElement.value,
                 prescribed_by: "{{ appointment.2 }}",
@@ -1040,8 +1040,6 @@
                 additional_notes: document.getElementById("additional_notes")?.value || "",
             };
 
-            console.log(prescriptionData);
-        
             fetch("/doctor/save_prescription/", {
                 method: "POST",
                 headers: {
@@ -1054,12 +1052,15 @@
                 .then((data) => {
                     if (data.success) {
                         alert("Prescription saved successfully!");
+                        // Redirect to doctor's page after successful save
+                        window.location.href = "{% url 'index' %}";
                     } else {
                         alert("Error: " + data.message);
                     }
                 })
                 .catch((error) => {
                     console.error("Error:", error);
+                    alert("Error saving prescription");
                 });
         }
     
