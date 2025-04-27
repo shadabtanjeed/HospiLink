@@ -4,7 +4,6 @@ from django.http import JsonResponse
 import json
 
 
-
 def index(request):
     username = request.session.get("receptionist_username", "")
 
@@ -20,7 +19,9 @@ def index(request):
 def add_blood_donor(request):
     return render(request, "add_blood_donor.html")
 
+
 from patient.views import fetch_doctors  # reuse fn
+
 
 def store_blood_donor_details(request):
     if request.method == "POST":
@@ -93,20 +94,24 @@ def store_blood_donor_details(request):
 
     return JsonResponse({"success": False, "message": "Method not allowed"}, status=405)
 
+
 def blood_repo_receptionist(request):
-    return render(request, 'blood_repo_receptionist.html')
+    return render(request, "blood_repo_receptionist.html")
+
 
 def check_patient_exists(request):
-    phone_number = request.GET.get('phone_number', '')
+    phone_number = request.GET.get("phone_number", "")
 
     with connection.cursor() as cursor:
         cursor.execute("SELECT public.check_patient_exists(%s)", [phone_number])
         exists = cursor.fetchone()[0]
 
-    return JsonResponse({'exists': exists})
+    return JsonResponse({"exists": exists})
+
 
 def create_patient_account(request):
-    return render(request, 'recptions_signing_up_patient.html')
+    return render(request, "recptions_signing_up_patient.html")
+
 
 def fetch_doctors():
     with connection.cursor() as cursor:
@@ -172,16 +177,24 @@ def fetch_doctors():
             )
     return doctor_list
 
+
 def receptionist_search_doctor(request):
     patient_phone_number = request.GET.get("patient_phone_number", "")
 
+    print("Patient phone number:", patient_phone_number)
+
     # Fetch patient username using the phone number
     with connection.cursor() as cursor:
-        cursor.execute("SELECT username FROM patients WHERE phone_no = '%s'", [patient_phone_number])
+        cursor.execute(
+            "SELECT username FROM patients WHERE phone_no = %s",
+            [patient_phone_number],
+        )
         patient_username = cursor.fetchone()
 
     # If no patient is found, set patient_username to an empty string
     patient_username = patient_username[0] if patient_username else ""
+
+    print("Patient username:", patient_username)
 
     # Fetch the list of doctors
     doctors = fetch_doctors()
