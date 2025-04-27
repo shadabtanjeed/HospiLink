@@ -218,6 +218,60 @@
                 margin-top: 2rem !important;
             }
         }
+
+        /* Print formatting */
+        @media print {
+            /* Hide unnecessary elements */
+            nav, .overlay, #title, #prescriptionForm, .btn {
+                display: none !important;
+            }
+    
+            /* Ensure the prescription template is visible */
+            #prescriptionTemplate {
+                display: block !important;
+                margin: 0;
+                padding: 20px;
+                width: 100%;
+                box-shadow: none;
+            }
+    
+            /* Center the prescription content */
+            #prescriptionTemplate .container {
+                margin: 0 auto;
+                width: 100%;
+            }
+    
+            /* Adjust font sizes for printing */
+            body {
+                font-size: 12px;
+                line-height: 1.5;
+            }
+    
+            h1, h2, h3 {
+                font-size: 16px;
+                text-align: center;
+            }
+    
+            p, span {
+                font-size: 12px;
+            }
+    
+            /* Remove background colors and shadows */
+            * {
+                background: none !important;
+                box-shadow: none !important;
+            }
+    
+            /* Ensure the prescription content fits on the page */
+            .container {
+                page-break-inside: avoid;
+            }
+    
+            /* Add page breaks for long content */
+            .page-break {
+                page-break-before: always;
+            }
+        }
     </style>
 
     <title>Attend Appointment</title>

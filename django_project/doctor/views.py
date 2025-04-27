@@ -3,6 +3,7 @@ import json
 from django.db import connection
 from django.http import HttpResponse
 from django.shortcuts import render
+from datetime import date
 
 # Create your views here.
 def index(request):
@@ -78,24 +79,46 @@ def fetch_previous_appointments(request):
     response_data = json.dumps(data)
     return HttpResponse(response_data, content_type="application/json")
 
+def calculate_age(date_of_birth):
+    today = date.today()
+    return today.year - date_of_birth.year - ((today.month, today.day) < (date_of_birth.month, date_of_birth.day))
+
 def attend_appointment(request, appointment_id):
     with connection.cursor() as cursor:
         # Fetch appointment details
         cursor.execute("SELECT * FROM appointments WHERE appointment_id = %s", [appointment_id])
         appointment = cursor.fetchone()
 
-        # Fetch patient details
-        patient_username = appointment[1]  #patient_username is the second column
-        cursor.execute("SELECT * FROM patients WHERE username = %s", [patient_username])
+        # Fetch patient details (join users and patients tables)
+        patient_username = appointment[1]  # patient_username is the second column
+        cursor.execute("""
+            SELECT u.name, p.phone_no, p.blood_group, p.complexities, p.date_of_birth, p.gender
+            FROM patients p
+            INNER JOIN users u ON p.username = u.username
+            WHERE p.username = %s
+        """, [patient_username])
         patient = cursor.fetchone()
 
         # Fetch previous prescriptions
         cursor.execute("SELECT * FROM prescriptions WHERE prescribed_to = %s", [patient_username])
         prescriptions = cursor.fetchall()
 
+    # Calculate age
+    age = calculate_age(patient[4])  # Assuming date_of_birth is the 5th column
+
+    # Prepare context with patient details
     context = {
         "appointment": appointment,
-        "patient": patient,
+        "patient": {
+            "name": patient[0],
+            "phone_no": patient[1],
+            "blood_group": patient[2],
+            "complexities": patient[3],
+            "date_of_birth": patient[4],
+            "gender": patient[5],
+            "age": age,
+            "appointment_date": appointment[3].strftime('%Y-%m-%d'),
+        },
         "prescriptions": prescriptions,
     }
-    return render(request, "attend_appointment.html", context)
+    return render(request, "attend_app.html", context)
