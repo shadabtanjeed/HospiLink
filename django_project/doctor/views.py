@@ -43,8 +43,12 @@ def fetch_upcoming_appointments(request):
             patient_name = cursor.fetchone()[0]
             item["patient_name"] = patient_name
 
-    response_data = json.dumps(data)
-    return HttpResponse(response_data, content_type="application/json")
+            return JsonResponse(data, safe=False)
+    except Exception as e:
+        import traceback
+        print(f"Error in fetch_upcoming_appointments:")
+        print(traceback.format_exc())
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 def previous_appointments(request):
