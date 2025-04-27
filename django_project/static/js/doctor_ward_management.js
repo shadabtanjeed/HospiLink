@@ -107,10 +107,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         ${!bed.admission_id ? 'disabled' : ''}>
                         <i class="bx bx-plus"></i> Add Note
                     </button>
+                    
                     <button class="btn btn-sm btn-info view-notes-btn" 
                         data-admission-id="${bed.admission_id}" 
                         ${!bed.admission_id ? 'disabled' : ''}>
-                        <i class="bx bx-note"></i> View Notes
+                        <i class="bx bx-note"></i> View Patient Notes
                     </button>
                     <button class="btn btn-sm btn-danger discharge-btn" 
                         data-admission-id="${bed.admission_id}" 
