@@ -40,6 +40,9 @@ DEBUG = True
 # filepath: django_project/hospilink_django/settings.py
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'hospilink.onrender.com']
 
+# Add this near your ALLOWED_HOSTS configuration
+CSRF_TRUSTED_ORIGINS = ['https://hospilink.onrender.com']
+
 
 # Application definition
 
