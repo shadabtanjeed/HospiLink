@@ -1,6 +1,8 @@
 ## HospiLink
 A comprehensive Hospital Management System built with Django, designed to streamline hospital operations by connecting patients, doctors, and receptionists in a unified platform.
 
+You can try out the application here: https://hospilink.onrender.com
+
 ## Features
 ### For Patients
 - Appointment Management: Book, modify, and cancel appointments with doctors
