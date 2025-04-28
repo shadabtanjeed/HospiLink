@@ -779,8 +779,8 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert("Signup successful!");
-                        window.location.href = "{% url 'signup_success' %}";
+                        alert("Signup successful! Please login with your credentials.");
+                        window.location.href = "/user_authentication/login/";  // Redirect to login page
                     } else {
                         // Show the error message from the server response
                         alert(data.message || "Signup failed. Please try again.");
