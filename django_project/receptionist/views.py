@@ -308,3 +308,246 @@ def receptionist_book_appointment(request, doctor_username):
         else:
             # Handle case when doctor is not found
             return HttpResponse("Doctor not found.")
+
+def patient_appointments(request):
+    phone_number = request.GET.get("patient_phone_number", "")
+    receptionist_username = request.session.get("receptionist_username", "")
+    
+    # Get receptionist name
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT public.get_name(%s)", [receptionist_username])
+        receptionist_name = cursor.fetchone()[0]
+    
+    # Get patient username and name
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT username, public.get_name(username) FROM patients WHERE phone_no = %s",
+            [phone_number],
+        )
+        result = cursor.fetchone()
+        
+    if not result:
+        # Handle case when patient is not found
+        return redirect('receptionist_search_patient')
+        
+    patient_username, patient_name = result
+    
+    context = {
+        "name": receptionist_name,
+        "patient_name": patient_name,
+        "patient_username": patient_username,
+        "patient_phone": phone_number
+    }
+    
+    return render(request, "patient_appointments.html", context)
+
+def upcoming_appointments_for_patient(request):
+    """API endpoint to get upcoming appointments for a specific patient."""
+    patient_username = request.GET.get("patient_username", "")
+    
+    if not patient_username:
+        return JsonResponse({"error": "Patient username is required"}, status=400)
+    
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT a.appointment_id, a.appointment_date, a.appointment_time, 
+                       a.doctor_username AS with_user
+                FROM appointments a
+                WHERE a.patient_username = %s 
+                  AND a.appointment_date >= CURRENT_DATE
+                ORDER BY a.appointment_date, a.appointment_time
+                """, 
+                [patient_username]
+            )
+            columns = [col[0] for col in cursor.description]
+            data = [dict(zip(columns, row)) for row in cursor.fetchall()]
+            
+            # Convert date and time objects to strings
+            for item in data:
+                if isinstance(item["appointment_date"], date):
+                    item["appointment_date"] = item["appointment_date"].strftime("%Y-%m-%d")
+                if isinstance(item["appointment_time"], time):
+                    item["appointment_time"] = item["appointment_time"].strftime("%H:%M:%S")
+                
+                doctor_username = item["with_user"]
+                cursor.execute("SELECT public.get_name(%s)", [doctor_username])
+                doctor_name = cursor.fetchone()[0]
+                item["doctor_name"] = doctor_name
+        
+        return JsonResponse(data, safe=False)
+    except Exception as e:
+        print(f"Error fetching appointments: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
+        return JsonResponse({"error": str(e)}, status=500)
+
+def cancel_appointment(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            doctor_username = data.get("doctor_username")
+            appointment_date = data.get("appointment_date")
+            patient_username = data.get("patient_username")
+
+            if not all([doctor_username, appointment_date, patient_username]):
+                return JsonResponse(
+                    {"success": False, "message": "Missing required data"}, status=400
+                )
+
+            with connection.cursor() as cursor:
+                # Call the cancel_appointment function
+                cursor.execute(
+                    """
+                    SELECT public.cancel_appointment(%s, %s, %s)
+                    """,
+                    [patient_username, doctor_username, appointment_date],
+                )
+
+            return JsonResponse({"success": True})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)}, status=500)
+    return JsonResponse({"success": False, "message": "Method not allowed"}, status=405)
+
+def receptionist_modify_appointment(request, doctor_username, appointment_date):
+    # For GET requests, patient_username comes from the URL parameters
+    if request.method == "GET":
+        patient_username = request.GET.get("patient_username", "")
+    else:
+        # For POST requests, patient_username comes from the form data
+        patient_username = request.POST.get("patient_username", "")
+    
+    if request.method == "POST":
+        new_date = request.POST.get("booking_date")
+
+        try:
+            # First check if the appointment exists
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT COUNT(*) 
+                    FROM appointments 
+                    WHERE patient_username = %s 
+                    AND doctor_username = %s 
+                    AND appointment_date = %s::date
+                    """,
+                    [patient_username, doctor_username, appointment_date]
+                )
+                appointment_exists = cursor.fetchone()[0]
+                
+                if not appointment_exists:
+                    return JsonResponse({
+                        "success": False, 
+                        "message": f"No appointment found for patient {patient_username} with doctor {doctor_username} on {appointment_date}"
+                    }, status=400)
+                
+                # Call the reschedule_appointment function
+                cursor.execute(
+                    """
+                    SELECT public.reschedule_appointment(%s, %s, %s::date, %s::date)
+                    """,
+                    [patient_username, doctor_username, appointment_date, new_date],
+                )
+
+                # Fetch the new appointment time
+                cursor.execute(
+                    """
+                    SELECT appointment_time
+                    FROM appointments
+                    WHERE patient_username = %s
+                      AND doctor_username = %s
+                      AND appointment_date = %s::date
+                    """,
+                    [patient_username, doctor_username, new_date],
+                )
+                result = cursor.fetchone()
+                if not result:
+                    return JsonResponse({"success": False, "message": "Failed to reschedule appointment"}, status=400)
+                
+                new_appointment_time = result[0]
+
+            return JsonResponse(
+                {
+                    "success": True,
+                    "new_date": new_date,
+                    "new_time": new_appointment_time.strftime("%H:%M"),
+                }
+            )
+        except Exception as e:
+            import traceback
+            print(f"Error rescheduling appointment: {str(e)}")
+            print(traceback.format_exc())
+            return JsonResponse({"success": False, "message": str(e)}, status=400)
+    else:
+        # Fetch doctor information
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT username, public.get_name(username) AS name, phone_no,
+                       visiting_days, visiting_time_start, visiting_time_end,
+                       specialization, fee, degrees
+                FROM doctors
+                WHERE username = %s
+                """,
+                [doctor_username],
+            )
+            doctor = cursor.fetchone()
+
+        if doctor:
+            # Process doctor data
+            visiting_days = doctor[3]
+            if isinstance(visiting_days, str):
+                visiting_days = visiting_days.strip("{}").split(",")
+                visiting_days = [day.capitalize() for day in visiting_days]
+            degrees = doctor[8]
+            if isinstance(degrees, str):
+                degrees = degrees.strip("{}").split(",")
+
+            doctor_info = {
+                "username": doctor[0],
+                "name": doctor[1],
+                "phone_no": doctor[2],
+                "visiting_days": visiting_days,
+                "visiting_time_start": doctor[4],
+                "visiting_time_end": doctor[5],
+                "specialization": doctor[6],
+                "fee": doctor[7],
+                "degrees": degrees,
+            }
+
+            # Prepare date range for the next 10 days
+            today = timezone.now().date()
+            end_date = today + timedelta(days=10)
+            date_range = [today + timedelta(days=x) for x in range(0, 11)]
+
+            # Get the name of the receptionist for display
+            receptionist_username = request.session.get("receptionist_username", "")
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT public.get_name(%s)", [receptionist_username])
+                receptionist_name = cursor.fetchone()[0]
+                
+            # Get patient phone number for redirection after modification
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT phone_no FROM patients WHERE username = %s",
+                    [patient_username]
+                )
+                patient_phone_result = cursor.fetchone()
+                patient_phone = patient_phone_result[0] if patient_phone_result else ""
+
+            context = {
+                "name": receptionist_name,
+                "doctor": doctor_info,
+                "date_range": date_range,
+                "today": today,
+                "end_date": end_date,
+                "current_appointment_date": appointment_date,
+                "patient_username": patient_username,
+                "patient_phone": patient_phone
+            }
+
+            return render(request, "receptionist_modify_appointment.html", context)
+        else:
+            # Handle case when doctor is not found
+            return HttpResponse("Doctor not found.")

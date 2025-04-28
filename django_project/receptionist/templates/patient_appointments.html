@@ -1,0 +1,632 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="{% static 'app_logo_3.png' %}" type="image/png">
+    <link href="https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+
+
+    <style>
+        /* Google Fonts - Poppins */
+        @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap");
+
+        .card {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: center;
+            margin-top: 20px;
+            border-radius: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 15px 20px;
+            width: 95%;
+            min-height: 120px;
+            gap: 20px;
+        }
+
+
+        .search_container {
+            display: flex;
+            flex-direction: row;
+            border: #000000 1px solid;
+            margin-top: 30px;
+            width: 90%;
+            justify-content: space-between;
+        }
+
+        .filter_section {
+            display: flex;
+            flex-direction: column;
+            background-color: #f0f8ff;
+            /* Light blue */
+            padding: 10px;
+            margin-left: 20px;
+            border: #000000 1px solid;
+        }
+
+        .list_section {
+            display: flex;
+            flex-direction: column;
+            background-color: #ffffff;
+            /* Light beige */
+            padding: 10px;
+            border: #000000 1px solid;
+            margin-right: 20px;
+        }
+
+
+
+        .card_img {
+            flex: 0 0 100px;
+            /* Fixed width of 100px, won't grow or shrink */
+
+        }
+
+        .card_identity {
+            flex: 0 0 250px;
+            /* Fixed width of 200px */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            hyphens: auto;
+        }
+
+        .card_details {
+            flex: 0 0 300px;
+            /* Fixed width of 300px */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            hyphens: auto;
+        }
+
+        .card_appointment {
+            flex: 0 0 170px;
+            /* Fixed width of 150px */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-end;
+            text-align: right;
+        }
+
+        /* Example card styling */
+        .card-title {
+            margin: 0;
+            font-size: 1.2em;
+            line-height: 1.4;
+        }
+
+        .card-text {
+            margin: 5px 0;
+            line-height: 1.3;
+        }
+
+        .btn {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+
+            font-size: 15px;
+        }
+
+        .modify-btn {
+            background-color: #7b8fde;
+            color: white;
+            margin-right: 5px;
+        }
+
+        .modify-btn:hover {
+            background-color: #617be4;
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #dd636e;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background-color: #c5555e;
+            color: white;
+        }
+
+        /* search button styling */
+
+        .search-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 20px 0;
+            /* Changed from 'margin: 20px auto' to remove center alignment */
+        }
+
+        .search-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .search-wrapper:hover,
+        .search-wrapper:focus-within {
+            box-shadow: 0 4px 8px rgba(221, 99, 110, 0.2);
+        }
+
+        .search-input {
+            width: 100%;
+            height: 48px;
+            padding: 0 48px;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            font-size: 16px;
+            color: #333;
+            transition: all 0.3s ease;
+            font-family: "Poppins", sans-serif;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #dd636e;
+        }
+
+        .search-input::placeholder {
+            color: #999;
+        }
+
+        .search-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 48px;
+            height: 48px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn i {
+            color: #999;
+            font-size: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .search-wrapper:focus-within .search-btn i {
+            color: #dd636e;
+        }
+
+        .search-input::-webkit-search-cancel-button {
+            position: relative;
+            right: 10px;
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23999'><path d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/></svg>") no-repeat 50% 50%;
+            cursor: pointer;
+        }
+
+        /* Add these styles to properly position within your list section */
+        .list_section .search.doctor {
+            width: 100%;
+            padding: 20px 0;
+        }
+
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Poppins", sans-serif;
+        }
+
+        body {
+            min-height: 100%;
+            background: #ffffff;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 70px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            /* background: #dd636e; */
+            box-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
+        }
+
+        nav .logo {
+            display: flex;
+            align-items: center;
+            margin: 0 24px;
+        }
+
+        .logo .menu-icon {
+            color: #dd636e;
+            font-size: 24px;
+            margin-right: 14px;
+            cursor: pointer;
+        }
+
+        .logo .logo-name {
+            color: #dd636e;
+            font-size: 22px;
+            font-weight: 500;
+        }
+
+        nav .sidebar {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            height: 100%;
+            width: 260px;
+            padding: 20px 0;
+            background-color: #ffffff;
+            box-shadow: 0 5px 1px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s ease;
+        }
+
+        nav.open .sidebar {
+            left: 0;
+        }
+
+        .sidebar .sidebar-content {
+            display: flex;
+            height: 100%;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 30px 16px;
+        }
+
+        .sidebar-content .list {
+            list-style: none;
+        }
+
+        .list .nav-link {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            padding: 14px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+        }
+
+        .lists .nav-link:hover {
+            background-color: #c5555e;
+        }
+
+        .nav-link .icon {
+            margin-right: 14px;
+            font-size: 20px;
+            color: #000000;
+        }
+
+        .nav-link .link {
+            font-size: 16px;
+            color: #000000;
+            font-weight: 400;
+        }
+
+        .lists .nav-link:hover .icon,
+        .lists .nav-link:hover .link {
+            color: #fff;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            height: 1000vh;
+            width: 200%;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s ease;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        nav.open~.overlay {
+            opacity: 1;
+            left: 260px;
+            pointer-events: auto;
+        }
+
+        .content {
+            margin-top: 10px;
+            /* Adjust this value based on your navbar height */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container.mt-3 {
+            margin-top: 100px !important;
+            /* Moves dropdown lower */
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        #blood-group-select {
+            width: 200px !important;
+            /* Optional: set a specific width */
+            margin-right: 20px;
+            /* Optional: add some right margin */
+        }
+    </style>
+
+    <title>Patient Dashboard</title>
+</head>
+
+<body>
+    {% csrf_token %}
+    <nav>
+        <div class="logo">
+            <i class="bx bx-menu menu-icon"></i>
+            <!-- <span class="logo-name">HospiLinkdf</span> -->
+        </div>
+        <div class="sidebar">
+            <div class="logo">
+                <i class="bx bx-menu menu-icon"></i>
+                <span class="logo-name"><b>HospiLink</b></span>
+            </div>
+
+            <div class="sidebar-content">
+                <ul class="lists">
+                    <li class="list">
+                        <a href="{% url 'index' %}" class="nav-link">
+                            <a class="nav-link" onclick="window.location.href='/receptionist/'">
+                            <i class="bx bx-home-alt icon"></i>
+                            <span class="link">Dashboard</span>
+                        </a>
+
+                    <li class="list">
+                        <a href="{% url 'blood_repo_receptionist' %}" class="nav-link">
+                            <i class="bx bx-droplet icon"></i>
+                            <span class="link">Blood Repo</span>
+                        </a>
+                    </li>
+
+                    <li class="list">
+                        <a href="{% url 'add_blood_donor' %}" class="nav-link">
+                            <i class="bx bx-user icon"></i>
+                            <span class="link">Add Blood Donor</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="bottom-content">
+                    <li class="list">
+                        <a href="#" class="nav-link">
+                            <i class="bx bx-cog icon"></i>
+                            <span class="link">Settings</span>
+                        </a>
+                    </li>
+                    <li class="list">
+                        <a href="#" class="nav-link" onclick="window.location.href='/user_authentication/'">
+                            <i class="bx bx-log-out icon"></i>
+                            <span class="link">Logout</span>
+                        </a>
+                    </li>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="overlay"></section>
+
+    <div class="content">
+        <h2>Welcome, {{ name }}</h2>
+        <h3>Appointments for {{ patient_name }}</h3>
+    </div>
+    
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>Upcoming Appointments</h3>
+            <a href="{% url 'receptionist_search_doctor' %}?patient_phone_number={{ patient_phone }}" class="btn btn-primary">
+                <i class="bx bx-plus"></i> New Appointment
+            </a>
+        </div>
+        <br>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Appointment ID</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>With</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <!-- Dynamic rows will be inserted here -->
+            </tbody>
+        </table>
+    
+        <!-- Modal for appointment cancellation -->
+        <div class="modal fade" id="cancelModal" tabindex="-1" role="dialog" aria-labelledby="cancelModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="cancelModalLabel">Cancel Appointment</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to cancel this appointment?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">No, Keep It</button>
+                        <button type="button" class="btn delete-btn" id="confirmCancel">Yes, Cancel Appointment</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <!-- Add Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Hovering Effect -->
+    <style>
+        tbody tr:hover {
+            /* background-color: #dd636e; */
+            /* cursor: pointer; */
+            /* color: white; */
+        }
+    </style>
+
+    <!-- Script to dynamically generate table rows -->
+    <script>
+        const navBar = document.querySelector("nav"),
+            menuBtns = document.querySelectorAll(".menu-icon"),
+            overlay = document.querySelector(".overlay");
+
+        menuBtns.forEach((menuBtn) => {
+            menuBtn.addEventListener("click", () => {
+                navBar.classList.toggle("open");
+            });
+        });
+
+        overlay.addEventListener("click", () => {
+            navBar.classList.remove("open");
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const tableBody = document.getElementById('table-body');
+            const patientUsername = "{{ patient_username }}";
+
+            async function fetchAppointments() {
+                try {
+                    const response = await fetch('/receptionist/api/upcoming_appointments_for_patient/?patient_username=' + patientUsername);
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    const data = await response.json();
+                    renderTable(data);
+                } catch (error) {
+                    console.error('Error:', error);
+                    const tableBody = document.getElementById('table-body');
+                    tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error loading appointments</td></tr>';
+                }
+            }
+
+            function renderTable(data) {
+                tableBody.innerHTML = '';
+                if (data.length === 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = '<td colspan="5" class="text-center">No upcoming appointments found</td>';
+                    tableBody.appendChild(row);
+                    return;
+                }
+                
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.appointment_id}</td>
+                        <td>${item.appointment_date}</td>
+                        <td>${item.appointment_time}</td>
+                        <td>Dr. ${item.doctor_name}</td>
+                        <td>
+                            <button class="btn modify-btn" 
+                                data-doctor="${item.with_user}" 
+                                data-date="${item.appointment_date}">Modify</button>
+                            <button class="btn delete-btn" 
+                                data-doctor="${item.with_user}" 
+                                data-date="${item.appointment_date}">Cancel</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+
+                    // Add event listener to the modify button
+                    row.querySelector('.modify-btn').addEventListener('click', function () {
+                        const doctorUsername = this.getAttribute('data-doctor');
+                        const appointmentDate = this.getAttribute('data-date');
+                        window.location.href = `/receptionist/modify_appointment/${doctorUsername}/${appointmentDate}/?patient_username=${patientUsername}`;
+                    });
+
+                    // Add event listener for delete button
+                    row.querySelector('.delete-btn').addEventListener('click', function () {
+                        const doctorUsername = this.getAttribute('data-doctor');
+                        const appointmentDate = this.getAttribute('data-date');
+
+                        // Store the data for the modal to use
+                        document.getElementById('confirmCancel').setAttribute('data-doctor', doctorUsername);
+                        document.getElementById('confirmCancel').setAttribute('data-date', appointmentDate);
+
+                        // Show the modal
+                        $('#cancelModal').modal('show');
+                    });
+                });
+            }
+
+            fetchAppointments();
+
+            document.getElementById('confirmCancel').addEventListener('click', async function () {
+                const doctorUsername = this.getAttribute('data-doctor');
+                const appointmentDate = this.getAttribute('data-date');
+
+                try {
+                    const response = await fetch('/receptionist/cancel_appointment/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        },
+                        body: JSON.stringify({
+                            doctor_username: doctorUsername,
+                            appointment_date: appointmentDate,
+                            patient_username: patientUsername
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Hide the modal
+                        $('#cancelModal').modal('hide');
+
+                        // Show success message
+                        alert('Appointment cancelled successfully');
+
+                        // Refresh the appointments table
+                        fetchAppointments();
+                    } else {
+                        alert('Failed to cancel appointment: ' + result.message);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred while cancelling the appointment');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
