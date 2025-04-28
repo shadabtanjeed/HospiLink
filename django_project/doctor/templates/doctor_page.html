@@ -540,7 +540,7 @@
                         <td>${item.appointment_time}</td>
                         <td>${item.patient_name}</td>
                         <td>
-                            <button class="btn modify-btn">Modify</button>
+                            {% comment %} <button class="btn modify-btn">Modify</button> {% endcomment %}
                             <button class="btn attend-btn ${item.has_prescription ? 'disabled' : ''}" 
                                 onclick="handleAttendClick(${item.appointment_id}, '${item.appointment_date}', ${item.is_today})"
                                 ${item.has_prescription ? 'disabled' : ''}>
