@@ -392,6 +392,7 @@
 
         <form id="appointmentForm" method="post" class="appointment-form">
             {% csrf_token %}
+            <input type="hidden" name="patient_username" value="{{ patient_username }}">
             <label for="booking_date">Select New Date:</label>
             <input type="date" id="booking_date" name="booking_date" min="{{ today }}" max="{{ end_date }}" required>
             <button type="submit" class="btn">Confirm Changes</button>

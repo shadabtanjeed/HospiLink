@@ -411,7 +411,12 @@ def cancel_appointment(request):
     return JsonResponse({"success": False, "message": "Method not allowed"}, status=405)
 
 def receptionist_modify_appointment(request, doctor_username, appointment_date):
-    patient_username = request.GET.get("patient_username", "")
+    # For GET requests, patient_username comes from the URL parameters
+    if request.method == "GET":
+        patient_username = request.GET.get("patient_username", "")
+    else:
+        # For POST requests, patient_username comes from the form data
+        patient_username = request.POST.get("patient_username", "")
     
     if request.method == "POST":
         new_date = request.POST.get("booking_date")
@@ -462,7 +467,6 @@ def receptionist_modify_appointment(request, doctor_username, appointment_date):
                 
                 new_appointment_time = result[0]
 
-            # Match patient's format by returning both date and time values
             return JsonResponse(
                 {
                     "success": True,
