@@ -492,59 +492,84 @@
         }
 
         @media print {
-            /* Hide unnecessary elements */
-            nav, .overlay, #title, #prescriptionForm, .btn, #prescriptionHeading, .content {
+            nav, .overlay, .btn, .content, #prescriptionHeading {
                 display: none !important;
             }
     
-            /* Ensure the prescription template is visible */
-            #prescriptionTemplate {
-                display: block !important;
+            body {
                 margin: 0;
                 padding: 20px;
-                width: 100%;
-                box-shadow: none;
-            }
-    
-            /* Center the prescription content */
-            #prescriptionTemplate .container {
-                margin: 0 auto;
-                width: 100%;
-            }
-    
-            /* Adjust font sizes for printing */
-            body {
                 font-size: 12px;
                 line-height: 1.5;
+                background: white;
+            }
+    
+            .prescription-container {
+                width: 100%;
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 20px;
+                box-shadow: none;
+                background: white;
             }
     
             h1, h2, h3 {
                 font-size: 16px;
                 text-align: center;
+                margin-bottom: 1em;
             }
     
             p, span {
                 font-size: 12px;
+                margin-bottom: 0.5em;
             }
     
-            /* Remove background colors and shadows */
-            * {
-                background: none !important;
-                box-shadow: none !important;
+            .patient-detail {
+                margin: 1em 0;
             }
     
-            /* Ensure the prescription content fits on the page */
-            .container {
+            .rx-symbol {
+                margin: 1em 2em; /* Added horizontal margin */
+                padding-left: 3em; /* Added left padding */
+            }
+    
+            .diagnosis-section,
+            .medication-section,
+            .notes-section {
+                margin: 1em 0;
                 page-break-inside: avoid;
             }
     
-            /* Add page breaks for long content */
-            .page-break {
-                page-break-before: always;
+            .doctor-signature {
+                margin-top: 2em;
+                text-align: right;
+            }
+    
+            hr {
+                border: none;
+                border-top: 1px solid #000;
+                margin: 1em 0;
+            }
+    
+            * {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+    
+            @page {
+                size: A4;
+                margin: 1cm;
+            }
+    
+            .container {
+                width: 100% !important;
+                max-width: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
         }
 
-        body {
+        {% comment %} body {
             font-family: 'Montserrat', sans-serif !important;
             background-color: #f6f6f6 !important;
         }
@@ -628,7 +653,7 @@
             .prescription {
                 margin-top: 2rem;
             }
-        }
+        } {% endcomment %}
     </style>
 
     <title>Doctor Dashboard</title>
@@ -829,8 +854,8 @@
                         </p>
                     </div>
 
-                    <div class="mt-4">
-                        <span class="fs-1">R</span><span class="fs-4">x</span>
+                    <div class="rx-symbol">
+                        <span class="fs-1" style="margin-left: 1em;">R</span><span class="fs-4">x</span>
                     </div>
 
                     <div class="mx-5 mt-5">
